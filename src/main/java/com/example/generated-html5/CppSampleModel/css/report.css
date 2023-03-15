@@ -1,0 +1,78 @@
+a:link {
+    text-decoration: none;
+}
+
+a:visited {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+a:active {
+    text-decoration: underline;
+}
+
+body {
+	font-size: 16px;
+	background-color: honeydew;
+	color: green;
+}
+
+.yellow {
+	background-color: yellow;
+}
+
+/* 
+ * Элемент модели на который есть только ссылки.
+ */
+.external {
+	color: gray;
+}
+
+/* 
+ * Абстрактный показывается курсивом.
+ */
+.abstract
+{
+	font-style: italic;
+}
+
+.tabs {
+	padding: 5px;
+}
+
+.tab {
+	color: navy;
+	border-color: lightblue;
+	background-color: lightblue;
+
+	border-style: solid;
+	border-width: 2px;
+	
+	padding: 3px;
+} 
+
+.tab-selected {
+	color: white;
+	border-color: blue;
+	background-color: blue;
+
+	border-style: solid;
+	border-width: 2px;
+	
+	padding: 3px; 
+} 
+
+.tab-content {
+	border-top-style: solid;
+	border-width: 2px;
+	border-color: blue;
+	
+	height: 100%;
+	width: 100%;
+	
+	margin-top: 4px;
+	padding: 7px;
+}

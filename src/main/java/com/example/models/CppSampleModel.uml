@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="ASCII"?>
+<uml:Model xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" name="CppSampleModel">
+  <packagedElement xsi:type="uml:Package" name="game">
+    <packagedElement xsi:type="uml:Package" name="sub_game"/>
+    <packagedElement xsi:type="uml:Class" name="Board"/>
+    <packagedElement xsi:type="uml:Class" name="Square"/>
+    <packagedElement xsi:type="uml:Class" name="Piece"/>
+  </packagedElement>
+  <packagedElement xsi:type="uml:Package" name="chess">
+    <packagedElement xsi:type="uml:Class" name="Pawn"/>
+    <packagedElement xsi:type="uml:Class" name="Rook"/>
+    <packagedElement xsi:type="uml:Class" name="Knight"/>
+    <packagedElement xsi:type="uml:Class" name="Bishop"/>
+    <packagedElement xsi:type="uml:Class" name="Queen"/>
+    <packagedElement xsi:type="uml:Class" name="King"/>
+  </packagedElement>
+  <packagedElement xsi:type="uml:Package" name="geometry">
+    <packagedElement xsi:type="uml:Class" name="Point">
+      <ownedAttribute name="x" type="//int"/>
+      <ownedAttribute name="y" type="//int"/>
+    </packagedElement>
+    <packagedElement xsi:type="uml:Class" name="Rectangle">
+      <ownedAttribute name="start" type="//Point"/>
+      <ownedAttribute name="end" type="//Point"/>
+    </packagedElement>
+  </packagedElement>
+  <packagedElement xsi:type="uml:Association" name="int"/>
+  <packagedElement xsi:type="uml:Association" name="Point"/>
+  <packagedElement xsi:type="uml:Package" name="graph">
+    <packagedElement xsi:type="uml:Class" name="View" visibility="public"/>
+    <packagedElement xsi:type="uml:Class" name="Node">
+      <generalization general="//graph/View"/>
+    </packagedElement>
+    <packagedElement xsi:type="uml:Class" name="Edge">
+      <generalization general="//graph/View"/>
+      <ownedOperation name="main">
+        <ownedParameter name="methodATR" type="//int"/>
+        <ownedParameter name="atr2" type="//float"/>
+        <ownedParameter type="//int" direction="return"/>
+      </ownedOperation>
+    </packagedElement>
+  </packagedElement>
+  <packagedElement xsi:type="uml:Package" name="Objects">
+    <packagedElement xsi:type="uml:Class" name="Device" visibility="public"/>
+    <packagedElement xsi:type="uml:Class" name="Computer" visibility="public">
+      <generalization general="//Objects/Device"/>
+    </packagedElement>
+    <packagedElement xsi:type="uml:Class" name="Monitor" visibility="protected">
+      <generalization general="//Objects/Device"/>
+    </packagedElement>
+    <packagedElement xsi:type="uml:Class" name="Laptop">
+      <generalization general="//Objects/Computer"/>
+      <generalization general="//Objects/Monitor"/>
+    </packagedElement>
+  </packagedElement>
+  <packagedElement xsi:type="uml:Package" name="abstractClass">
+    <packagedElement xsi:type="uml:Class" name="Figure" isAbstract="true">
+      <ownedOperation name="getSquare" isAbstract="true">
+        <ownedParameter type="//double" direction="return"/>
+      </ownedOperation>
+      <ownedOperation name="getPerimeter" isAbstract="true">
+        <ownedParameter type="//double" direction="return"/>
+      </ownedOperation>
+      <ownedOperation name="showFigureType" isAbstract="true">
+        <ownedParameter type="//void" direction="return"/>
+      </ownedOperation>
+    </packagedElement>
+  </packagedElement>
+  <packagedElement xsi:type="uml:Package" name="interfaceClass">
+    <packagedElement xsi:type="uml:Interface" name="Human">
+      <ownedOperation name="getHealth" isAbstract="true">
+        <ownedParameter type="//double" direction="return"/>
+      </ownedOperation>
+      <ownedOperation name="getBrain" isAbstract="true">
+        <ownedParameter type="//double" direction="return"/>
+      </ownedOperation>
+      <ownedOperation name="showSkin" isAbstract="true">
+        <ownedParameter type="//void" direction="return"/>
+      </ownedOperation>
+    </packagedElement>
+  </packagedElement>
+  <packagedElement xsi:type="uml:Association" name="float"/>
+  <packagedElement xsi:type="uml:Association" name="double"/>
+  <packagedElement xsi:type="uml:Association" name="void"/>
+</uml:Model>
