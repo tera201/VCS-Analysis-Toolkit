@@ -29,59 +29,31 @@ public class UMLToolWindowFactory implements ToolWindowFactory {
      * @param toolWindow current tool windowA
      */
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
-//        final JFXPanel fxPanel = new JFXPanel();
-//        JComponent component = toolWindow.getComponent();
-//
-//        Platform.setImplicitExit(false);
-//        Platform.runLater(() -> {
-//            WebView webView = new WebView();
-//            WebEngine webEngine = webView.getEngine();
-//            webEngine.load("file:///C:\\Users\\rnary\\IdeaProjects\\cpppainter\\generated-html5\\CppSampleModel\\index.html");
-//            webEngine.load("file:///C:\\Users\\rnary\\IdeaProjects\\UMLDrawer\\src\\main\\java\\com\\example\\generated-html5\\CppSampleModel\\index.html");
-//            Group root  =  new Group();
-//            Scene scene  =  new  Scene(root, 40, 100);
-//            root.getChildren().add(webView);
-//
-//            fxPanel.setScene(scene);
-//        });
-
-//        component.getParent().add(fxPanel);
-        JRootPane jRootPane = new JRootPane();
 
         JPanel myToolWindowContent = new JPanel();
         myToolWindowContent.setAutoscrolls(true);
 
-        JFrame frame = new JFrame();
-//        final JFXPanel fxPanel = new JFXPanel();
         JComponent component = toolWindow.getComponent();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JTabbedPane jtp = new JTabbedPane();
-        jtp.add("One", createTab("http://www.example.com"));
-        jtp.add("Two", createTab("http://www.example.net"));
-        jtp.add("Three", createTab("http://www.example.org"));
-        frame.add(jtp, BorderLayout.CENTER);
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        jtp.add("UML drawer", createTab("file:///C:\\Users\\rnary\\IdeaProjects\\cpppainter\\generated-html5\\CppSampleModel\\index.html"));
+        jtp.add("Settings", createTab("http://www.example.net"));
+        jtp.add("SomethingNew", createTab("http://www.example.org"));
 
-        myToolWindowContent.add(createTab("file:///C:\\Users\\rnary\\IdeaProjects\\cpppainter\\generated-html5\\CppSampleModel\\index.html"));
-        myToolWindowContent.add(createTab("http://www.example.com"));
+//        myToolWindowContent.add(createTab(""));
+//        myToolWindowContent.add(createTab("http://www.example.com"));
         myToolWindowContent.add(jtp, BorderLayout.CENTER);
+        myToolWindowContent.setVisible(true);
         component.getParent().add(myToolWindowContent);
-
-//        ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
-//        Content content = contentFactory.createContent(myToolWindowContent, "", true);
-//        toolWindow.getContentManager().addContent(content);
     }
 
     private JFXPanel createTab(String s) {
-        final JFXPanel fxPanel = new JFXPanel() {
-
-            @Override
-            public Dimension getPreferredSize() {
-                return new Dimension(640, 480);
-            }
-        };
+        final JFXPanel fxPanel = new JFXPanel() {};
+//
+//            @Override
+//            public Dimension getPreferredSize() {
+//                return new Dimension(640, 480);
+//            }
+//        };
         Platform.runLater(() -> {
             initFX(fxPanel, s);
         });
