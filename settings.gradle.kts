@@ -1,1 +1,1 @@
-rootProject.name = "UMLDrawer"
+rootProject.name = "IdeaPlugin"

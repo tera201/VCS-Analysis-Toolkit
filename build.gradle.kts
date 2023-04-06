@@ -8,10 +8,27 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://maven.pkg.github.com/tera201/JavaFXUMLCityBuilder")
+        credentials {
+            username = project.properties["username"].toString()
+            password = project.properties["password"].toString()
+        }
+        }
+    maven {
+        url = uri("https://maven.pkg.github.com/tera201/JavaFXUMLGraph")
+        credentials {
+            username = project.properties["username"].toString()
+            password = project.properties["password"].toString()
+        }
+
+    }
 }
 
 dependencies {
     implementation(fileTree(mapOf("dir" to "lib", "include" to listOf("*.jar"))))
+    implementation("org.example:javafx-uml-city-builder:1.0-SNAPSHOT")
+    implementation("org.example:javafx-uml-graph:1.0")
 }
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
@@ -19,7 +36,7 @@ intellij {
     version.set("2021.2")
     type.set("IC") // Target IDE Platform
 
-    plugins.set(listOf(/* Plugin Dependencies */))
+    plugins.set(listOf("com.intellij.javafx:1.0.3"))
 }
 
 tasks {
