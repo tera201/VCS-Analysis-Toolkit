@@ -27,8 +27,8 @@ repositories {
 
 dependencies {
     implementation(fileTree(mapOf("dir" to "lib", "include" to listOf("*.jar"))))
-    implementation("org.example:javafx-uml-city-builder:1.0-SNAPSHOT")
-    implementation("org.example:javafx-uml-graph:1.0")
+    implementation("org.example:javafx-uml-city-builder:latest.integration")
+    implementation("org.example:javafx-uml-graph:latest.integration")
 }
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
