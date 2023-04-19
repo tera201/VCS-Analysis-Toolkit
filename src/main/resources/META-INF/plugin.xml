@@ -36,7 +36,7 @@
 
   <extensions defaultExtensionNs="com.intellij">
     <toolWindow id="UML Toolkit" secondary="true" icon="AllIcons.General.Modified" anchor="left"
-                factoryClass="com.example.umldrawer.UMLToolWindowFactory"/>
+                factoryClass="com.example.umldrawer.UMLToolWindowFactoryKt"/>
   </extensions>
 
 </idea-plugin>
