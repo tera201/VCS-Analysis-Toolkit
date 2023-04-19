@@ -3,6 +3,8 @@ package com.example.umldrawer;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
+import com.intellij.ui.components.JBTabbedPane;
+import cpp.console.CppParserRunner;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -14,11 +16,16 @@ import javafx.scene.SceneAntialiasing;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.Pane;
+import model.console.BuildModel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.eclipse.uml2.uml.Model;
 import org.example.MainSubScene;
 import org.example.elements.Building;
 import org.example.elements.City;
 import org.example.elements.Quarter;
 import org.jetbrains.annotations.NotNull;
+import org.repodriller.scm.SCMRepository;
 import umlgraph.containers.GraphDemoContainer;
 import umlgraph.graph.Digraph;
 import umlgraph.graph.DigraphEdgeList;
@@ -32,8 +39,11 @@ import umlgraph.graphview.vertices.elements.ElementTypes;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 
 public class UMLToolWindowFactory implements ToolWindowFactory {
+
+//    private static Logger log = LogManager.getLogger(UMLToolWindowFactory.class);
 
     /**
      * Create the tool window content.
@@ -47,12 +57,20 @@ public class UMLToolWindowFactory implements ToolWindowFactory {
         myToolWindowContent.setAutoscrolls(true);
 
         JComponent component = toolWindow.getComponent();
-        JTabbedPane jtp = new JTabbedPane();
-        jtp.add("FX City", createFXCity());
+        JBTabbedPane jtp = new JBTabbedPane();
         jtp.add("FX Graph", createFXGraph());
+        jtp.add("FX City", createFXCity());
 
-//        myToolWindowContent.add(createTab(""));
-//        myToolWindowContent.add(createTab("http://www.example.com"));
+        BuildModel buildModel = new BuildModel();
+        SCMRepository repo = buildModel.createClone("https://github.com/microsoft/cpprestsdk.git");
+
+//        CppParserRunner cppParserRunner = new CppParserRunner();
+
+//        ArrayList<String> cppFiles = cppParserRunner.collectFiles(repo.getPath());
+
+//        Model model =  cppParserRunner.buildModel("CppParserRunnerSampleModel", cppFiles);
+        repo.getScm().delete();
+
         myToolWindowContent.add(jtp, BorderLayout.CENTER);
         myToolWindowContent.setVisible(true);
         component.getParent().add(myToolWindowContent);

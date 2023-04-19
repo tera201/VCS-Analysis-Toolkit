@@ -11,6 +11,7 @@
 
   <!-- Indicate this plugin can be loaded in all IntelliJ Platform-based products. -->
   <depends>com.intellij.modules.platform</depends>
+  <depends>com.intellij.javafx</depends>
 
   <!-- Text to display as description on Preferences/Settings | Plugin page -->
   <description>
@@ -34,8 +35,6 @@
   <vendor url="https://plugins.jetbrains.com">IntelliJ Platform SDK</vendor>
 
   <extensions defaultExtensionNs="com.intellij">
-    <toolWindow id="Sample Calendar" secondary="true" icon="AllIcons.General.Modified" anchor="right"
-                factoryClass="org.intellij.sdk.toolWindow.MyToolWindowFactory"/>
     <toolWindow id="UML Toolkit" secondary="true" icon="AllIcons.General.Modified" anchor="left"
                 factoryClass="com.example.umldrawer.UMLToolWindowFactory"/>
   </extensions>
