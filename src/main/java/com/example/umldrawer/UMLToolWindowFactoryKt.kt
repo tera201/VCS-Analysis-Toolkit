@@ -16,7 +16,6 @@ import javafx.scene.SceneAntialiasing
 import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
 import javafx.scene.layout.Pane
-import model.console.BuildModel
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.example.MainSubScene
@@ -59,14 +58,14 @@ class UMLToolWindowFactoryKt : ToolWindowFactory {
         jtp.add("FX Graph", createFXGraph())
         jtp.add("FX City", createFXCity())
 
-        val buildModel = BuildModel()
-        val repo = buildModel.createClone("https://github.com/microsoft/cpprestsdk.git")
+//        val buildModel = BuildModel()
+//        val repo = buildModel.createClone("https://github.com/microsoft/cpprestsdk.git")
 
         val cppParserRunner = CppParserRunner()
         val cppFiles = cppParserRunner.collectFiles("C:\\Users\\rnaryshkin\\IdeaProjects\\cpp2uml/CppToUMLSamples/src")
         val model = cppParserRunner.buildModel("CppParserRunnerSampleModel", cppFiles)
 
-        repo.scm.delete()
+//        repo.scm.delete()
 
         myToolWindowContent.add(jtp, BorderLayout.CENTER)
         myToolWindowContent.isVisible = true

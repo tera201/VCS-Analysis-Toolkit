@@ -2,6 +2,7 @@ plugins {
     id("java")
     id("org.jetbrains.intellij") version "1.13.3"
     id("org.jetbrains.kotlin.jvm") version "1.8.0"
+    id("org.openjfx.javafxplugin") version "0.0.14"
 }
 
 group = "com.example"
@@ -10,13 +11,13 @@ version = "1.0-SNAPSHOT"
 repositories {
     mavenCentral()
     mavenLocal()
-    maven {
-        url = uri("https://maven.pkg.github.com/tera201/JavaFXUMLCityBuilder")
-        credentials {
-            username = project.properties["username"].toString()
-            password = project.properties["password"].toString()
-        }
-    }
+//    maven {
+//        url = uri("https://maven.pkg.github.com/tera201/JavaFXUMLCityBuilder")
+//        credentials {
+//            username = project.properties["username"].toString()
+//            password = project.properties["password"].toString()
+//        }
+//    }
 }
 
 dependencies {
@@ -26,7 +27,11 @@ dependencies {
     implementation("org.example:javafx-uml-city-builder:latest.integration")
     implementation("org.example:javafx-uml-graph-idea:1.1-SNAPSHOT")
     implementation("org.example:cpp-to-uml:1.2-SNAPSHOT")
-    implementation("org.example:swrminer:1.1-SNAPSHOT")
+//    implementation("org.example:swrminer:1.1-SNAPSHOT")
+}
+
+javafx {
+    modules("javafx.controls")
 }
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
