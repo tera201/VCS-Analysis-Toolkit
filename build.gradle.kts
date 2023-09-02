@@ -27,7 +27,7 @@ dependencies {
     implementation("org.example:javafx-uml-city-builder:latest.integration")
     implementation("org.example:javafx-uml-graph-idea:1.1-SNAPSHOT")
     implementation("org.example:cpp-to-uml:1.2-SNAPSHOT")
-//    implementation("org.example:swrminer:1.1-SNAPSHOT")
+    implementation("org.example:swrminer:1.1-SNAPSHOT")
 }
 
 javafx {
