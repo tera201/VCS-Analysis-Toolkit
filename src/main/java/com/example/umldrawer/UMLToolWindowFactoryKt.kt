@@ -7,12 +7,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.components.JBTabbedPane
-import model.console.BuildModel
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import java.awt.BorderLayout
 import java.awt.Dimension
-import javax.swing.JPanel
 
 
 class UMLToolWindowFactoryKt : ToolWindowFactory {
@@ -26,8 +23,6 @@ class UMLToolWindowFactoryKt : ToolWindowFactory {
      * @param toolWindow current tool windowA
      */
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        val myToolWindowContent = JPanel()
-        myToolWindowContent.autoscrolls = true
         val component = toolWindow.component
 
         val jtp = JBTabbedPane()
@@ -37,15 +32,6 @@ class UMLToolWindowFactoryKt : ToolWindowFactory {
         jtp.add("Git", createGit())
         jtp.preferredSize = Dimension(500, 400)
 
-
-        val cppParserRunner = CppParserRunner()
-        val cppFiles = cppParserRunner.collectFiles("C:\\Users\\rnaryshkin\\IdeaProjects\\cpp2uml/CppToUMLSamples/src")
-        val model = cppParserRunner.buildModel("CppParserRunnerSampleModel", cppFiles)
-
-//        repo.scm.delete()
-
-        myToolWindowContent.add(jtp, BorderLayout.CENTER)
-        myToolWindowContent.isVisible = true
-        component.parent.add(myToolWindowContent)
+        component.parent.add(jtp)
     }
 }
