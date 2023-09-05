@@ -4,6 +4,7 @@ import com.intellij.openapi.observable.util.whenSizeChanged
 import com.intellij.ui.components.JBScrollPane
 import java20.console.JavaParserRunner
 import java20.console.saveModel
+import javafx.application.Platform
 import model.console.BuildModel
 import org.eclipse.uml2.uml.Model
 import org.repodriller.scm.GitRemoteRepository
@@ -74,6 +75,12 @@ private fun initGit(gitJPanel: JPanel) {
             } else jTextArea.append("Get some repo for analyzing.\n")
         } catch (e:Exception) {
             println(e.toString())
+        }
+    }
+
+    getUmlFileButton.addActionListener {
+        Platform.runLater {
+            graphView?.setTheGraph(build_graph(model!!))
         }
     }
 

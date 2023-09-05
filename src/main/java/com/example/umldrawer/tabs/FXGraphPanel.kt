@@ -1,8 +1,10 @@
 package com.example.umldrawer.tabs
 
+import com.example.umldrawer.utils.toGraph
 import javafx.application.Platform
 import javafx.embed.swing.JFXPanel
 import javafx.scene.Scene
+import org.eclipse.uml2.uml.Model
 import umlgraph.containers.GraphDemoContainer
 import umlgraph.graph.Digraph
 import umlgraph.graph.DigraphEdgeList
@@ -15,6 +17,7 @@ import umlgraph.graphview.strategy.PlacementStrategy
 import umlgraph.graphview.vertices.GraphVertex
 import umlgraph.graphview.vertices.elements.ElementTypes
 
+var graphView: GraphPanel<String,String>? = null
 public fun createFXGraph(): JFXPanel? {
     val fxPanel: JFXPanel = object : JFXPanel() {}
     Platform.runLater { initFXGraph(fxPanel) }
@@ -26,18 +29,19 @@ private fun initFXGraph(fxPanel: JFXPanel) {
     val sceneHeight = 600.0
     val g = build_sample_digraph()
     val strategy: PlacementStrategy = CircularSortedPlacementStrategy()
-    val graphView = GraphPanel(g, strategy)
+    graphView = GraphPanel(g, strategy)
     if (g.numVertices() > 0) {
-        graphView.getStylableVertex("A").setStyle("-fx-fill: gold; -fx-stroke: brown;")
+        graphView!!.getStylableVertex("A").setStyle("-fx-fill: gold; -fx-stroke: brown;")
     }
     val scene = Scene(GraphDemoContainer(graphView), sceneWidth, sceneHeight)
-    graphView.setVertexDoubleClickAction { graphVertex: GraphVertex<String> ->
+    Platform.runLater({graphView!!.init()})
+    graphView!!.setVertexDoubleClickAction { graphVertex: GraphVertex<String> ->
         println("Vertex contains element: " + graphVertex.underlyingVertex.element())
         if (!graphVertex.removeStyleClass("myVertex")) {
             graphVertex.addStyleClass("myVertex")
         }
     }
-    graphView.setEdgeDoubleClickAction { graphEdge: Edge<String, String> ->
+    graphView!!.setEdgeDoubleClickAction { graphEdge: Edge<String, String> ->
         println("Edge contains element: " + graphEdge.underlyingEdge.element())
         graphEdge.setStyle("-fx-stroke: black; -fx-stroke-width: 3;")
         graphEdge.stylableArrow.setStyle("-fx-stroke: black; -fx-stroke-width: 3;")
@@ -45,6 +49,11 @@ private fun initFXGraph(fxPanel: JFXPanel) {
     fxPanel.scene = scene
 }
 
+public fun build_graph(model: Model): Graph<String, String> {
+    val g: Digraph<String, String> = DigraphEdgeList()
+    model.toGraph(g)
+    return g
+}
 
 
 private fun build_sample_digraph(): Graph<String, String> {

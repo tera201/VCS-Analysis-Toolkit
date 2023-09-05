@@ -1,8 +1,6 @@
 package com.example.umldrawer
 
-import com.example.umldrawer.tabs.createFXCity
-import com.example.umldrawer.tabs.createFXGraph
-import com.example.umldrawer.tabs.createGit
+import com.example.umldrawer.tabs.*
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
