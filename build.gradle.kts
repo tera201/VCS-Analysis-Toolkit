@@ -1,6 +1,8 @@
 plugins {
     id("java")
-    id("org.jetbrains.intellij") version "1.5.2"
+    id("org.jetbrains.intellij") version "1.13.3"
+    id("org.jetbrains.kotlin.jvm") version "1.8.0"
+    id("org.openjfx.javafxplugin") version "0.0.14"
 }
 
 group = "com.example"
@@ -8,18 +10,35 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    mavenLocal()
+//    maven {
+//        url = uri("https://maven.pkg.github.com/tera201/JavaFXUMLCityBuilder")
+//        credentials {
+//            username = project.properties["username"].toString()
+//            password = project.properties["password"].toString()
+//        }
+//    }
 }
 
 dependencies {
+    implementation(kotlin("stdlib"))
+    implementation(kotlin("reflect"))
     implementation(fileTree(mapOf("dir" to "lib", "include" to listOf("*.jar"))))
+    implementation("org.example:javafx-uml-city-builder:latest.integration")
+    implementation("org.example:javafx-uml-graph-idea:1.1-SNAPSHOT")
+    implementation("org.example:cpp-to-uml:1.2-SNAPSHOT")
+    implementation("org.example:swrminer:1.1-SNAPSHOT")
+}
+
+javafx {
+    modules("javafx.controls")
 }
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
 intellij {
-    version.set("2021.2")
+    version.set("2023.1")
     type.set("IC") // Target IDE Platform
-
-    plugins.set(listOf(/* Plugin Dependencies */))
+    plugins.set(listOf("com.intellij.javafx:1.0.4"))
 }
 
 tasks {
@@ -29,18 +48,29 @@ tasks {
         targetCompatibility = "11"
     }
 
+    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+        kotlinOptions {
+            jvmTarget = "11"
+            apiVersion = "1.8"
+            languageVersion = "1.8"
+        }
+    }
+
     patchPluginXml {
-        sinceBuild.set("212")
-        untilBuild.set("222.*")
+        sinceBuild.set("203")
+        untilBuild.set("231.*")
     }
+}
 
-    signPlugin {
-        certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
-        privateKey.set(System.getenv("PRIVATE_KEY"))
-        password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
+tasks {
+    compileKotlin {
+        kotlinOptions.jvmTarget = "11"
+        kotlinOptions.languageVersion = "1.8"
+        kotlinOptions.apiVersion = "1.8"
     }
-
-    publishPlugin {
-        token.set(System.getenv("PUBLISH_TOKEN"))
+    compileTestKotlin {
+        kotlinOptions.jvmTarget = "11"
+        kotlinOptions.languageVersion = "1.8"
+        kotlinOptions.apiVersion = "1.8"
     }
 }
