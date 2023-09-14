@@ -1,6 +1,6 @@
 plugins {
     id("java")
-    id("org.jetbrains.intellij") version "1.13.3"
+    id("org.jetbrains.intellij") version "1.15.0"
     id("org.jetbrains.kotlin.jvm") version "1.8.0"
     id("org.openjfx.javafxplugin") version "0.0.14"
 }
@@ -31,6 +31,7 @@ dependencies {
 }
 
 javafx {
+    version = "20"
     modules("javafx.controls")
 }
 
@@ -44,13 +45,13 @@ intellij {
 tasks {
     // Set the JVM compatibility versions
     withType<JavaCompile> {
-        sourceCompatibility = "11"
-        targetCompatibility = "11"
+        sourceCompatibility = "17"
+        targetCompatibility = "17"
     }
 
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
         kotlinOptions {
-            jvmTarget = "11"
+            jvmTarget = "17"
             apiVersion = "1.8"
             languageVersion = "1.8"
         }
@@ -64,12 +65,12 @@ tasks {
 
 tasks {
     compileKotlin {
-        kotlinOptions.jvmTarget = "11"
+        kotlinOptions.jvmTarget = "17"
         kotlinOptions.languageVersion = "1.8"
         kotlinOptions.apiVersion = "1.8"
     }
     compileTestKotlin {
-        kotlinOptions.jvmTarget = "11"
+        kotlinOptions.jvmTarget = "17"
         kotlinOptions.languageVersion = "1.8"
         kotlinOptions.apiVersion = "1.8"
     }
