@@ -3,41 +3,43 @@ package com.example.umldrawer.utils
 import org.eclipse.uml2.uml.*
 import uml.util.nl
 import umlgraph.graph.Digraph
+import umlgraph.graph.Vertex
 import umlgraph.graphview.arrows.ArrowTypes
 import umlgraph.graphview.vertices.elements.ElementTypes
 
 fun Package.toGraph(graph: Digraph<String, String>) {
+    val root = graph.insertVertex(name, ElementTypes.PACKAGE)
     ownedMembers
         .filter { !it.hasKeyword("unknown") }
         .forEach {
             when (it) {
-                is Class -> it.generateClass(graph, name)
-                is Interface -> it.generateInterface(graph, name)
-                is Enumeration -> it.generateEnumeration(graph, name)
-                is Package -> it.generatePackage(graph, name)
+                is Class -> it.generateClass(graph, root)
+                is Interface -> it.generateInterface(graph, root)
+                is Enumeration -> it.generateEnumeration(graph, root)
+                is Package -> it.generatePackage(graph, root)
             }
         }
 }
 
 
-fun Package.generatePackage(graph: Digraph<String, String>, parent:String) {
-    graph.insertVertex(name, ElementTypes.PACKAGE)
+fun Package.generatePackage(graph: Digraph<String, String>, parent: Vertex<String>) {
+    val root = graph.insertVertex(name, ElementTypes.PACKAGE)
 
     ownedMembers
         .filter { !it.hasKeyword("unknown") }
         .forEach {
             when (it) {
-                is Class -> it.generateClass(graph, name)
-                is Interface -> it.generateInterface(graph, name)
-                is Enumeration -> it.generateEnumeration(graph, name)
-                is Package -> it.generatePackage(graph, name)
+                is Class -> it.generateClass(graph, root)
+                is Interface -> it.generateInterface(graph, root)
+                is Enumeration -> it.generateEnumeration(graph, root)
+                is Package -> it.generatePackage(graph, root)
             }
         }
 }
 
-fun Class.generateClass(graph: Digraph<String, String>, parent:String) {
-    graph.insertVertex(name, ElementTypes.CLASS)
-    graph.insertEdge(parent, name, "$name-$parent", ArrowTypes.DEPENDENCY)
+fun Class.generateClass(graph: Digraph<String, String>, parent: Vertex<String>) {
+    val root = graph.insertVertex(name, ElementTypes.CLASS)
+    graph.insertEdge(parent, root, "$name-${parent}", ArrowTypes.DEPENDENCY)
 }
 
 private val Class.modifiers: String
@@ -123,9 +125,9 @@ private val Enumeration.modifiers: String
         return modifiers
     }
 
-fun Enumeration.generateEnumeration(graph: Digraph<String, String>, parent:String) {
-    graph.insertVertex(name, ElementTypes.ENUM)
-    graph.insertEdge(parent, name, "$name-$parent", ArrowTypes.DEPENDENCY)
+fun Enumeration.generateEnumeration(graph: Digraph<String, String>, parent: Vertex<String>) {
+    val root = graph.insertVertex(name, ElementTypes.ENUM)
+    graph.insertEdge(parent, root, "$name-$parent", ArrowTypes.DEPENDENCY)
 }
 
 private val Interface.modifiers: String
@@ -135,7 +137,7 @@ private val Interface.modifiers: String
         return modifiers
     }
 
-fun Interface.generateInterface(graph: Digraph<String, String>, parent:String) {
-    graph.insertVertex(name, ElementTypes.INTERFACE)
-    graph.insertEdge(parent, name, "$name-$parent", ArrowTypes.DEPENDENCY)
+fun Interface.generateInterface(graph: Digraph<String, String>, parent: Vertex<String>) {
+    val root = graph.insertVertex(name, ElementTypes.INTERFACE)
+    graph.insertEdge(parent, root, "$name-$parent", ArrowTypes.DEPENDENCY)
 }
