@@ -22,7 +22,7 @@ fun Package.toGraph(graph: Digraph<String, String>) {
 }
 
 
-fun Package.generatePackage(graph: Digraph<String, String>, parent: Vertex<String>) {
+private fun Package.generatePackage(graph: Digraph<String, String>, parent: Vertex<String>) {
     val root = graph.insertVertex(name, ElementTypes.PACKAGE)
 
     ownedMembers
@@ -37,18 +37,10 @@ fun Package.generatePackage(graph: Digraph<String, String>, parent: Vertex<Strin
         }
 }
 
-fun Class.generateClass(graph: Digraph<String, String>, parent: Vertex<String>) {
+private fun Class.generateClass(graph: Digraph<String, String>, parent: Vertex<String>) {
     val root = graph.insertVertex(name, ElementTypes.CLASS)
     graph.insertEdge(parent, root, "$name-${parent}", ArrowTypes.DEPENDENCY)
 }
-
-private val Class.modifiers: String
-    get() {
-        var modifiers = visibility.asJava
-        if (isAbstract) modifiers += "abstract "
-        if (isLeaf) modifiers += "final "
-        return modifiers
-    }
 
 private val newLine: CharSequence = "\n"
 
@@ -125,7 +117,7 @@ private val Enumeration.modifiers: String
         return modifiers
     }
 
-fun Enumeration.generateEnumeration(graph: Digraph<String, String>, parent: Vertex<String>) {
+private fun Enumeration.generateEnumeration(graph: Digraph<String, String>, parent: Vertex<String>) {
     val root = graph.insertVertex(name, ElementTypes.ENUM)
     graph.insertEdge(parent, root, "$name-$parent", ArrowTypes.DEPENDENCY)
 }
@@ -137,7 +129,7 @@ private val Interface.modifiers: String
         return modifiers
     }
 
-fun Interface.generateInterface(graph: Digraph<String, String>, parent: Vertex<String>) {
+private fun Interface.generateInterface(graph: Digraph<String, String>, parent: Vertex<String>) {
     val root = graph.insertVertex(name, ElementTypes.INTERFACE)
     graph.insertEdge(parent, root, "$name-$parent", ArrowTypes.DEPENDENCY)
 }

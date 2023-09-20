@@ -1,14 +1,17 @@
 package com.example.umldrawer.tabs
 
+import com.example.umldrawer.utils.toClass
 import com.example.umldrawer.utils.toGraph
+import com.example.umldrawer.utils.toPackage
+import com.intellij.icons.AllIcons
 import javafx.application.Platform
 import javafx.embed.swing.JFXPanel
 import javafx.scene.Scene
 import org.eclipse.uml2.uml.Model
 import umlgraph.containers.GraphDemoContainer
 import umlgraph.graph.Digraph
-import umlgraph.graph.Graph
 import umlgraph.graph.DigraphTreeEdgeList
+import umlgraph.graph.Graph
 import umlgraph.graphview.GraphPanel
 import umlgraph.graphview.arrows.ArrowTypes
 import umlgraph.graphview.edges.Edge
@@ -16,15 +19,56 @@ import umlgraph.graphview.strategy.DigraphTreePlacementStrategy
 import umlgraph.graphview.strategy.PlacementStrategy
 import umlgraph.graphview.vertices.GraphVertex
 import umlgraph.graphview.vertices.elements.ElementTypes
+import java.awt.BorderLayout
+import java.awt.FlowLayout
+import javax.swing.BoxLayout
+import javax.swing.JButton
+import javax.swing.JPanel
+import javax.swing.JRadioButton
+
 
 var graphView: GraphPanel<String,String>? = null
-public fun createFXGraph(): JFXPanel? {
-    val fxPanel: JFXPanel = object : JFXPanel() {}
-    Platform.runLater { initFXGraph(fxPanel) }
-    return fxPanel
+public fun createFXGraph(): JPanel? {
+    val jPanel: JPanel = object : JPanel() {}
+    initFXGraph(jPanel)
+    return jPanel
 }
 
-private fun initFXGraph(fxPanel: JFXPanel) {
+private fun initFXGraph(jPanel: JPanel) {
+    jPanel.layout = BorderLayout()
+
+    val topPanel = JPanel()
+    topPanel.layout = FlowLayout(FlowLayout.LEFT)
+    val packageButton = JButton("Package")
+    val classButton = JButton("Class")
+    classButton.icon = AllIcons.Nodes.Class
+    packageButton.icon = AllIcons.Nodes.Package
+    topPanel.add(packageButton)
+    topPanel.add(classButton)
+
+    packageButton.addActionListener {
+        if (model != null) graphView?.setTheGraph(build_package_graph(model!!))
+    }
+
+    classButton.addActionListener {
+        if (model != null) graphView?.setTheGraph(build_class_graph(model!!))
+    }
+
+    val rightPanel = JPanel()
+    rightPanel.layout = BoxLayout(rightPanel, BoxLayout.Y_AXIS)
+    rightPanel.add(JRadioButton("Option 1"))
+    rightPanel.add(JRadioButton("Option 2"))
+    rightPanel.add(JRadioButton("Option 3"))
+
+
+    val fxPanel: JFXPanel = object : JFXPanel() {}
+    Platform.runLater { make_fxPanel(fxPanel) }
+    jPanel.add(topPanel, BorderLayout.NORTH)
+    jPanel.add(rightPanel, BorderLayout.EAST)
+    jPanel.add(fxPanel, BorderLayout.CENTER)
+}
+
+fun make_fxPanel(mainPanel:JFXPanel) {
     val sceneWidth = 800.0
     val sceneHeight = 600.0
     val g = build_sample_digraph()
@@ -34,7 +78,7 @@ private fun initFXGraph(fxPanel: JFXPanel) {
         graphView!!.getStylableVertex("A").setStyle("-fx-fill: gold; -fx-stroke: brown;")
     }
     val scene = Scene(GraphDemoContainer(graphView), sceneWidth, sceneHeight)
-    Platform.runLater({graphView!!.init()})
+    Platform.runLater { graphView!!.init() }
     graphView!!.setVertexDoubleClickAction { graphVertex: GraphVertex<String> ->
         println("Vertex contains element: " + graphVertex.underlyingVertex.element())
         if (!graphVertex.removeStyleClass("myVertex")) {
@@ -46,12 +90,22 @@ private fun initFXGraph(fxPanel: JFXPanel) {
         graphEdge.setStyle("-fx-stroke: black; -fx-stroke-width: 3;")
         graphEdge.stylableArrow.setStyle("-fx-stroke: black; -fx-stroke-width: 3;")
     }
-    fxPanel.scene = scene
+    mainPanel.scene = scene
 }
 
 public fun build_graph(model: Model): Graph<String, String> {
     val g: Digraph<String, String> = DigraphTreeEdgeList();
     model.toGraph(g)
+    return g
+}
+public fun build_package_graph(model: Model): Graph<String, String> {
+    val g: Digraph<String, String> = DigraphTreeEdgeList();
+    model.toPackage(g)
+    return g
+}
+public fun build_class_graph(model: Model): Graph<String, String> {
+    val g: DigraphTreeEdgeList<String, String> = DigraphTreeEdgeList();
+    model.toClass(g)
     return g
 }
 
