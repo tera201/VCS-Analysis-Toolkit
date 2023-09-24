@@ -28,11 +28,6 @@ public fun createGit(): JPanel?{
 private fun initGit(gitJPanel: JPanel) {
     gitJPanel.layout = FlowLayout(FlowLayout.LEFT)
     val getButton = JButton("Get")
-    val removeButton = JButton("Clear cache")
-    val analyzeButton = JButton("Analyze")
-    val clearLogButton = JButton("Clear log")
-    val saveUmlFileButton = JButton("Save UML model")
-    val getUmlFileButton = JButton("Get UML model")
     val urlField = JTextField()
     val filesTreeJBScrollPane = JBScrollPane(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER)
     val logsJBScrollPane = JBScrollPane(jTextArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED)
@@ -41,8 +36,8 @@ private fun initGit(gitJPanel: JPanel) {
     urlField.text = "https://github.com/arnohaase/a-foundation.git"
 
     gitJPanel.whenSizeChanged { urlField.preferredSize = (Dimension(gitJPanel.width - getButton.width - 40, getButton.height))
-        filesTreeJBScrollPane.preferredSize = Dimension(gitJPanel.width - 20, (gitJPanel.height * 2f/3f).toInt())
-        logsJBScrollPane.preferredSize = Dimension(gitJPanel.width - removeButton.width - 40,
+        filesTreeJBScrollPane.preferredSize = Dimension(gitJPanel.width - 20, (gitJPanel.height * 2f/3f).toInt() - 10)
+        logsJBScrollPane.preferredSize = Dimension(gitJPanel.width - 140,
             (gitJPanel.height * 1f/6f).toInt()
         )
     }
@@ -50,6 +45,22 @@ private fun initGit(gitJPanel: JPanel) {
     getButton.addActionListener {
         clickGet(urlField, filesTreeJBScrollPane)
     }
+
+    //TODO: add listener for getUmlFileButton
+
+    gitJPanel.add(urlField)
+    gitJPanel.add(getButton)
+    gitJPanel.add(filesTreeJBScrollPane)
+    addLogPanelButtons(gitJPanel, filesTreeJBScrollPane)
+    gitJPanel.add(logsJBScrollPane)
+    addModelControlPanel(gitJPanel)
+}
+
+private fun addLogPanelButtons(mainJPanel: JPanel, filesTreeJBScrollPane:JBScrollPane) {
+    val logButtonsPanel = JPanel()
+    logButtonsPanel.layout = BoxLayout(logButtonsPanel, BoxLayout.Y_AXIS)
+    val removeButton = JButton("Clear cache")
+    val clearLogButton = JButton("Clear log")
 
     removeButton.addActionListener {
         filesTreeJBScrollPane.setViewportView(null)
@@ -61,6 +72,18 @@ private fun initGit(gitJPanel: JPanel) {
     clearLogButton.addActionListener {
         jTextArea.text = null
     }
+
+    logButtonsPanel.add(removeButton)
+    logButtonsPanel.add(clearLogButton)
+    mainJPanel.add(logButtonsPanel)
+}
+
+private fun addModelControlPanel(mainJPanel: JPanel) {
+    val modelControlPanel = JPanel()
+
+    val analyzeButton = JButton("Analyze")
+    val saveUmlFileButton = JButton("Save UML model")
+    val getUmlFileButton = JButton("Get UML model")
 
     analyzeButton.addActionListener {
         val javaParserRunner = JavaParserRunner()
@@ -88,7 +111,7 @@ private fun initGit(gitJPanel: JPanel) {
         if (model != null) {
             val fileChooser = JFileChooser()
             fileChooser.setDialogTitle("Save UML-model");
-            val userSelection = fileChooser.showSaveDialog(gitJPanel)
+            val userSelection = fileChooser.showSaveDialog(mainJPanel)
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 val fileToSave = fileChooser.selectedFile
                 jTextArea.append("Save as file: ${fileToSave.absolutePath}\n")
@@ -97,17 +120,10 @@ private fun initGit(gitJPanel: JPanel) {
         } else jTextArea.append("There isn't model for getting file.\n")
     }
 
-    //TODO: add listener for getUmlFileButton
-
-    gitJPanel.add(urlField)
-    gitJPanel.add(getButton)
-    gitJPanel.add(filesTreeJBScrollPane)
-    gitJPanel.add(removeButton)
-    gitJPanel.add(logsJBScrollPane)
-    gitJPanel.add(analyzeButton)
-    gitJPanel.add(clearLogButton)
-    gitJPanel.add(saveUmlFileButton)
-    gitJPanel.add(getUmlFileButton)
+    modelControlPanel.add(analyzeButton)
+    modelControlPanel.add(saveUmlFileButton)
+    modelControlPanel.add(getUmlFileButton)
+    mainJPanel.add(modelControlPanel)
 }
 
 private fun clickGet(textField: JTextField, jbScrollPane: JBScrollPane) {
