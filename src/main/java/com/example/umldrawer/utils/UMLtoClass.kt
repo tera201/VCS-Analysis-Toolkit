@@ -8,7 +8,7 @@ import umlgraph.graphview.arrows.ArrowTypes
 import umlgraph.graphview.vertices.elements.ElementTypes
 
 fun Package.toClass(graph: DigraphTreeEdgeList<String, String>) {
-    ownedMembers
+    packagedElements
         .filter { !it.hasKeyword("unknown") }
         .forEach {
             when (it) {
@@ -22,7 +22,7 @@ fun Package.toClass(graph: DigraphTreeEdgeList<String, String>) {
 
 
 private fun Package.generatePackage(graph: DigraphTreeEdgeList<String, String>, parent: Vertex<String>?) {
-    ownedMembers
+    packagedElements
         .filter { !it.hasKeyword("unknown") }
         .forEach {
             when (it) {

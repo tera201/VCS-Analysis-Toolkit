@@ -3,22 +3,25 @@ package com.example.umldrawer.tabs
 import com.intellij.openapi.observable.util.whenSizeChanged
 import com.intellij.ui.components.JBScrollPane
 import java20.console.JavaParserRunner
-import java20.console.saveModel
-import javafx.application.Platform
 import model.console.BuildModel
 import org.eclipse.uml2.uml.Model
-import org.repodriller.scm.GitRemoteRepository
+import org.repodriller.scm.SCMRepository
+import uml.util.UMLModelHandler
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.io.File
+import java.io.IOException
 import javax.swing.*
 import javax.swing.tree.DefaultMutableTreeNode
 import kotlin.concurrent.thread
 
 
-var myRepo:GitRemoteRepository? = null
+var myRepo:SCMRepository? = null
 val jTextArea = JTextArea()
 var model:Model? = null
+val handler = UMLModelHandler()
+val projectCache = "${System.getProperty("user.dir")}/UmlToolkitCache/"
+val modelCache = "${System.getProperty("user.dir")}/UmlToolkitCache/Models"
 public fun createGit(): JPanel?{
     val gitPanel: JPanel = object : JPanel() {}
     initGit(gitPanel)
@@ -26,6 +29,14 @@ public fun createGit(): JPanel?{
 }
 
 private fun initGit(gitJPanel: JPanel) {
+
+    try {
+        File(projectCache).mkdirs()
+        File(modelCache).mkdirs()
+    } catch (e: IOException) {
+        e.printStackTrace()
+    }
+
     gitJPanel.layout = FlowLayout(FlowLayout.LEFT)
     val getButton = JButton("Get")
     val urlField = JTextField()
@@ -65,7 +76,7 @@ private fun addLogPanelButtons(mainJPanel: JPanel, filesTreeJBScrollPane:JBScrol
     removeButton.addActionListener {
         filesTreeJBScrollPane.setViewportView(null)
         filesTreeJBScrollPane.updateUI()
-        myRepo?.delete()
+        myRepo?.scm?.delete()
         jTextArea.append("Removed.\n")
     }
 
@@ -90,7 +101,7 @@ private fun addModelControlPanel(mainJPanel: JPanel) {
         try {
             if (myRepo != null) {
                 thread {
-                    val javaFiles = javaParserRunner.collectFiles(myRepo!!.repositoryPath)
+                    val javaFiles = javaParserRunner.collectFiles(myRepo!!.path)
                     jTextArea.append("Start analyzing.\n")
                     model = javaParserRunner.buildModel("JavaSampleModel", javaFiles, jTextArea)
                     jTextArea.append("End analyzing.\n")
@@ -102,20 +113,29 @@ private fun addModelControlPanel(mainJPanel: JPanel) {
     }
 
     getUmlFileButton.addActionListener {
-        Platform.runLater {
-            graphView?.setTheGraph(build_graph(model!!))
+        val fileChooser = JFileChooser()
+        fileChooser.setDialogTitle("Get UML-model");
+        fileChooser.currentDirectory = File(modelCache)
+        val userSelection = fileChooser.showOpenDialog(mainJPanel)
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            val fileToSave = fileChooser.selectedFile
+            jTextArea.append("Get model from file: ${fileToSave.absolutePath}\n")
+            model = handler.loadModelFromFile(fileToSave.absolutePath)
         }
     }
 
     saveUmlFileButton.addActionListener {
         if (model != null) {
             val fileChooser = JFileChooser()
-            fileChooser.setDialogTitle("Save UML-model");
+            fileChooser.setDialogTitle("Save UML-model")
+            fileChooser.currentDirectory = File(modelCache)
+            fileChooser.selectedFile = File("$modelCache/model.json")
             val userSelection = fileChooser.showSaveDialog(mainJPanel)
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 val fileToSave = fileChooser.selectedFile
                 jTextArea.append("Save as file: ${fileToSave.absolutePath}\n")
-                model!!.saveModel(fileToSave.absolutePath)
+//                model!!.saveModel(fileToSave.absolutePath)
+                handler.saveModelToFile(model!!, fileToSave.absolutePath)
             }
         } else jTextArea.append("There isn't model for getting file.\n")
     }
@@ -127,19 +147,27 @@ private fun addModelControlPanel(mainJPanel: JPanel) {
 }
 
 private fun clickGet(textField: JTextField, jbScrollPane: JBScrollPane) {
-    myRepo?.delete()
+    myRepo?.scm?.delete()
     //TODO: add regex
     if (textField.text != "") {
-        jTextArea.append("Cloning: ${textField.text}\n")
         val buildModel = BuildModel()
-        myRepo = buildModel.createRepo(textField.text)
-        jTextArea.append("Cloned to ${myRepo!!.repositoryPath}\n")
-        println("PRINT PATH: " + myRepo!!.repositoryPath)
-        val root = DefaultMutableTreeNode(myRepo!!.repositoryPath.split("/").last())
-        val directories = File(myRepo!!.repositoryPath).list { dir, name -> File(dir, name).isDirectory }
-        buildTree(directories, root, myRepo!!.repositoryPath)
-        jbScrollPane.setViewportView(JTree(root))
-        jbScrollPane.updateUI()
+        val directoryPath = "$projectCache/${buildModel.getRepoNameByUrl(textField.text)}"
+        val directory = File(directoryPath)
+        if (directory.exists() && directory.isDirectory) {
+            jTextArea.append("Already exist!\n")
+            myRepo = buildModel.getRepository(textField.text, projectCache)
+        }
+        else {
+            jTextArea.append("Cloning: ${textField.text}\n")
+            myRepo = buildModel.createClone(textField.text, projectCache)
+            jTextArea.append("Cloned to ${myRepo!!.path}\n")
+
+            val root = DefaultMutableTreeNode(myRepo!!.path.split("/").last())
+            val directories = File(myRepo!!.path).list { dir, name -> File(dir, name).isDirectory }
+            buildTree(directories, root, myRepo!!.path)
+            jbScrollPane.setViewportView(JTree(root))
+            jbScrollPane.updateUI()
+        }
     }
 }
 

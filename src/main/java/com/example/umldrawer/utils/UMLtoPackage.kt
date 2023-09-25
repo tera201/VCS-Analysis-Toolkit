@@ -9,7 +9,7 @@ import umlgraph.graphview.vertices.elements.ElementTypes
 
 fun Package.toPackage(graph: Digraph<String, String>) {
     val root = graph.insertVertex(name, ElementTypes.PACKAGE)
-    ownedMembers
+    packagedElements
         .filter { !it.hasKeyword("unknown") }
         .forEach {
             when (it) {
@@ -21,7 +21,7 @@ fun Package.toPackage(graph: Digraph<String, String>) {
 private fun Package.generatePackage(graph: Digraph<String, String>, parent: Vertex<String>) {
     val root = graph.insertVertex(name, ElementTypes.PACKAGE)
     graph.insertEdge(parent, root, "$name-${parent}", ArrowTypes.DEPENDENCY)
-    ownedMembers
+    packagedElements
         .filter { !it.hasKeyword("unknown") }
         .forEach {
             when (it) {
