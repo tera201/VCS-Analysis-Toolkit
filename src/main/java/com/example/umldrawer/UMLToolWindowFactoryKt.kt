@@ -1,5 +1,6 @@
 package com.example.umldrawer
 
+import com.example.umldrawer.action.ShowSettingsAction
 import com.example.umldrawer.tabs.*
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
@@ -31,5 +32,6 @@ class UMLToolWindowFactoryKt : ToolWindowFactory {
         jtp.preferredSize = Dimension(500, 400)
 
         component.parent.add(jtp)
+        toolWindow.setTitleActions(listOf(ShowSettingsAction()))
     }
 }
