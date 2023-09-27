@@ -5,7 +5,7 @@ plugins {
     id("org.openjfx.javafxplugin") version "0.0.14"
 }
 
-group = "com.example"
+group = "com.tera201"
 version = "1.0-SNAPSHOT"
 
 repositories {

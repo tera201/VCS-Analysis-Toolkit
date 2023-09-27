@@ -6,6 +6,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.components.JBTabbedPane
+import com.intellij.ui.content.ContentFactory
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import java.awt.Dimension
@@ -22,16 +23,15 @@ class UMLToolWindowFactoryKt : ToolWindowFactory {
      * @param toolWindow current tool windowA
      */
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        val component = toolWindow.component
-
+        val contentFactory = ContentFactory.getInstance()
         val jtp = JBTabbedPane()
         jtp.autoscrolls = true
-        jtp.add("FX Graph", createFXGraph())
-        jtp.add("FX City", createFXCity())
-        jtp.add("Git", createGit())
+        jtp.add("FX Graph", FXGraphPanel())
+        jtp.add("FX City", FXCityPanel())
+        jtp.add("Git", GitPanel())
         jtp.preferredSize = Dimension(500, 400)
-
-        component.parent.add(jtp)
+        val content = contentFactory.createContent(jtp, "", false)
+        toolWindow.contentManager.addContent(content)
         toolWindow.setTitleActions(listOf(ShowSettingsAction()))
     }
 }
