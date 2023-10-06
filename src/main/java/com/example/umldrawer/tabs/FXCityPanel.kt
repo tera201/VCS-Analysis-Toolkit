@@ -17,10 +17,14 @@ import java.awt.event.ComponentEvent
 
 
 class FXCityPanel : JFXPanel() {
-    init {
-        Platform.runLater { initFXCity() }
 
-        // TODO: remove this listener
+    companion object {
+        var city = City(8000.0, 20.0, 8000.0)
+    }
+    init {
+        Platform.runLater { initFXCity(city) }
+
+//         TODO: remove this listener
         this.addComponentListener(object : ComponentAdapter() {
             override fun componentShown(e: ComponentEvent?) {
                 FXCityPanel()
@@ -28,20 +32,19 @@ class FXCityPanel : JFXPanel() {
         })
     }
 
-    private fun initFXCity() {
+    private fun initFXCity(city: City) {
         val sceneWidth = 800.0
         val sceneHeight = 600.0
-        val city = City(8000.0, 20.0, 8000.0)
-        val quarter = Quarter(500.0, 10.0, 500.0, 50.0)
+        val quarter = Quarter("First quarter",500.0, 10.0, 500.0, 50.0)
         quarter.setPosition(0.0, 0.0)
-        val building1 = Building(100.0, 900.0, 100.0)
-        val building2 = Building(100.0, 700.0, 100.0)
-        val building3 = Building(100.0, 600.0, 100.0)
-        val building4 = Building(100.0, 600.0, 100.0)
-        val building5 = Building(200.0, 600.0, 200.0)
-        val building6 = Building(50.0, 600.0, 50.0)
-        val building7 = Building(100.0, 600.0, 100.0)
-        val building8 = Building(100.0, 600.0, 100.0)
+        val building1 = Building("1", 100.0, 900.0, 100.0)
+        val building2 = Building("2", 100.0, 700.0, 100.0)
+        val building3 = Building("3", 100.0, 600.0, 100.0)
+        val building4 = Building("4", 100.0, 600.0, 100.0)
+        val building5 = Building("5", 200.0, 600.0, 200.0)
+        val building6 = Building("6", 50.0, 600.0, 50.0)
+        val building7 = Building("7", 100.0, 600.0, 100.0)
+        val building8 = Building("8", 100.0, 600.0, 100.0)
         building1.setNotes("dawfawfwa")
         quarter.addAllBuildings(building1, building2, building3, building4, building5, building6, building7, building8)
         city.addQuarter(quarter)
