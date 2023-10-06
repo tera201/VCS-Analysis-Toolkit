@@ -24,7 +24,7 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
     implementation(fileTree(mapOf("dir" to "lib", "include" to listOf("*.jar"))))
-    implementation("org.example:javafx-uml-city-builder:latest.integration")
+    implementation("org.tera201:javafx-uml-city-builder:latest.integration")
     implementation("org.example:javafx-uml-graph-idea:0.0.1-SNAPSHOT")
     implementation("org.example:code-to-uml:0.0.2-SNAPSHOT")
     implementation("org.example:swrminer:0.0.2-SNAPSHOT")
