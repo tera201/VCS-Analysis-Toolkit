@@ -1,7 +1,6 @@
 package com.example.umldrawer.utils
 
 import org.eclipse.uml2.uml.*
-import uml.util.nl
 import umlgraph.graph.Digraph
 import umlgraph.graph.Vertex
 import umlgraph.graphview.arrows.ArrowTypes
@@ -29,13 +28,3 @@ private fun Package.generatePackage(graph: Digraph<String, String>, parent: Vert
             }
         }
 }
-
-private val VisibilityKind.asJava
-    get() = if (this == VisibilityKind.PACKAGE_LITERAL) "" else "$literal "
-
-private val NamedElement.javaName: String
-    get() {
-        val longName = qualifiedName.replace("::", ".")
-        val k = longName.indexOf('.')
-        return longName.substring(k + 1)
-    }
