@@ -1,6 +1,7 @@
 package com.example.umldrawer.tabs
 
 import com.example.umldrawer.settings.UMLToolkitSettings
+import com.example.umldrawer.utils.toCity
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
@@ -8,6 +9,7 @@ import com.intellij.openapi.observable.util.whenSizeChanged
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.ui.components.JBScrollPane
 import java20.console.JavaParserRunner
+import javafx.application.Platform
 import model.console.BuildModel
 import org.eclipse.uml2.uml.Model
 import org.repodriller.scm.SCMRepository
@@ -147,6 +149,12 @@ class GitPanel : JPanel() {
             if (virtualFile != null) {
                 jTextArea.append("Get model from file: ${virtualFile.path}\n")
                 model = handler.loadModelFromFile(virtualFile.path)
+
+                Platform.runLater {
+                    FXCityPanel.city.clear()
+                    model?.toCity(FXCityPanel.city)
+                    FXCityPanel.city.updateView()
+                }
             }
         }
 
