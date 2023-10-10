@@ -35,7 +35,6 @@ private fun Class.generateClass(quarter: Quarter?) {
     val size = ownedComments[0].body.toDouble()
     val methods = ownedComments[1].body.toDouble()
     val side = size / 20
-    println("$name $size $methods ${size::class.java}")
     val building = Building(name, side, 10 * methods, side)
     quarter?.addBuilding(building)
 }

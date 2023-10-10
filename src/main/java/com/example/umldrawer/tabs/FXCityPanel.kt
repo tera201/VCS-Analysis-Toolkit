@@ -1,19 +1,16 @@
 package com.example.umldrawer.tabs
 
 import javafx.application.Platform
-import javafx.beans.value.ChangeListener
-import javafx.beans.value.ObservableValue
 import javafx.embed.swing.JFXPanel
-import javafx.scene.Node
 import javafx.scene.Scene
 import javafx.scene.SceneAntialiasing
-import javafx.scene.layout.BorderPane
+import javafx.scene.layout.StackPane
+import org.example.InfoPane
 import org.example.MainSubScene
 import org.example.elements.Building
 import org.example.elements.City
 import org.example.elements.Quarter
-import java.awt.event.ComponentAdapter
-import java.awt.event.ComponentEvent
+import java.util.*
 
 
 class FXCityPanel : JFXPanel() {
@@ -21,44 +18,62 @@ class FXCityPanel : JFXPanel() {
     companion object {
         var city = City(8000.0, 20.0, 8000.0)
     }
+    var rand = Random()
+    var infoPane = InfoPane()
+    private val SCENE_WIDTH = 800.0
+    private val SCENE_HEIGHT = 600.0
+
     init {
         Platform.runLater { initFXCity(city) }
 
 //         TODO: remove this listener
-        this.addComponentListener(object : ComponentAdapter() {
-            override fun componentShown(e: ComponentEvent?) {
-                FXCityPanel()
-            }
-        })
+//        this.addComponentListener(object : ComponentAdapter() {
+//            override fun componentShown(e: ComponentEvent?) {
+//                FXCityPanel()
+//            }
+//        })
     }
 
     private fun initFXCity(city: City) {
         val sceneWidth = 800.0
         val sceneHeight = 600.0
-        val quarter = Quarter("First quarter",500.0, 10.0, 500.0, 50.0)
-        quarter.setPosition(0.0, 0.0)
-        val building1 = Building("1", 100.0, 900.0, 100.0)
-        val building2 = Building("2", 100.0, 700.0, 100.0)
-        val building3 = Building("3", 100.0, 600.0, 100.0)
-        val building4 = Building("4", 100.0, 600.0, 100.0)
-        val building5 = Building("5", 200.0, 600.0, 200.0)
-        val building6 = Building("6", 50.0, 600.0, 50.0)
-        val building7 = Building("7", 100.0, 600.0, 100.0)
-        val building8 = Building("8", 100.0, 600.0, 100.0)
-        building1.setNotes("dawfawfwa")
-        quarter.addAllBuildings(building1, building2, building3, building4, building5, building6, building7, building8)
-        city.addQuarter(quarter)
-        val mainSubScene = MainSubScene(city, sceneWidth, sceneHeight, true, SceneAntialiasing.BALANCED)
-        val borderPane = BorderPane()
-        borderPane.center = mainSubScene
-        mainSubScene.heightProperty().bind(borderPane.heightProperty())
-        mainSubScene.widthProperty().bind(borderPane.widthProperty())
-        val scene2 = Scene(borderPane, sceneWidth, sceneHeight, true, SceneAntialiasing.BALANCED)
-        scene2.focusOwnerProperty().addListener(object : ChangeListener<Node?> {
-            override fun changed(observable: ObservableValue<out Node?>?, oldValue: Node?, newValue: Node?) {
-                println("focus owner: $newValue")
-            }
-        })
+
+        createQuarters(60, city)
+
+        val mainSubScene =
+            MainSubScene(city, SCENE_WIDTH, SCENE_HEIGHT, true, SceneAntialiasing.BALANCED)
+        val stackPane = StackPane(mainSubScene)
+        InfoPane.setMainPane(stackPane)
+
+        mainSubScene.heightProperty().bind(stackPane.heightProperty())
+        mainSubScene.widthProperty().bind(stackPane.widthProperty())
+
+        val scene2 = Scene(stackPane, sceneWidth, sceneHeight, true, SceneAntialiasing.BALANCED)
         this.scene = scene2
+        city.updateView()
+    }
+
+    fun createQuarters(n: Int, city: City) {
+        for (i in 0 until n) {
+            val quarter = Quarter("$i quarter", 500.0, 10.0, 500.0, 50.0)
+            createBuildings(randomValue(), quarter)
+            city.addQuarter(quarter)
+        }
+    }
+
+    fun createBuildings(n: Int, quarter: Quarter) {
+        for (i in 0 until n) {
+            val building1 =
+                Building("$i", 200 * randomDValue(), 900 * randomDValue(), 200 * randomDValue())
+            quarter.addBuilding(building1)
+        }
+    }
+
+    private fun randomDValue(): Double {
+        return rand.nextDouble(0.2, 1.0)
+    }
+
+    private fun randomValue(): Int {
+        return rand.nextInt(4, 13)
     }
 }
