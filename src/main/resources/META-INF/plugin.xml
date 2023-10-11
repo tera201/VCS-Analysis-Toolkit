@@ -4,10 +4,10 @@
 <idea-plugin>
 
   <!-- Unique id for this plugin. Must stay constant for the life of the plugin. -->
-  <id>org.intellij.sdk.toolWindow</id>
+  <id>org.tera201.UMLToolkit</id>
 
   <!-- Text to display as name on Preferences/Settings | Plugin page -->
-  <name>SDK: Tool Window Sample</name>
+  <name>SDK: UML Toolkit</name>
 
   <!-- Indicate this plugin can be loaded in all IntelliJ Platform-based products. -->
   <depends>com.intellij.modules.platform</depends>
@@ -37,6 +37,9 @@
   <extensions defaultExtensionNs="com.intellij">
     <toolWindow id="UML Toolkit" secondary="true" icon="AllIcons.General.Modified" anchor="left"
                 factoryClass="com.example.umldrawer.UMLToolWindowFactoryKt"/>
+
+    <applicationService serviceImplementation="com.example.umldrawer.settings.UMLToolkitSettings"/>
+    <applicationConfigurable instance="com.example.umldrawer.settings.UMLToolkitSettingsPage" groupId="language"/>
   </extensions>
 
 </idea-plugin>
