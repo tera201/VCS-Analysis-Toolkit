@@ -7,7 +7,10 @@ import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.observable.util.whenSizeChanged
 import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.ui.ColorUtil
+import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
+import com.intellij.util.ui.UIUtil
 import java20.console.JavaParserRunner
 import javafx.application.Platform
 import model.console.BuildModel
@@ -16,9 +19,12 @@ import org.repodriller.scm.SCMRepository
 import uml.util.UMLModelHandler
 import java.awt.Dimension
 import java.awt.FlowLayout
+import java.awt.Graphics
 import java.io.File
 import java.io.IOException
 import javax.swing.*
+import javax.swing.plaf.basic.BasicSplitPaneDivider
+import javax.swing.plaf.basic.BasicSplitPaneUI
 import javax.swing.tree.DefaultMutableTreeNode
 import kotlin.concurrent.thread
 
@@ -30,6 +36,15 @@ class GitPanel : JPanel() {
         var model: Model? = null
     }
     private val handler = UMLModelHandler()
+    private var isClearingSelection = false
+    val branchList = JBList<String>()
+    val tagList = JBList<String>()
+    val branchListScrollPane = JBScrollPane(branchList)
+    val tagListScrollPane = JBScrollPane(tagList)
+    private val vcSplitPane = JSplitPane(JSplitPane.VERTICAL_SPLIT, branchListScrollPane, tagListScrollPane)
+    private val filesTreeJBScrollPane =
+        JBScrollPane(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER)
+    private val showSplitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, filesTreeJBScrollPane, vcSplitPane)
     private val projectCache = "${System.getProperty("user.dir")}/UmlToolkitCache/"
     private val modelCache = "${System.getProperty("user.dir")}/UmlToolkitCache/Models"
     
@@ -49,8 +64,6 @@ class GitPanel : JPanel() {
         this.layout = FlowLayout(FlowLayout.LEFT)
         val getButton = JButton("Get")
         val urlField = JTextField()
-        val filesTreeJBScrollPane =
-            JBScrollPane(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER)
         val logsJBScrollPane = JBScrollPane(
             jTextArea,
             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -71,7 +84,7 @@ class GitPanel : JPanel() {
 
         this.whenSizeChanged {
             urlField.preferredSize = (Dimension(this.width - getButton.width - 40, getButton.height))
-            filesTreeJBScrollPane.preferredSize =
+            showSplitPane.preferredSize =
                 Dimension(this.width - 20, (this.height * 2f / 3f).toInt() - 10)
             logsJBScrollPane.preferredSize = Dimension(
                 this.width - 140,
@@ -80,18 +93,57 @@ class GitPanel : JPanel() {
         }
 
         getButton.addActionListener {
-            clickGet(urlField, filesTreeJBScrollPane)
+            clickGet(urlField)
         }
-
+        configureSplitPanes()
         this.add(urlField)
         this.add(getButton)
-        this.add(filesTreeJBScrollPane)
-        addLogPanelButtons(this, filesTreeJBScrollPane)
+        this.add(showSplitPane)
+        addLogPanelButtons(this)
         this.add(logsJBScrollPane)
         addModelControlPanel(this)
     }
 
-    private fun addLogPanelButtons(mainJPanel: JPanel, filesTreeJBScrollPane: JBScrollPane) {
+    private fun configureSplitPanes() {
+        showSplitPane.setUI(CustomSplitPaneUI())
+        vcSplitPane.setUI(CustomSplitPaneUI())
+        showSplitPane.whenSizeChanged {
+            if (showSplitPane.dividerLocation != it.width / 2)
+                showSplitPane.dividerLocation = it.width / 2
+        }
+        vcSplitPane.whenSizeChanged {
+            if (vcSplitPane.dividerLocation != it.height / 2)
+                vcSplitPane.dividerLocation = it.height / 2
+        }
+        setupListSelectionListeners()
+    }
+
+    private fun setupListSelectionListeners() {
+
+        branchList.addListSelectionListener {
+            if (!it!!.valueIsAdjusting && !isClearingSelection && tagList.selectedValue != null) {
+                isClearingSelection = true
+                tagList.clearSelection()
+                isClearingSelection = false
+            }
+        }
+
+        tagList.addListSelectionListener {
+            if (!it!!.valueIsAdjusting && !isClearingSelection && branchList.selectedValue != null) {
+                isClearingSelection = true
+                branchList.clearSelection()
+                isClearingSelection = false
+            }
+        }
+    }
+
+    private fun populateJBList(targetPane:JBList<String>, stringList: List<String>) {
+        val listModel = DefaultListModel<String>()
+        listModel.addAll(stringList)
+        targetPane.model = listModel
+    }
+
+    private fun addLogPanelButtons(mainJPanel: JPanel) {
         val logButtonsPanel = JPanel()
         logButtonsPanel.layout = BoxLayout(logButtonsPanel, BoxLayout.Y_AXIS)
         val removeButton = JButton("Clear cache")
@@ -180,8 +232,7 @@ class GitPanel : JPanel() {
         mainJPanel.add(modelControlPanel)
     }
 
-    private fun clickGet(textField: JTextField, jbScrollPane: JBScrollPane) {
-        myRepo?.scm?.delete()
+    private fun clickGet(textField: JTextField) {
         //TODO: add regex
         if (textField.text != "") {
             val buildModel = BuildModel()
@@ -194,14 +245,19 @@ class GitPanel : JPanel() {
                 jTextArea.append("Cloning: ${textField.text}\n")
                 myRepo = buildModel.createClone(textField.text, projectCache)
                 jTextArea.append("Cloned to ${myRepo!!.path}\n")
-
-                val root = DefaultMutableTreeNode(myRepo!!.path.split("/").last())
-                val directories = File(myRepo!!.path).list { dir, name -> File(dir, name).isDirectory }
-                buildTree(directories, root, myRepo!!.path)
-                jbScrollPane.setViewportView(JTree(root))
-                jbScrollPane.updateUI()
             }
+            updatePathPanel()
+            populateJBList(branchList, buildModel.getBranches(myRepo))
+            populateJBList(tagList, buildModel.getTags(myRepo))
         }
+    }
+
+    private fun updatePathPanel() {
+        val root = DefaultMutableTreeNode(myRepo!!.path.split("/").last())
+        val directories = File(myRepo!!.path).list { dir, name -> File(dir, name).isDirectory }
+        buildTree(directories, root, myRepo!!.path)
+        filesTreeJBScrollPane.setViewportView(JTree(root))
+        filesTreeJBScrollPane.updateUI()
     }
 
     private fun buildTree(directories: Array<String>?, rootTree: DefaultMutableTreeNode, rootPath: String) {
@@ -215,5 +271,19 @@ class GitPanel : JPanel() {
                 val nodeDirectories = File(nodeRootPath).list { dir, name -> File(dir, name).isDirectory }
                 buildTree(nodeDirectories, node, nodeRootPath)
             }
+    }
+}
+
+class CustomSplitPaneUI : BasicSplitPaneUI() {
+    override fun createDefaultDivider(): BasicSplitPaneDivider {
+        return object : BasicSplitPaneDivider(this) {
+            override fun paint(g: Graphics) {
+                val bgColor = UIUtil.getPanelBackground()
+                val borderColor = ColorUtil.darker(bgColor, 1)
+                g.color = borderColor
+                g.fillRect(0, 0, size.width, size.height)
+                super.paint(g)
+            }
+        }
     }
 }
