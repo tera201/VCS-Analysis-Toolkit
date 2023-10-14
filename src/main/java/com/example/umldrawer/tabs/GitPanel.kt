@@ -41,9 +41,15 @@ class GitPanel : JPanel() {
     private var settings:UMLToolkitSettings = UMLToolkitSettings.getInstance()
     private var myRepo: SCMRepository? = null
     val buildModel = BuildModel()
-    private val jTextArea = JTextArea()
+    private val logsJTextArea = JTextArea()
+    val logsJBScrollPane = JBScrollPane(
+        logsJTextArea,
+        JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+        JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
+    )
     companion object {
         var model: Model? = null
+        val models = ArrayList<Model>()
     }
     private val handler = UMLModelHandler()
     private var isClearingSelection = false
@@ -75,11 +81,6 @@ class GitPanel : JPanel() {
         this.layout = FlowLayout(FlowLayout.LEFT)
         val getButton = JButton("Get")
         val urlField = JTextField()
-        val logsJBScrollPane = JBScrollPane(
-            jTextArea,
-            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
-        )
         logsJBScrollPane.isVisible = settings.showGitLogs
 
         ApplicationManager.getApplication().messageBus.connect()
@@ -198,11 +199,11 @@ class GitPanel : JPanel() {
             filesTreeJBScrollPane.setViewportView(null)
             filesTreeJBScrollPane.updateUI()
             myRepo?.scm?.delete()
-            jTextArea.append("Removed.\n")
+            logsJTextArea.append("Removed.\n")
         }
 
         clearLogButton.addActionListener {
-            jTextArea.text = null
+            logsJTextArea.text = null
         }
 
         logButtonsPanel.add(removeButton)
@@ -220,18 +221,36 @@ class GitPanel : JPanel() {
 
         analyzeButton.addActionListener {
             val javaParserRunner = JavaParserRunner()
-            try {
-                if (myRepo != null) {
-                    thread {
+            if (myRepo != null) {
+                thread {
+                    val javaFiles = javaParserRunner.collectFiles(myRepo!!.path)
+                    logsJTextArea.append("Start analyzing.\n")
+                    model = javaParserRunner.buildModel("JavaSampleModel", javaFiles, logsJTextArea)
+                    logsJTextArea.append("End analyzing.\n")
+                    logsJTextArea.caret.dot = logsJTextArea.text.length
+                }
+            } else logsJTextArea.append("Get some repo for analyzing.\n")
+        }
+
+        analyzeAllButton.addActionListener {
+            if (myRepo != null) {
+                val javaParserRunner = JavaParserRunner()
+                thread {
+                    val allList = ArrayList<String>()
+                    allList.addAll(buildModel.getBranches(myRepo))
+                    allList.addAll(buildModel.getTags(myRepo))
+                    for (i in allList) {
+                        buildModel.checkout(myRepo, i)
                         val javaFiles = javaParserRunner.collectFiles(myRepo!!.path)
-                        jTextArea.append("Start analyzing.\n")
-                        model = javaParserRunner.buildModel("JavaSampleModel", javaFiles, jTextArea)
-                        jTextArea.append("End analyzing.\n")
+                        logsJTextArea.append("Start analyzing $i.\n")
+                        models.add(javaParserRunner.buildModel("i", javaFiles))
+                        logsJTextArea.append("End analyzing $i.\n")
+                        logsJTextArea.caret.dot = logsJTextArea.text.length
                     }
-                } else jTextArea.append("Get some repo for analyzing.\n")
-            } catch (e: Exception) {
-                println(e.toString())
+                    allList.clear()
+                }
             }
+            else logsJTextArea.append("Get some repo for analyzing.\n")
         }
 
         getUmlFileButton.addActionListener {
@@ -245,7 +264,7 @@ class GitPanel : JPanel() {
             val virtualFile = FileChooser.chooseFile(descriptor, null, toSelect)
 
             if (virtualFile != null) {
-                jTextArea.append("Get model from file: ${virtualFile.path}\n")
+                logsJTextArea.append("Get model from file: ${virtualFile.path}\n")
                 model = handler.loadModelFromFile(virtualFile.path)
 
                 Platform.runLater {
@@ -265,14 +284,15 @@ class GitPanel : JPanel() {
                 val userSelection = fileChooser.showSaveDialog(mainJPanel)
                 if (userSelection == JFileChooser.APPROVE_OPTION) {
                     val fileToSave = fileChooser.selectedFile
-                    jTextArea.append("Save as file: ${fileToSave.absolutePath}\n")
+                    logsJTextArea.append("Save as file: ${fileToSave.absolutePath}\n")
 //                model!!.saveModel(fileToSave.absolutePath)
                     handler.saveModelToFile(model!!, fileToSave.absolutePath)
                 }
-            } else jTextArea.append("There isn't model for getting file.\n")
+            } else logsJTextArea.append("There isn't model for getting file.\n")
         }
 
         modelControlPanel.add(analyzeButton)
+        modelControlPanel.add(analyzeAllButton)
         modelControlPanel.add(saveUmlFileButton)
         modelControlPanel.add(getUmlFileButton)
         mainJPanel.add(modelControlPanel)
@@ -284,15 +304,15 @@ class GitPanel : JPanel() {
             val directoryPath = "$projectCache/${buildModel.getRepoNameByUrl(textField.text)}"
             val directory = File(directoryPath)
             if (directory.exists() && directory.isDirectory) {
-                jTextArea.append("Already exist!\n")
+                logsJTextArea.append("Already exist!\n")
                 myRepo = buildModel.getRepository(textField.text, projectCache)
             } else {
-                jTextArea.append("Cloning: ${textField.text}\n")
+                logsJTextArea.append("Cloning: ${textField.text}\n")
                 myRepo = buildModel.createClone(textField.text, projectCache)
-                jTextArea.append("Cloned to ${myRepo!!.path}\n")
+                logsJTextArea.append("Cloned to ${myRepo!!.path}\n")
             }
             updatePathPanel()
-            populateJBList(branchList, buildModel.getBranches(myRepo))
+            populateJBList(branchList, buildModel.getBranches(myRepo).filter { it != "HEAD" })
             populateJBList(tagList, buildModel.getTags(myRepo))
         }
     }
