@@ -379,6 +379,7 @@ private fun onTreeNodeDoubleClicked(node: DefaultMutableTreeNode?) {
     val filePath = node?.userObject.toString()
     val virtualFile = LocalFileSystem.getInstance().findFileByPath(filePath)
     if (virtualFile != null) {
+        // TODO: should be current project (not first)
         ProjectManager.getInstance().openProjects.firstOrNull()
             ?.let { FileEditorManager.getInstance(it).openFile(virtualFile, true) }
     }
