@@ -28,6 +28,7 @@ class UMLToolWindowFactoryKt : ToolWindowFactory {
         jtp.autoscrolls = true
         jtp.add("FX Graph", FXGraphPanel())
         jtp.add("FX City", FXCityPanel())
+        jtp.add("FX Circle", FXCirclePanel())
         jtp.add("Git", GitPanel())
         jtp.preferredSize = Dimension(500, 400)
         val content = contentFactory.createContent(jtp, "", false)

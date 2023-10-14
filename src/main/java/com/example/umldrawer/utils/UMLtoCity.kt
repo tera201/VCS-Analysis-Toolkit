@@ -36,6 +36,9 @@ private fun Class.generateClass(quarter: Quarter?) {
     val methods = ownedComments[1].body.toDouble()
     val side = size / 20
     val building = Building(name, side, 10 * methods, side)
+    building.info = """
+        $parentsAsJava
+    """.trimIndent()
     quarter?.addBuilding(building)
 }
 
@@ -51,3 +54,20 @@ private fun Enumeration.generateEnumeration(quarter: Quarter?) {
     val building = Building(name, 100.0, 900.0, 100.0)
     quarter?.addBuilding(building)
 }
+
+private val Classifier.parentsAsJava: String
+    get() {
+        val parents = generalizations
+            .map { it.general }
+            .filter { !it.javaName.endsWith("java.lang.Object") }
+            .joinToString { it.name }
+        return if (parents.isNotEmpty()) " extends $parents" else ""
+    }
+
+
+private val NamedElement.javaName: String
+    get() {
+        val longName = qualifiedName.replace("::", ".")
+        val k = longName.indexOf('.')
+        return longName.substring(k + 1)
+    }
