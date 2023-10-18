@@ -33,7 +33,7 @@ private fun Package.generatePackage(city: City) {
 
 private fun Class.generateClass(quarter: Quarter?) {
     val size = ownedComments[0].body.toDouble()
-    val methods = ownedComments[1].body.toDouble()
+    val methods = ownedComments[1].body.toDouble() + 1
     val side = size / 20
     val building = Building(name, side, 10 * methods, side)
     building.info = """
@@ -44,7 +44,7 @@ private fun Class.generateClass(quarter: Quarter?) {
 
 private fun Interface.generateInterface(quarter: Quarter?) {
     val size = ownedComments[0].body.toDouble()
-    val methods = ownedComments[1].body.toDouble()
+    val methods = ownedComments[1].body.toDouble() + 1
     val side = size / 20
     val building = Building(name, side, 10 * methods, side)
     quarter?.addBuilding(building)
