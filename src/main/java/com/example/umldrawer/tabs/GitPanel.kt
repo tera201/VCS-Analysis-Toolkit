@@ -1,6 +1,7 @@
 package com.example.umldrawer.tabs
 
 import com.example.umldrawer.settings.UMLToolkitSettings
+import com.example.umldrawer.utils.toCircle
 import com.example.umldrawer.utils.toCity
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileChooser.FileChooser
@@ -269,8 +270,11 @@ class GitPanel : JPanel() {
 
                 Platform.runLater {
                     FXCityPanel.city.clear()
+                    FXCirclePanel.circleSpace.clean()
                     model?.toCity(FXCityPanel.city)
+                    model?.toCircle()
                     FXCityPanel.city.updateView()
+                    FXCirclePanel.circleSpace.mainCircle.updateView()
                 }
             }
         }
