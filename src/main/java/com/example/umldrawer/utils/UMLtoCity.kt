@@ -1,5 +1,6 @@
 package com.example.umldrawer.utils
 
+import com.example.umldrawer.tabs.FXCityPanel
 import org.eclipse.uml2.uml.*
 import org.example.elements.Building
 import org.example.elements.City
@@ -10,20 +11,22 @@ fun Package.toCity(city: City) {
         .filter { !it.hasKeyword("unknown") }
         .forEach {
             when (it) {
-                is Package -> it.generatePackage(city)
+                is Package -> it.generatePackage(null)
                 is Class -> it.generateClass(null)
             }
         }
 }
 
-private fun Package.generatePackage(city: City) {
-    val quarter = Quarter(name,500.0, 10.0, 500.0, 50.0)
-    city.addQuarter(quarter)
+private fun Package.generatePackage(parentName: String?) {
+    val size = ownedComments[0].body.toDouble()
+    val newName = if (parentName.orEmpty().isNotEmpty())  "$parentName.$name" else name
+    val quarter = Quarter(newName, size, 10.0, size, 50.0)
+    FXCityPanel.city.addQuarter(quarter)
     packagedElements
         .filter { !it.hasKeyword("unknown") }
         .forEach {
             when (it) {
-                is Package -> it.generatePackage(city)
+                is Package -> it.generatePackage(newName)
                 is Class -> it.generateClass(quarter)
                 is Interface -> it.generateInterface(quarter)
                 is Enumeration -> it.generateEnumeration(quarter)
@@ -33,7 +36,7 @@ private fun Package.generatePackage(city: City) {
 
 private fun Class.generateClass(quarter: Quarter?) {
     val size = ownedComments[0].body.toDouble()
-    val methods = ownedComments[1].body.toDouble()
+    val methods = ownedComments[1].body.toDouble() + 1
     val side = size / 20
     val building = Building(name, side, 10 * methods, side)
     building.info = """
@@ -44,7 +47,7 @@ private fun Class.generateClass(quarter: Quarter?) {
 
 private fun Interface.generateInterface(quarter: Quarter?) {
     val size = ownedComments[0].body.toDouble()
-    val methods = ownedComments[1].body.toDouble()
+    val methods = ownedComments[1].body.toDouble() + 1
     val side = size / 20
     val building = Building(name, side, 10 * methods, side)
     quarter?.addBuilding(building)

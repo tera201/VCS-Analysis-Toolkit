@@ -2,12 +2,12 @@ package com.example.umldrawer.tabs
 
 import javafx.application.Platform
 import javafx.embed.swing.JFXPanel
-import javafx.scene.Group
 import javafx.scene.Scene
 import javafx.scene.SceneAntialiasing
 import javafx.scene.layout.StackPane
 import org.tera201.InfoPane
 import org.tera201.MainSubScene
+import org.tera201.elements.CircleSpace
 import org.tera201.elements.ClassCircle
 import org.tera201.elements.PackageCircle
 
@@ -15,17 +15,17 @@ import org.tera201.elements.PackageCircle
 class FXCirclePanel : JFXPanel() {
 
     companion object {
-        var circleGroup = Group()
+        var circleSpace = CircleSpace()
     }
     var infoPane = InfoPane()
     private val SCENE_WIDTH = 800.0
     private val SCENE_HEIGHT = 600.0
 
     init {
-        Platform.runLater { initFXCircle(circleGroup) }
+        Platform.runLater { initFXCircle(circleSpace) }
     }
 
-    private fun initFXCircle(mainCircle: Group) {
+    private fun initFXCircle(circleSpace: CircleSpace) {
         val packageCircle = PackageCircle("First", 2000.0, 1900.0, 100.0)
         val circle = ClassCircle("First", 500.0, 400.0, 100.0)
         val circle2 = ClassCircle("Second", 800.0, 400.0, 100.0)
@@ -40,10 +40,10 @@ class FXCirclePanel : JFXPanel() {
         packageCircle2.addCircle(circle4)
         packageCircle.addCircle(packageCircle2)
 
-        mainCircle.children.add(packageCircle.group)
+        circleSpace.add(packageCircle)
 
         val mainSubScene =
-            MainSubScene(mainCircle, SCENE_WIDTH, SCENE_HEIGHT, true, SceneAntialiasing.BALANCED)
+            MainSubScene(circleSpace, SCENE_WIDTH, SCENE_HEIGHT, true, SceneAntialiasing.BALANCED)
         val stackPane = StackPane(mainSubScene)
         InfoPane.setMainPane(stackPane)
 
