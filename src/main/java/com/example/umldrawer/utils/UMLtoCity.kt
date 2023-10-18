@@ -3,10 +3,9 @@ package com.example.umldrawer.utils
 import com.example.umldrawer.tabs.FXCityPanel
 import org.eclipse.uml2.uml.*
 import org.example.elements.Building
-import org.example.elements.City
 import org.example.elements.Quarter
 
-fun Package.toCity(city: City) {
+fun Package.toCity() {
     packagedElements
         .filter { !it.hasKeyword("unknown") }
         .forEach {

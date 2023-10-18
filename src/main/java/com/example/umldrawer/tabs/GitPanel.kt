@@ -271,7 +271,7 @@ class GitPanel : JPanel() {
                 Platform.runLater {
                     FXCityPanel.city.clear()
                     FXCirclePanel.circleSpace.clean()
-                    model?.toCity(FXCityPanel.city)
+                    model?.toCity()
                     model?.toCircle()
                     FXCityPanel.city.updateView()
                     FXCirclePanel.circleSpace.mainCircle.updateView()
