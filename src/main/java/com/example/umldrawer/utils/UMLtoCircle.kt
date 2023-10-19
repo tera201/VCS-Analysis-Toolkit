@@ -2,13 +2,13 @@ package com.example.umldrawer.utils
 
 import com.example.umldrawer.tabs.FXCirclePanel
 import org.eclipse.uml2.uml.*
-import org.tera201.elements.ClassCircle
-import org.tera201.elements.PackageCircle
+import org.tera201.elements.circle.ClassCircle
+import org.tera201.elements.circle.PackageCircle
 
 fun Package.toCircle() {
     val packageCircle = PackageCircle(name, 6000.0, 5500.0, 100.0)
     FXCirclePanel.circleSpace.add(packageCircle)
-    FXCirclePanel.circleSpace.mainCircle = packageCircle
+    FXCirclePanel.circleSpace.mainObject = packageCircle
     packagedElements
         .filter { !it.hasKeyword("unknown") }
         .forEach {
@@ -24,7 +24,7 @@ private fun Package.generatePackage(circleParent: PackageCircle) {
     val side = size / 20
     println("${circleParent.name} call $name radiusIn ${circleParent.innerRadius/2}")
     val packageCircle = PackageCircle(name, circleParent.innerRadius/2 + 500, circleParent.innerRadius/2, 100.0)
-    circleParent.addCircle(packageCircle)
+    circleParent.addObject(packageCircle)
     packagedElements
         .filter { !it.hasKeyword("unknown") }
         .forEach {
@@ -44,7 +44,7 @@ private fun Class.generateClass(circleParent: PackageCircle) {
     println("${circleParent.name} call $name radiusIn $side")
 
     val classCircle = ClassCircle(name, side + methods * 10, side, 100.0)
-    circleParent.addCircle(classCircle)
+    circleParent.addObject(classCircle)
 }
 
 private fun Interface.generateInterface(circleParent: PackageCircle) {
@@ -52,12 +52,12 @@ private fun Interface.generateInterface(circleParent: PackageCircle) {
     val methods = (ownedComments[1].body.toDouble() + 1) * 10
     val side = size / 2
     val classCircle = ClassCircle(name, side + methods * 10, side, 100.0)
-    circleParent.addCircle(classCircle)
+    circleParent.addObject(classCircle)
 }
 
 private fun Enumeration.generateEnumeration(circleParent: PackageCircle) {
     val classCircle = ClassCircle(name, 1000.0, 700.0, 100.0)
-    circleParent.addCircle(classCircle)
+    circleParent.addObject(classCircle)
 }
 
 private val Classifier.parentsAsJava: String
