@@ -9,7 +9,6 @@ import org.tera201.elements.city.Quarter
 fun Package.toCity() {
     var city = City(8000.0, 20.0, 8000.0)
     FXCityPanel.citySpace.add(city)
-    FXCityPanel.citySpace.mainObject = city;
     packagedElements
         .filter { !it.hasKeyword("unknown") }
         .forEach {
@@ -24,7 +23,7 @@ private fun Package.generatePackage(parentName: String?) {
     val size = ownedComments[0].body.toDouble()
     val newName = if (parentName.orEmpty().isNotEmpty())  "$parentName.$name" else name
     val quarter = Quarter(newName, size, 10.0, size, 50.0)
-    FXCityPanel.citySpace.add(quarter)
+    FXCityPanel.citySpace.mainObject.addObject(quarter)
     packagedElements
         .filter { !it.hasKeyword("unknown") }
         .forEach {
