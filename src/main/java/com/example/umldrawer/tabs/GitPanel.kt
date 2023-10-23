@@ -269,12 +269,12 @@ class GitPanel : JPanel() {
                 model = handler.loadModelFromFile(virtualFile.path)
 
                 Platform.runLater {
-                    FXCityPanel.city.clear()
+                    FXCityPanel.citySpace.clean()
                     FXCirclePanel.circleSpace.clean()
-                    model?.toCity(FXCityPanel.city)
+                    model?.toCity()
                     model?.toCircle()
-                    FXCityPanel.city.updateView()
-                    FXCirclePanel.circleSpace.mainCircle.updateView()
+                    FXCityPanel.citySpace.mainObject.updateView()
+                    FXCirclePanel.circleSpace.mainObject.updateView()
                 }
             }
         }
