@@ -344,13 +344,16 @@ class GitPanel : JPanel() {
 
         saveUmlFileButton.addActionListener {
             if (model != null) {
-                val fileChooser = JFileChooser()
-                fileChooser.setDialogTitle("Save UML-model")
-                fileChooser.currentDirectory = File(modelCache)
-                fileChooser.selectedFile = File("$modelCache/model.json")
-                val userSelection = fileChooser.showSaveDialog(mainJPanel)
-                if (userSelection == JFileChooser.APPROVE_OPTION) {
-                    val fileToSave = fileChooser.selectedFile
+                val descriptor = FileSaverDescriptor(
+                    "SAVE UML-MODEL", "Choose the destination file",
+                    ".json"
+                );
+                val toSelect = if (modelCache == null || modelCache.isEmpty()) null else LocalFileSystem.getInstance()
+                    .findFileByPath(modelCache)
+                val fileSaverDialog = FileChooserFactory.getInstance().createSaveFileDialog(descriptor, null)
+                val virtualFileWrapper = fileSaverDialog.save(toSelect, "$modelCache/${cache.lastProject}Model.json")
+                if (virtualFileWrapper != null) {
+                    val fileToSave = virtualFileWrapper.file
                     logsJTextArea.append("Save as file: ${fileToSave.absolutePath}\n")
 //                model!!.saveModel(fileToSave.absolutePath)
                     handler.saveModelToFile(model!!, fileToSave.absolutePath)
