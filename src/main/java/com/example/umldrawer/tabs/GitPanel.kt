@@ -44,7 +44,12 @@ class GitPanel : JPanel() {
     private var settings:UMLToolkitSettings = UMLToolkitSettings.getInstance()
     private var cache:UMLToolkitCache = UMLToolkitCache.getInstance()
     private var myRepo: SCMRepository? = null
-    val buildModel = BuildModel()
+    private val analyzeButton = JButton("Analyze")
+    private val analyzeAllButton = JButton("AnalyzeAll")
+    private val saveUmlFileButton = JButton("Save UML model")
+    private val saveUmlPackFileButton = JButton("Save UML model pack")
+    private val getUmlFileButton = JButton("Get UML model")
+    private val buildModel = BuildModel()
     private val logsJTextArea = JTextArea()
     val logsJBScrollPane = JBScrollPane(
         logsJTextArea,
@@ -273,11 +278,6 @@ class GitPanel : JPanel() {
 
     private fun addModelControlPanel(mainJPanel: JPanel) {
         val modelControlPanel = JPanel()
-
-        val analyzeButton = JButton("Analyze")
-        val analyzeAllButton = JButton("AnalyzeAll")
-        val saveUmlFileButton = JButton("Save UML model")
-        val getUmlFileButton = JButton("Get UML model")
 
         analyzeButton.addActionListener {
             val javaParserRunner = JavaParserRunner()
