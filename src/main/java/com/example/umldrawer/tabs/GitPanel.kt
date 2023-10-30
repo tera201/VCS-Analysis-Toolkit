@@ -363,9 +363,25 @@ class GitPanel : JPanel() {
             } else logsJTextArea.append("There isn't model for getting file.\n")
         }
 
+        saveUmlPackFileButton.addActionListener {
+            if (models.isNotEmpty()) {
+                val fileChooser = JFileChooser()
+                fileChooser.setDialogTitle("Save UML-model Pack")
+                fileChooser.currentDirectory = File(modelCache)
+                fileChooser.selectedFile = File("$modelCache/${cache.lastProject}ModelPack.json")
+                val userSelection = fileChooser.showSaveDialog(mainJPanel)
+                if (userSelection == JFileChooser.APPROVE_OPTION) {
+                    val fileToSave = fileChooser.selectedFile
+                    logsJTextArea.append("Save as file: ${fileToSave.absolutePath}\n")
+                    handler.saveModelToFile(models, fileToSave.absolutePath)
+                }
+            } else logsJTextArea.append("There isn't model for getting file.\n")
+        }
+
         modelControlPanel.add(analyzeButton)
         modelControlPanel.add(analyzeAllButton)
         modelControlPanel.add(saveUmlFileButton)
+        modelControlPanel.add(saveUmlPackFileButton)
         modelControlPanel.add(getUmlFileButton)
         mainJPanel.add(modelControlPanel)
     }
