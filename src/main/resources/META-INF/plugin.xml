@@ -20,6 +20,15 @@
       See the
       <a href="https://plugins.jetbrains.com/docs/intellij/tool-windows.html">Tool Windows</a>
       for more information.
+
+      1) Open IntelliJ IDEA.
+      2) Go to "Help" > "Edit Custom VM Options."
+      3) In the custom VM options file, you can add or modify the -Xmx parameter to increase the maximum Java heap size as per your requirements.
+         For example, if you want to set the maximum heap size to 2 gigabytes, add the following line:
+          -Xmx2g
+         This will set the maximum heap size to 2 gigabytes.
+      4) Save the custom VM options file.
+      5) Restart IntelliJ IDEA for the changes to take effect.
     ]]>
   </description>
   <change-notes>
@@ -39,6 +48,7 @@
                 factoryClass="com.example.umldrawer.UMLToolWindowFactoryKt"/>
 
     <applicationService serviceImplementation="com.example.umldrawer.services.settings.UMLToolkitSettings"/>
+    <applicationService serviceImplementation="com.example.umldrawer.services.UMLToolkitCache"/>
     <applicationConfigurable instance="com.example.umldrawer.services.settings.UMLToolkitSettingsPage" groupId="language"/>
   </extensions>
 
