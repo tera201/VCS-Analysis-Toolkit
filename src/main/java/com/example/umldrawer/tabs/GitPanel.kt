@@ -1,6 +1,6 @@
 package com.example.umldrawer.tabs
 
-import com.example.umldrawer.settings.UMLToolkitSettings
+import com.example.umldrawer.services.settings.UMLToolkitSettings
 import com.example.umldrawer.utils.toCircle
 import com.example.umldrawer.utils.toCity
 import com.intellij.openapi.application.ApplicationManager

@@ -38,8 +38,8 @@
     <toolWindow id="UML Toolkit" secondary="true" icon="AllIcons.General.Modified" anchor="left"
                 factoryClass="com.example.umldrawer.UMLToolWindowFactoryKt"/>
 
-    <applicationService serviceImplementation="com.example.umldrawer.settings.UMLToolkitSettings"/>
-    <applicationConfigurable instance="com.example.umldrawer.settings.UMLToolkitSettingsPage" groupId="language"/>
+    <applicationService serviceImplementation="com.example.umldrawer.services.settings.UMLToolkitSettings"/>
+    <applicationConfigurable instance="com.example.umldrawer.services.settings.UMLToolkitSettingsPage" groupId="language"/>
   </extensions>
 
 </idea-plugin>

@@ -1,4 +1,4 @@
-package com.example.umldrawer.settings;
+package com.example.umldrawer.services.settings;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileChooser.FileChooser;

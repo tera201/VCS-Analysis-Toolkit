@@ -1,6 +1,6 @@
 package com.example.umldrawer.action
 
-import com.example.umldrawer.settings.UMLToolkitSettingsPage
+import com.example.umldrawer.services.settings.UMLToolkitSettingsPage
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.options.ShowSettingsUtil
