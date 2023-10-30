@@ -296,9 +296,7 @@ class GitPanel : JPanel() {
             if (myRepo != null) {
                 val javaParserRunner = JavaParserRunner()
                 thread {
-                    val allList = ArrayList<String>()
-                    allList.addAll(buildModel.getBranches(myRepo))
-                    allList.addAll(buildModel.getTags(myRepo))
+                    val allList = branchList.selectedValuesList + tagList.selectedValuesList
                     for (i in allList) {
                         buildModel.checkout(myRepo, i)
                         val javaFiles = javaParserRunner.collectFiles(myRepo!!.path)
@@ -307,7 +305,13 @@ class GitPanel : JPanel() {
                         logsJTextArea.append("End analyzing $i.\n")
                         logsJTextArea.caret.dot = logsJTextArea.text.length
                     }
-                    allList.clear()
+                    Platform.runLater {
+                        FXCirclePanel.circleSpace.clean()
+                        for (i in 0 until models.size) {
+                            models[i].toCircle(i)
+                        }
+                        FXCirclePanel.circleSpace.mainListObjects.forEach { it.updateView() }
+                    }
                 }
             }
             else logsJTextArea.append("Get some repo for analyzing.\n")
