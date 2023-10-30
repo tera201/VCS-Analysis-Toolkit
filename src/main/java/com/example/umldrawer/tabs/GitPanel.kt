@@ -200,21 +200,28 @@ class GitPanel : JPanel() {
     }
 
     private fun setupListSelectionListeners() {
-        branchList.addListSelectionListener {
-            if (!it!!.valueIsAdjusting && !isClearingSelection && tagList.selectedValue != null) {
-                isClearingSelection = true
-                tagList.clearSelection()
-                isClearingSelection = false
-            }
-        }
+        branchList.addClearSelectorByAnotherList(tagList)
+        tagList.addClearSelectorByAnotherList(branchList)
+    }
 
-        tagList.addListSelectionListener {
-            if (!it!!.valueIsAdjusting && !isClearingSelection && branchList.selectedValue != null) {
-                isClearingSelection = true
-                branchList.clearSelection()
-                isClearingSelection = false
+    fun JBList<String>.addClearSelectorByAnotherList(anotherList: JBList<String>) {
+        this.addMouseListener(object : MouseAdapter() {
+            override fun mouseClicked(e: MouseEvent?) {
+                if ((e != null) &&!(e.isMetaDown || e.isShiftDown)
+                    && (!isClearingSelection && anotherList.selectedValue != null)) {
+                    isClearingSelection = true
+                    anotherList.clearSelection()
+                    isClearingSelection = false
+                }
+                val selected = this@addClearSelectorByAnotherList.selectedValuesList.size + anotherList.selectedValuesList.size
+                if (selected == 1) {
+                    analyzeButton.text = "Analyze"
+                }
+                else {
+                    analyzeButton.text = "AnalyzeAll"
+                }
             }
-        }
+        })
     }
 
     private fun setupListDoubleClickAction() {
