@@ -1,5 +1,6 @@
 package com.example.umldrawer.tabs
 
+import com.example.umldrawer.services.UMLToolkitCache
 import com.example.umldrawer.services.settings.UMLToolkitSettings
 import com.example.umldrawer.utils.toCircle
 import com.example.umldrawer.utils.toCity
@@ -10,6 +11,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.observable.util.whenSizeChanged
 import com.intellij.openapi.project.ProjectManager
+import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.ui.ColorUtil
 import com.intellij.ui.ColoredTreeCellRenderer
@@ -40,6 +42,7 @@ import kotlin.concurrent.thread
 
 class GitPanel : JPanel() {
     private var settings:UMLToolkitSettings = UMLToolkitSettings.getInstance()
+    private var cache:UMLToolkitCache = UMLToolkitCache.getInstance()
     private var myRepo: SCMRepository? = null
     val buildModel = BuildModel()
     private val logsJTextArea = JTextArea()
@@ -59,6 +62,8 @@ class GitPanel : JPanel() {
     val branchListScrollPane = JBScrollPane(branchList)
     val tagListScrollPane = JBScrollPane(tagList)
     val pathJTree = Tree()
+    private val projectComboBox = ComboBox<String>()
+    private val openProjectButton = JButton("Open project")
     private val vcSplitPane = JSplitPane(JSplitPane.VERTICAL_SPLIT, branchListScrollPane, tagListScrollPane)
     private val filesTreeJBScrollPane =
         JBScrollPane(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED)
@@ -106,7 +111,9 @@ class GitPanel : JPanel() {
         }
 
         getButton.addActionListener {
-            clickGet(urlField)
+            thread {
+                clickGet(urlField)
+            }
         }
         setupTree()
         configureSplitPanes()
@@ -116,6 +123,58 @@ class GitPanel : JPanel() {
         addLogPanelButtons(this)
         this.add(logsJBScrollPane)
         addModelControlPanel(this)
+        addProjectPane()
+    }
+
+    private fun addProjectPane() {
+        if (cache.projectPathMap.isNotEmpty()) {
+            cache.projectPathMap.keys.forEach {
+                projectComboBox.addItem(it)
+            }
+            projectComboBox.selectedItem = cache.lastProject
+            thread {
+                myRepo = buildModel.getRepository(cache.projectPathMap[cache.lastProject])
+                updatePathPanel()
+                populateJBList(branchList, buildModel.getBranches(myRepo).filter { it != "HEAD" })
+                populateJBList(tagList, buildModel.getTags(myRepo))
+            }
+        }
+
+        File(projectCache).list { dir, name -> File(dir, name).isDirectory.and(name != "Models") }?.forEach {
+            val path = "$projectCache/$it"
+            if ((0 until projectComboBox.model.size).none { i -> projectComboBox.model.getElementAt(i) == it }) {
+                cache.projectPathMap[it] = path
+                projectComboBox.addItem(it)
+            }
+        }
+
+        projectComboBox.addActionListener {
+            val selectedProject = projectComboBox.selectedItem as String
+            cache.lastProject = selectedProject
+            val projectPath = cache.projectPathMap[selectedProject]
+            thread {
+                myRepo = buildModel.getRepository(projectPath)
+                updatePathPanel()
+                populateJBList(branchList, buildModel.getBranches(myRepo).filter { it != "HEAD" })
+                populateJBList(tagList, buildModel.getTags(myRepo))
+            }
+        }
+
+        openProjectButton.addActionListener {
+            val descriptor = FileChooserDescriptor(false, true, false, false, false, false)
+            val toSelect = if (projectCache == null || projectCache.isEmpty()) null else LocalFileSystem.getInstance()
+                .findFileByPath(projectCache)
+            val selectedDirectory = FileChooser.chooseFile(descriptor, null, toSelect)
+            if (selectedDirectory != null) {
+                val newProjectName = selectedDirectory.name
+                cache.projectPathMap[newProjectName] = selectedDirectory.path
+                projectComboBox.addItem(newProjectName)
+                projectComboBox.selectedItem = newProjectName
+            }
+        }
+
+        this.add(projectComboBox)
+        this.add(openProjectButton)
     }
 
     private fun configureSplitPanes() {
