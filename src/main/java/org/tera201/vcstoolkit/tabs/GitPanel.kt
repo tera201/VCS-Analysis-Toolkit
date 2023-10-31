@@ -1,9 +1,11 @@
-package com.example.umldrawer.tabs
+package org.tera201.vcstoolkit.tabs
 
-import com.example.umldrawer.helpers.SharedModel
-import com.example.umldrawer.services.UMLToolkitCache
-import com.example.umldrawer.services.settings.UMLToolkitSettings
-import com.example.umldrawer.utils.toCircle
+import org.tera201.vcstoolkit.helpers.SharedModel
+import org.tera201.vcstoolkit.services.VCSToolkitCache
+import org.tera201.vcstoolkit.services.settings.VCSToolkitSettings
+import org.tera201.vcstoolkit.utils.toCircle
+import org.tera201.code2uml.java20.console.JavaParserRunner
+import org.tera201.code2uml.uml.util.UMLModelHandler
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
@@ -22,12 +24,10 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.treeStructure.Tree
 import com.intellij.util.PlatformIcons
 import com.intellij.util.ui.UIUtil
-import java20.console.JavaParserRunner
 import javafx.application.Platform
 import model.console.BuildModel
 import org.eclipse.uml2.uml.Model
 import org.repodriller.scm.SCMRepository
-import uml.util.UMLModelHandler
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.awt.Graphics
@@ -45,8 +45,8 @@ import javax.swing.tree.DefaultTreeModel
 import kotlin.concurrent.thread
 
 class GitPanel : JPanel() {
-    private var settings:UMLToolkitSettings = UMLToolkitSettings.getInstance()
-    private var cache:UMLToolkitCache = UMLToolkitCache.getInstance()
+    private var settings: VCSToolkitSettings = VCSToolkitSettings.getInstance()
+    private var cache: VCSToolkitCache = VCSToolkitCache.getInstance()
     private var myRepo: SCMRepository? = null
     private val analyzeButton = JButton("Analyze")
     private val saveUmlFileButton = JButton("Save UML model")
@@ -78,8 +78,8 @@ class GitPanel : JPanel() {
         JBScrollPane(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED)
     private val showSplitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, filesTreeJBScrollPane, vcSplitPane)
     private val logModelSplitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, logsJBScrollPane, modelListScrollPane)
-    private val projectCache = "${System.getProperty("user.dir")}/UmlToolkitCache/"
-    private val modelCache = "${System.getProperty("user.dir")}/UmlToolkitCache/Models"
+    private val projectCache = "${System.getProperty("user.dir")}/VCSToolkitCache/"
+    private val modelCache = "${System.getProperty("user.dir")}/VCSToolkitCache/Models"
     
     init {
         initGit()
@@ -100,9 +100,9 @@ class GitPanel : JPanel() {
         logsJBScrollPane.isVisible = settings.showGitLogs
 
         ApplicationManager.getApplication().messageBus.connect()
-            .subscribe(UMLToolkitSettings.SettingsChangedListener.TOPIC, object :
-                UMLToolkitSettings.SettingsChangedListener {
-                override fun onSettingsChange(settings: UMLToolkitSettings) {
+            .subscribe(VCSToolkitSettings.SettingsChangedListener.TOPIC, object :
+                VCSToolkitSettings.SettingsChangedListener {
+                override fun onSettingsChange(settings: VCSToolkitSettings) {
                     logsJBScrollPane.isVisible = settings.showGitLogs
                 }
             })

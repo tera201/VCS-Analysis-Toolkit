@@ -1,4 +1,4 @@
-package com.example.umldrawer.tabs
+package org.tera201.vcstoolkit.tabs
 
 import javafx.application.Platform
 import javafx.embed.swing.JFXPanel

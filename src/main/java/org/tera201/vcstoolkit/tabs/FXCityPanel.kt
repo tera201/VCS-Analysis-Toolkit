@@ -1,6 +1,6 @@
-package com.example.umldrawer.tabs
+package org.tera201.vcstoolkit.tabs
 
-import com.example.umldrawer.utils.toCity
+import org.tera201.vcstoolkit.utils.toCity
 import com.intellij.openapi.ui.ComboBox
 import javafx.application.Platform
 import javafx.embed.swing.JFXPanel

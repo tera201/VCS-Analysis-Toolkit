@@ -4,10 +4,10 @@
 <idea-plugin>
 
   <!-- Unique id for this plugin. Must stay constant for the life of the plugin. -->
-  <id>org.tera201.UMLToolkit</id>
+  <id>org.tera201.VCSToolkit</id>
 
   <!-- Text to display as name on Preferences/Settings | Plugin page -->
-  <name>SDK: UML Toolkit</name>
+  <name>SDK: VCS Toolkit</name>
 
   <!-- Indicate this plugin can be loaded in all IntelliJ Platform-based products. -->
   <depends>com.intellij.modules.platform</depends>
@@ -44,12 +44,12 @@
   <vendor url="https://plugins.jetbrains.com">IntelliJ Platform SDK</vendor>
 
   <extensions defaultExtensionNs="com.intellij">
-    <toolWindow id="UML Toolkit" secondary="true" icon="AllIcons.General.Modified" anchor="left"
-                factoryClass="com.example.umldrawer.UMLToolWindowFactoryKt"/>
+    <toolWindow id="VCS Toolkit" secondary="true" icon="AllIcons.General.Modified" anchor="left"
+                factoryClass="org.tera201.vcstoolkit.VCSToolWindowFactoryKt"/>
 
-    <applicationService serviceImplementation="com.example.umldrawer.services.settings.UMLToolkitSettings"/>
-    <applicationService serviceImplementation="com.example.umldrawer.services.UMLToolkitCache"/>
-    <applicationConfigurable instance="com.example.umldrawer.services.settings.UMLToolkitSettingsPage" groupId="language"/>
+    <applicationService serviceImplementation="org.tera201.vcstoolkit.services.settings.VCSToolkitSettings"/>
+    <applicationService serviceImplementation="org.tera201.vcstoolkit.services.VCSToolkitCache"/>
+    <applicationConfigurable instance="org.tera201.vcstoolkit.services.settings.VCSToolkitSettingsPage" groupId="language"/>
   </extensions>
 
 </idea-plugin>

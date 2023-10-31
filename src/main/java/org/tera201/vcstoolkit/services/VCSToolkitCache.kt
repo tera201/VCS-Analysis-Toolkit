@@ -1,4 +1,4 @@
-package com.example.umldrawer.services
+package org.tera201.vcstoolkit.services
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.PersistentStateComponent
@@ -8,23 +8,23 @@ import com.intellij.util.messages.Topic
 import com.intellij.util.xmlb.XmlSerializerUtil
 
 
-@State(name = "UMLToolkitCachesNew", storages = [Storage("umltoolkit_cache.xml")])
-class UMLToolkitCache : PersistentStateComponent<UMLToolkitCache> {
+@State(name = "VCSToolkitCachesNew", storages = [Storage("vcs_toolkit_cache.xml")])
+class VCSToolkitCache : PersistentStateComponent<VCSToolkitCache> {
     var lastProject: String = ""
     var projectPathMap:MutableMap<String, String> = hashMapOf()
 
 
     companion object {
-        fun getInstance(): UMLToolkitCache {
-            return ApplicationManager.getApplication().getService(UMLToolkitCache::class.java)
+        fun getInstance(): VCSToolkitCache {
+            return ApplicationManager.getApplication().getService(VCSToolkitCache::class.java)
         }
     }
 
-    override fun getState(): UMLToolkitCache {
+    override fun getState(): VCSToolkitCache {
         return this
     }
 
-    override fun loadState(state: UMLToolkitCache) {
+    override fun loadState(state: VCSToolkitCache) {
         XmlSerializerUtil.copyBean(state, this)
         ApplicationManager.getApplication().messageBus.syncPublisher(CacheChangedListener.TOPIC)
             .onCacheChange(this)
@@ -34,12 +34,12 @@ class UMLToolkitCache : PersistentStateComponent<UMLToolkitCache> {
 
         companion object {
             val TOPIC = Topic.create(
-                "UMLToolkitApplicationCacheChanged",
+                "VCSToolkitApplicationCacheChanged",
                 CacheChangedListener::class.java
             )
         }
 
-        fun onCacheChange(cache: UMLToolkitCache)
+        fun onCacheChange(cache: VCSToolkitCache)
     }
 
 }

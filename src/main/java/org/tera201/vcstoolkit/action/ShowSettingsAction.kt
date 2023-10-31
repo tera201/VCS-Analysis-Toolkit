@@ -1,6 +1,6 @@
-package com.example.umldrawer.action
+package org.tera201.vcstoolkit.action
 
-import com.example.umldrawer.services.settings.UMLToolkitSettingsPage
+import org.tera201.vcstoolkit.services.settings.VCSToolkitSettingsPage
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.options.ShowSettingsUtil
@@ -9,6 +9,8 @@ import java.util.function.Supplier
 
 class ShowSettingsAction : DumbAwareAction(Supplier {"Plugin Settings"}, AllIcons.General.Settings) {
     override fun actionPerformed(event: AnActionEvent) {
-        ShowSettingsUtil.getInstance().editConfigurable(event.project, "UMLToolkitSettings", UMLToolkitSettingsPage())
+        ShowSettingsUtil.getInstance().editConfigurable(event.project, "VCSToolkitSettings",
+            VCSToolkitSettingsPage()
+        )
     }
 }

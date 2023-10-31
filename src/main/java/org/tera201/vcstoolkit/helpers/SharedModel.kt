@@ -1,4 +1,4 @@
-package com.example.umldrawer.helpers
+package org.tera201.vcstoolkit.helpers
 
 import javax.swing.ComboBoxModel
 import javax.swing.ListModel

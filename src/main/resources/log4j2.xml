@@ -6,7 +6,7 @@
         </Console>
     </Appenders>
     <Loggers>
-        <Logger name="com.example.umldrawer" level="INFO" additivity="false">
+        <Logger name="com.tera201.vcstoolkit" level="INFO" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
         <Root level="error">

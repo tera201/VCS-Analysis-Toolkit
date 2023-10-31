@@ -1,6 +1,6 @@
-package com.example.umldrawer.utils
+package org.tera201.vcstoolkit.utils
 
-import com.example.umldrawer.tabs.FXCirclePanel
+import org.tera201.vcstoolkit.tabs.FXCirclePanel
 import org.eclipse.uml2.uml.*
 import org.tera201.elements.circle.ClassCircle
 import org.tera201.elements.circle.PackageCircle
