@@ -37,7 +37,7 @@ javafx {
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
 intellij {
-    version.set("2023.1")
+    version.set("2023.2")
     type.set("IC") // Target IDE Platform
     plugins.set(listOf("com.intellij.javafx:1.0.4"))
 }
@@ -56,11 +56,6 @@ tasks {
             languageVersion = "1.8"
         }
     }
-
-    patchPluginXml {
-        sinceBuild.set("203")
-        untilBuild.set("231.*")
-    }
 }
 
 tasks {
@@ -73,5 +68,10 @@ tasks {
         kotlinOptions.jvmTarget = "17"
         kotlinOptions.languageVersion = "1.8"
         kotlinOptions.apiVersion = "1.8"
+    }
+
+    patchPluginXml {
+        version.set("1.0.0")
+        sinceBuild.set("230.*")
     }
 }
