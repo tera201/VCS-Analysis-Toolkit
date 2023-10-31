@@ -26,12 +26,18 @@ import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.JRadioButton
-import kotlin.concurrent.thread
 import kotlin.jvm.optionals.getOrNull
 
 class FXGraphPanel: JPanel() {
 
     var graphView: GraphPanel<String, String>? = null
+    private val fxPanel: JFXPanel = object : JFXPanel() {}
+    private val topPanel = JPanel()
+    private val modelComboBox = ComboBox(GitPanel.modelListContent)
+    private var model:Model? = null
+    private val packageButton = JButton("Package")
+    private val classButton = JButton("Class")
+    private val rightPanel = JPanel()
 
     init {
         this.layout = BorderLayout()
@@ -39,13 +45,7 @@ class FXGraphPanel: JPanel() {
     }
 
     private fun initFXGraph() {
-
-        val topPanel = JPanel()
-        val modelComboBox = ComboBox(GitPanel.modelListContent)
-        var model:Model? = null
         topPanel.layout = FlowLayout(FlowLayout.LEFT)
-        val packageButton = JButton("Package")
-        val classButton = JButton("Class")
         classButton.icon = AllIcons.Nodes.Class
         packageButton.icon = AllIcons.Nodes.Package
         topPanel.add(packageButton)
@@ -67,14 +67,11 @@ class FXGraphPanel: JPanel() {
             if (model != null) graphView?.setTheGraph(build_class_graph(model!!))
         }
 
-        val rightPanel = JPanel()
         rightPanel.layout = BoxLayout(rightPanel, BoxLayout.Y_AXIS)
         rightPanel.add(JRadioButton("Option 1"))
         rightPanel.add(JRadioButton("Option 2"))
         rightPanel.add(JRadioButton("Option 3"))
 
-
-        val fxPanel: JFXPanel = object : JFXPanel() {}
         Platform.runLater { make_fxPanel(fxPanel) }
         this.add(topPanel, BorderLayout.NORTH)
         this.add(rightPanel, BorderLayout.EAST)
