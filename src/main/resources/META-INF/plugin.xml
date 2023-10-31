@@ -16,11 +16,6 @@
   <!-- Text to display as description on Preferences/Settings | Plugin page -->
   <description>
     <![CDATA[
-      This sample plugin illustrates how to create your custom tool window.<br>
-      See the
-      <a href="https://plugins.jetbrains.com/docs/intellij/tool-windows.html">Tool Windows</a>
-      for more information.
-
       1) Open IntelliJ IDEA.
       2) Go to "Help" > "Edit Custom VM Options."
       3) In the custom VM options file, you can add or modify the -Xmx parameter to increase the maximum Java heap size as per your requirements.
@@ -32,12 +27,6 @@
     ]]>
   </description>
   <change-notes>
-    <![CDATA[
-      <ul>
-        <li><b>2.0.0</b> Convert to Gradle-based plugin.</li>
-        <li><b>1.0.0</b> Release 2018.3 and earlier.</li>
-      </ul>
-    ]]>
   </change-notes>
 
   <!-- Text to display as company information on Preferences/Settings | Plugin page -->
