@@ -4,6 +4,7 @@ import com.example.umldrawer.utils.toClass
 import com.example.umldrawer.utils.toGraph
 import com.example.umldrawer.utils.toPackage
 import com.intellij.icons.AllIcons
+import com.intellij.openapi.ui.ComboBox
 import javafx.application.Platform
 import javafx.embed.swing.JFXPanel
 import javafx.scene.Scene
@@ -25,6 +26,8 @@ import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.JRadioButton
+import kotlin.concurrent.thread
+import kotlin.jvm.optionals.getOrNull
 
 class FXGraphPanel: JPanel() {
 
@@ -38,6 +41,8 @@ class FXGraphPanel: JPanel() {
     private fun initFXGraph() {
 
         val topPanel = JPanel()
+        val modelComboBox = ComboBox(GitPanel.modelListContent)
+        var model:Model? = null
         topPanel.layout = FlowLayout(FlowLayout.LEFT)
         val packageButton = JButton("Package")
         val classButton = JButton("Class")
@@ -45,13 +50,21 @@ class FXGraphPanel: JPanel() {
         packageButton.icon = AllIcons.Nodes.Package
         topPanel.add(packageButton)
         topPanel.add(classButton)
+        topPanel.add(modelComboBox)
 
-        packageButton.addActionListener {
-            if (GitPanel.model != null) graphView?.setTheGraph(build_package_graph(GitPanel.model!!))
+        modelComboBox.addActionListener {
+            if (modelComboBox.selectedItem != null) {
+                val selectedModelName = modelComboBox.selectedItem as String
+                model = GitPanel.models.stream().filter { it.name == selectedModelName }.findAny().getOrNull()
+            }
         }
 
+        packageButton.addActionListener {
+            if (model != null) graphView?.setTheGraph(build_package_graph(model!!))
+        }
+//
         classButton.addActionListener {
-            if (GitPanel.model != null) graphView?.setTheGraph(build_class_graph(GitPanel.model!!))
+            if (model != null) graphView?.setTheGraph(build_class_graph(model!!))
         }
 
         val rightPanel = JPanel()
