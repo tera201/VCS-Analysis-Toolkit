@@ -1,20 +1,23 @@
-package com.example.umldrawer
+package org.tera201.vcstoolkit
 
-import com.example.umldrawer.action.ShowSettingsAction
-import com.example.umldrawer.tabs.*
+import org.tera201.vcstoolkit.action.ShowSettingsAction
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.components.JBTabbedPane
 import com.intellij.ui.content.ContentFactory
+import org.tera201.vcstoolkit.tabs.FXCirclePanel
+import org.tera201.vcstoolkit.tabs.FXCityPanel
+import org.tera201.vcstoolkit.tabs.FXGraphPanel
+import org.tera201.vcstoolkit.tabs.GitPanel
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import java.awt.Dimension
 
 
-class UMLToolWindowFactoryKt : ToolWindowFactory {
+class VCSToolWindowFactoryKt : ToolWindowFactory {
 
-    private val log: Logger = LogManager.getLogger(UMLToolWindowFactoryKt::class.java)
+    private val log: Logger = LogManager.getLogger(VCSToolWindowFactoryKt::class.java)
 
     /**
      * Create the tool window content.

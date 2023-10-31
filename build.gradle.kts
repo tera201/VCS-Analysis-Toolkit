@@ -5,7 +5,7 @@ plugins {
     id("org.openjfx.javafxplugin") version "0.0.14"
 }
 
-group = "com.tera201"
+group = "org.tera201"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -24,10 +24,10 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
     implementation(fileTree(mapOf("dir" to "lib", "include" to listOf("*.jar"))))
-    implementation("org.example:javafx-uml-graph-idea:0.0.1-SNAPSHOT")
-    implementation("org.example:code-to-uml:0.0.2-SNAPSHOT")
-    implementation("org.example:swrminer:0.0.2-SNAPSHOT")
-    implementation("org.tera201:javafx-code-modeling-tool:0.0.1-SNAPSHOT")
+    implementation("org.tera201:javafx-uml-graph:0.0.1-SNAPSHOT")
+    implementation("org.tera201:code-to-uml:0.0.2-SNAPSHOT")
+    implementation("org.tera201:swrminer:0.0.2-SNAPSHOT")
+    implementation("org.tera201:javafx-code-modeling-tool:1.0.0-SNAPSHOT")
 }
 
 javafx {

@@ -1,15 +1,21 @@
-package com.example.umldrawer.tabs
+package org.tera201.vcstoolkit.tabs
 
-import com.example.umldrawer.settings.UMLToolkitSettings
-import com.example.umldrawer.utils.toCircle
-import com.example.umldrawer.utils.toCity
+import org.tera201.vcstoolkit.helpers.SharedModel
+import org.tera201.vcstoolkit.services.VCSToolkitCache
+import org.tera201.vcstoolkit.services.settings.VCSToolkitSettings
+import org.tera201.vcstoolkit.utils.toCircle
+import org.tera201.code2uml.java20.console.JavaParserRunner
+import org.tera201.code2uml.uml.util.UMLModelHandler
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
+import com.intellij.openapi.fileChooser.FileChooserFactory
+import com.intellij.openapi.fileChooser.FileSaverDescriptor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.observable.util.whenSizeChanged
 import com.intellij.openapi.project.ProjectManager
+import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.ui.ColorUtil
 import com.intellij.ui.ColoredTreeCellRenderer
@@ -18,15 +24,15 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.treeStructure.Tree
 import com.intellij.util.PlatformIcons
 import com.intellij.util.ui.UIUtil
-import java20.console.JavaParserRunner
 import javafx.application.Platform
 import model.console.BuildModel
 import org.eclipse.uml2.uml.Model
 import org.repodriller.scm.SCMRepository
-import uml.util.UMLModelHandler
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.awt.Graphics
+import java.awt.event.KeyAdapter
+import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.io.File
@@ -39,9 +45,13 @@ import javax.swing.tree.DefaultTreeModel
 import kotlin.concurrent.thread
 
 class GitPanel : JPanel() {
-    private var settings:UMLToolkitSettings = UMLToolkitSettings.getInstance()
+    private var settings: VCSToolkitSettings = VCSToolkitSettings.getInstance()
+    private var cache: VCSToolkitCache = VCSToolkitCache.getInstance()
     private var myRepo: SCMRepository? = null
-    val buildModel = BuildModel()
+    private val analyzeButton = JButton("Analyze")
+    private val saveUmlFileButton = JButton("Save UML model")
+    private val getUmlFileButton = JButton("Get UML model")
+    private val buildModel = BuildModel()
     private val logsJTextArea = JTextArea()
     val logsJBScrollPane = JBScrollPane(
         logsJTextArea,
@@ -49,22 +59,27 @@ class GitPanel : JPanel() {
         JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
     )
     companion object {
-        var model: Model? = null
         val models = ArrayList<Model>()
+        val modelListContent = SharedModel()
     }
     private val handler = UMLModelHandler()
     private var isClearingSelection = false
     val branchList = JBList<String>()
     val tagList = JBList<String>()
+    val modelList = JBList(modelListContent)
     val branchListScrollPane = JBScrollPane(branchList)
     val tagListScrollPane = JBScrollPane(tagList)
+    val modelListScrollPane = JBScrollPane(modelList)
     val pathJTree = Tree()
+    private val projectComboBox = ComboBox<String>()
+    private val openProjectButton = JButton("Open project")
     private val vcSplitPane = JSplitPane(JSplitPane.VERTICAL_SPLIT, branchListScrollPane, tagListScrollPane)
     private val filesTreeJBScrollPane =
         JBScrollPane(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED)
     private val showSplitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, filesTreeJBScrollPane, vcSplitPane)
-    private val projectCache = "${System.getProperty("user.dir")}/UmlToolkitCache/"
-    private val modelCache = "${System.getProperty("user.dir")}/UmlToolkitCache/Models"
+    private val logModelSplitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, logsJBScrollPane, modelListScrollPane)
+    private val projectCache = "${System.getProperty("user.dir")}/VCSToolkitCache/"
+    private val modelCache = "${System.getProperty("user.dir")}/VCSToolkitCache/Models"
     
     init {
         initGit()
@@ -85,9 +100,9 @@ class GitPanel : JPanel() {
         logsJBScrollPane.isVisible = settings.showGitLogs
 
         ApplicationManager.getApplication().messageBus.connect()
-            .subscribe(UMLToolkitSettings.SettingsChangedListener.TOPIC, object :
-                UMLToolkitSettings.SettingsChangedListener {
-                override fun onSettingsChange(settings: UMLToolkitSettings) {
+            .subscribe(VCSToolkitSettings.SettingsChangedListener.TOPIC, object :
+                VCSToolkitSettings.SettingsChangedListener {
+                override fun onSettingsChange(settings: VCSToolkitSettings) {
                     logsJBScrollPane.isVisible = settings.showGitLogs
                 }
             })
@@ -99,14 +114,16 @@ class GitPanel : JPanel() {
             urlField.preferredSize = (Dimension(this.width - getButton.width - 40, getButton.height))
             showSplitPane.preferredSize =
                 Dimension(this.width - 20, (this.height * 2f / 3f).toInt() - 10)
-            logsJBScrollPane.preferredSize = Dimension(
+            logModelSplitPane.preferredSize = Dimension(
                 this.width - 140,
                 (this.height * 1f / 6f).toInt()
             )
         }
 
         getButton.addActionListener {
-            clickGet(urlField)
+            thread {
+                clickGet(urlField)
+            }
         }
         setupTree()
         configureSplitPanes()
@@ -114,13 +131,66 @@ class GitPanel : JPanel() {
         this.add(getButton)
         this.add(showSplitPane)
         addLogPanelButtons(this)
-        this.add(logsJBScrollPane)
+        this.add(logModelSplitPane)
         addModelControlPanel(this)
+        addProjectPane()
+    }
+
+    private fun addProjectPane() {
+        if (cache.projectPathMap.isNotEmpty()) {
+            cache.projectPathMap.keys.forEach {
+                projectComboBox.addItem(it)
+            }
+            projectComboBox.selectedItem = cache.lastProject
+            thread {
+                myRepo = buildModel.getRepository(cache.projectPathMap[cache.lastProject])
+                updatePathPanel()
+                populateJBList(branchList, buildModel.getBranches(myRepo).filter { it != "HEAD" })
+                populateJBList(tagList, buildModel.getTags(myRepo))
+            }
+        }
+
+        File(projectCache).list { dir, name -> File(dir, name).isDirectory.and(name != "Models") }?.forEach {
+            val path = "$projectCache/$it"
+            if ((0 until projectComboBox.model.size).none { i -> projectComboBox.model.getElementAt(i) == it }) {
+                cache.projectPathMap[it] = path
+                projectComboBox.addItem(it)
+            }
+        }
+
+        projectComboBox.addActionListener {
+            val selectedProject = projectComboBox.selectedItem as String
+            cache.lastProject = selectedProject
+            val projectPath = cache.projectPathMap[selectedProject]
+            thread {
+                myRepo = buildModel.getRepository(projectPath)
+                updatePathPanel()
+                populateJBList(branchList, buildModel.getBranches(myRepo).filter { it != "HEAD" })
+                populateJBList(tagList, buildModel.getTags(myRepo))
+            }
+        }
+
+        openProjectButton.addActionListener {
+            val descriptor = FileChooserDescriptor(false, true, false, false, false, false)
+            val toSelect = if (projectCache == null || projectCache.isEmpty()) null else LocalFileSystem.getInstance()
+                .findFileByPath(projectCache)
+            val selectedDirectory = FileChooser.chooseFile(descriptor, null, toSelect)
+            if (selectedDirectory != null) {
+                val newProjectName = selectedDirectory.name
+                cache.projectPathMap[newProjectName] = selectedDirectory.path
+                projectComboBox.addItem(newProjectName)
+                projectComboBox.selectedItem = newProjectName
+            }
+        }
+
+        this.add(projectComboBox)
+        this.add(openProjectButton)
     }
 
     private fun configureSplitPanes() {
         showSplitPane.setUI(CustomSplitPaneUI())
         vcSplitPane.setUI(CustomSplitPaneUI())
+        logModelSplitPane.setUI(CustomSplitPaneUI())
         showSplitPane.whenSizeChanged {
             if (showSplitPane.dividerLocation != it.width / 2)
                 showSplitPane.dividerLocation = it.width / 2
@@ -129,26 +199,48 @@ class GitPanel : JPanel() {
             if (vcSplitPane.dividerLocation != it.height / 2)
                 vcSplitPane.dividerLocation = it.height / 2
         }
+        logModelSplitPane.whenSizeChanged {
+            if (logModelSplitPane.dividerLocation != it.width / 2)
+                logModelSplitPane.dividerLocation = it.width / 2
+        }
         setupListSelectionListeners()
         setupListDoubleClickAction()
     }
 
     private fun setupListSelectionListeners() {
-        branchList.addListSelectionListener {
-            if (!it!!.valueIsAdjusting && !isClearingSelection && tagList.selectedValue != null) {
-                isClearingSelection = true
-                tagList.clearSelection()
-                isClearingSelection = false
+        branchList.addClearSelectorByAnotherList(tagList)
+        tagList.addClearSelectorByAnotherList(branchList)
+        modelList.addKeyListener(object : KeyAdapter() {
+            override fun keyPressed(e: KeyEvent?) {
+                if (e?.keyCode == KeyEvent.VK_BACK_SPACE) {
+                    val selectedIndices = modelList.selectedIndices
+                    for (i in selectedIndices.reversedArray()) {
+                        modelListContent.removeAt(i)
+                        models.removeAt(i)
+                    }
+                }
             }
-        }
+        })
+    }
 
-        tagList.addListSelectionListener {
-            if (!it!!.valueIsAdjusting && !isClearingSelection && branchList.selectedValue != null) {
-                isClearingSelection = true
-                branchList.clearSelection()
-                isClearingSelection = false
+    fun JBList<String>.addClearSelectorByAnotherList(anotherList: JBList<String>) {
+        this.addMouseListener(object : MouseAdapter() {
+            override fun mouseClicked(e: MouseEvent?) {
+                if ((e != null) &&!(e.isMetaDown || e.isShiftDown)
+                    && (!isClearingSelection && anotherList.selectedValue != null)) {
+                    isClearingSelection = true
+                    anotherList.clearSelection()
+                    isClearingSelection = false
+                }
+                val selected = this@addClearSelectorByAnotherList.selectedValuesList.size + anotherList.selectedValuesList.size
+                if (selected == 1) {
+                    analyzeButton.text = "Analyze"
+                }
+                else {
+                    analyzeButton.text = "AnalyzeAll"
+                }
             }
-        }
+        })
     }
 
     private fun setupListDoubleClickAction() {
@@ -214,41 +306,39 @@ class GitPanel : JPanel() {
 
     private fun addModelControlPanel(mainJPanel: JPanel) {
         val modelControlPanel = JPanel()
-
-        val analyzeButton = JButton("Analyze")
-        val analyzeAllButton = JButton("AnalyzeAll")
-        val saveUmlFileButton = JButton("Save UML model")
-        val getUmlFileButton = JButton("Get UML model")
-
         analyzeButton.addActionListener {
-            val javaParserRunner = JavaParserRunner()
-            if (myRepo != null) {
-                thread {
-                    val javaFiles = javaParserRunner.collectFiles(myRepo!!.path)
-                    logsJTextArea.append("Start analyzing.\n")
-                    model = javaParserRunner.buildModel("JavaSampleModel", javaFiles, logsJTextArea)
-                    logsJTextArea.append("End analyzing.\n")
-                    logsJTextArea.caret.dot = logsJTextArea.text.length
-                }
-            } else logsJTextArea.append("Get some repo for analyzing.\n")
-        }
-
-        analyzeAllButton.addActionListener {
             if (myRepo != null) {
                 val javaParserRunner = JavaParserRunner()
                 thread {
-                    val allList = ArrayList<String>()
-                    allList.addAll(buildModel.getBranches(myRepo))
-                    allList.addAll(buildModel.getTags(myRepo))
+                    val allList = branchList.selectedValuesList + tagList.selectedValuesList
+                    models.clear()
+                    modelListContent.clear()
+
                     for (i in allList) {
                         buildModel.checkout(myRepo, i)
                         val javaFiles = javaParserRunner.collectFiles(myRepo!!.path)
                         logsJTextArea.append("Start analyzing $i.\n")
-                        models.add(javaParserRunner.buildModel("i", javaFiles))
+                        if (allList.size > 1) {
+                            models.add(javaParserRunner.buildModel(i, javaFiles))
+                            saveUmlFileButton.text = "Save UML model pack"
+                        }
+                        else {
+                            models.add(javaParserRunner.buildModel(i, javaFiles, logsJTextArea))
+                            saveUmlFileButton.text = "Save UML model"
+                        }
                         logsJTextArea.append("End analyzing $i.\n")
                         logsJTextArea.caret.dot = logsJTextArea.text.length
                     }
-                    allList.clear()
+
+                    modelListContent.addAll(models.stream().map { it.name }.toList())
+
+                    Platform.runLater {
+                        FXCirclePanel.circleSpace.clean()
+                        for (i in 0 until models.size) {
+                            models[i].toCircle(i)
+                        }
+                        FXCirclePanel.circleSpace.mainListObjects.forEach { it.updateView() }
+                    }
                 }
             }
             else logsJTextArea.append("Get some repo for analyzing.\n")
@@ -266,37 +356,28 @@ class GitPanel : JPanel() {
 
             if (virtualFile != null) {
                 logsJTextArea.append("Get model from file: ${virtualFile.path}\n")
-                model = handler.loadModelFromFile(virtualFile.path)
-
-                Platform.runLater {
-                    FXCityPanel.citySpace.clean()
-                    FXCirclePanel.circleSpace.clean()
-                    model?.toCity()
-                    model?.toCircle()
-                    FXCityPanel.citySpace.mainObject.updateView()
-                    FXCirclePanel.circleSpace.mainObject.updateView()
-                }
+            }
+        }
+//
+        saveUmlFileButton.addActionListener {
+            val title =  if (models.size == 1) "SAVE UML-MODEL" else "SAVE UML-MODEL PACK"
+            val fileNameExt = if (models.size == 1) "" else "Pack"
+            val descriptor = FileSaverDescriptor(
+                title, "Choose the destination file",
+                ".json"
+            );
+            val toSelect = if (modelCache.isEmpty()) null else LocalFileSystem.getInstance()
+                .findFileByPath(modelCache)
+            val fileSaverDialog = FileChooserFactory.getInstance().createSaveFileDialog(descriptor, null)
+            val virtualFileWrapper = fileSaverDialog.save(toSelect, "$modelCache/${cache.lastProject}Model$fileNameExt.json")
+            if (virtualFileWrapper != null) {
+                val fileToSave = virtualFileWrapper.file
+                logsJTextArea.append("Save as file: ${fileToSave.absolutePath}\n")
+                handler.saveModelToFile(models, fileToSave.absolutePath)
             }
         }
 
-        saveUmlFileButton.addActionListener {
-            if (model != null) {
-                val fileChooser = JFileChooser()
-                fileChooser.setDialogTitle("Save UML-model")
-                fileChooser.currentDirectory = File(modelCache)
-                fileChooser.selectedFile = File("$modelCache/model.json")
-                val userSelection = fileChooser.showSaveDialog(mainJPanel)
-                if (userSelection == JFileChooser.APPROVE_OPTION) {
-                    val fileToSave = fileChooser.selectedFile
-                    logsJTextArea.append("Save as file: ${fileToSave.absolutePath}\n")
-//                model!!.saveModel(fileToSave.absolutePath)
-                    handler.saveModelToFile(model!!, fileToSave.absolutePath)
-                }
-            } else logsJTextArea.append("There isn't model for getting file.\n")
-        }
-
         modelControlPanel.add(analyzeButton)
-        modelControlPanel.add(analyzeAllButton)
         modelControlPanel.add(saveUmlFileButton)
         modelControlPanel.add(getUmlFileButton)
         mainJPanel.add(modelControlPanel)

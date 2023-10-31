@@ -1,6 +1,6 @@
-package com.example.umldrawer.utils
+package org.tera201.vcstoolkit.utils
 
-import com.example.umldrawer.tabs.FXCityPanel
+import org.tera201.vcstoolkit.tabs.FXCityPanel
 import org.eclipse.uml2.uml.*
 import org.tera201.elements.city.Building
 import org.tera201.elements.city.City

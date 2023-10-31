@@ -1,34 +1,43 @@
-package com.example.umldrawer.tabs
+package org.tera201.vcstoolkit.tabs
 
-import com.example.umldrawer.utils.toClass
-import com.example.umldrawer.utils.toGraph
-import com.example.umldrawer.utils.toPackage
+import org.tera201.vcstoolkit.utils.toClass
+import org.tera201.vcstoolkit.utils.toGraph
+import org.tera201.vcstoolkit.utils.toPackage
 import com.intellij.icons.AllIcons
+import com.intellij.openapi.ui.ComboBox
 import javafx.application.Platform
 import javafx.embed.swing.JFXPanel
 import javafx.scene.Scene
 import org.eclipse.uml2.uml.Model
-import umlgraph.containers.GraphDemoContainer
-import umlgraph.graph.Digraph
-import umlgraph.graph.DigraphTreeEdgeList
-import umlgraph.graph.Graph
-import umlgraph.graphview.GraphPanel
-import umlgraph.graphview.arrows.ArrowTypes
-import umlgraph.graphview.edges.Edge
-import umlgraph.graphview.strategy.DigraphTreePlacementStrategy
-import umlgraph.graphview.strategy.PlacementStrategy
-import umlgraph.graphview.vertices.GraphVertex
-import umlgraph.graphview.vertices.elements.ElementTypes
+import org.tera201.umlgraph.containers.GraphDemoContainer
+import org.tera201.umlgraph.graph.Digraph
+import org.tera201.umlgraph.graph.DigraphTreeEdgeList
+import org.tera201.umlgraph.graph.Graph
+import org.tera201.umlgraph.graphview.GraphPanel
+import org.tera201.umlgraph.graphview.arrows.ArrowTypes
+import org.tera201.umlgraph.graphview.edges.Edge
+import org.tera201.umlgraph.graphview.strategy.DigraphTreePlacementStrategy
+import org.tera201.umlgraph.graphview.strategy.PlacementStrategy
+import org.tera201.umlgraph.graphview.vertices.GraphVertex
+import org.tera201.umlgraph.graphview.vertices.elements.ElementTypes
 import java.awt.BorderLayout
 import java.awt.FlowLayout
 import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.JRadioButton
+import kotlin.jvm.optionals.getOrNull
 
 class FXGraphPanel: JPanel() {
 
     var graphView: GraphPanel<String, String>? = null
+    private val fxPanel: JFXPanel = object : JFXPanel() {}
+    private val topPanel = JPanel()
+    private val modelComboBox = ComboBox(GitPanel.modelListContent)
+    private var model:Model? = null
+    private val packageButton = JButton("Package")
+    private val classButton = JButton("Class")
+//    private val rightPanel = JPanel()
 
     init {
         this.layout = BorderLayout()
@@ -36,35 +45,36 @@ class FXGraphPanel: JPanel() {
     }
 
     private fun initFXGraph() {
-
-        val topPanel = JPanel()
         topPanel.layout = FlowLayout(FlowLayout.LEFT)
-        val packageButton = JButton("Package")
-        val classButton = JButton("Class")
         classButton.icon = AllIcons.Nodes.Class
         packageButton.icon = AllIcons.Nodes.Package
         topPanel.add(packageButton)
         topPanel.add(classButton)
+        topPanel.add(modelComboBox)
+
+        modelComboBox.addActionListener {
+            if (modelComboBox.selectedItem != null) {
+                val selectedModelName = modelComboBox.selectedItem as String
+                model = GitPanel.models.stream().filter { it.name == selectedModelName }.findAny().getOrNull()
+            }
+        }
 
         packageButton.addActionListener {
-            if (GitPanel.model != null) graphView?.setTheGraph(build_package_graph(GitPanel.model!!))
+            if (model != null) graphView?.setTheGraph(build_package_graph(model!!))
         }
-
+//
         classButton.addActionListener {
-            if (GitPanel.model != null) graphView?.setTheGraph(build_class_graph(GitPanel.model!!))
+            if (model != null) graphView?.setTheGraph(build_class_graph(model!!))
         }
 
-        val rightPanel = JPanel()
-        rightPanel.layout = BoxLayout(rightPanel, BoxLayout.Y_AXIS)
-        rightPanel.add(JRadioButton("Option 1"))
-        rightPanel.add(JRadioButton("Option 2"))
-        rightPanel.add(JRadioButton("Option 3"))
+//        rightPanel.layout = BoxLayout(rightPanel, BoxLayout.Y_AXIS)
+//        rightPanel.add(JRadioButton("Option 1"))
+//        rightPanel.add(JRadioButton("Option 2"))
+//        rightPanel.add(JRadioButton("Option 3"))
 
-
-        val fxPanel: JFXPanel = object : JFXPanel() {}
         Platform.runLater { make_fxPanel(fxPanel) }
         this.add(topPanel, BorderLayout.NORTH)
-        this.add(rightPanel, BorderLayout.EAST)
+//        this.add(rightPanel, BorderLayout.EAST)
         this.add(fxPanel, BorderLayout.CENTER)
     }
 
@@ -80,13 +90,11 @@ class FXGraphPanel: JPanel() {
         val scene = Scene(GraphDemoContainer(graphView), sceneWidth, sceneHeight)
         Platform.runLater { graphView!!.init() }
         graphView!!.setVertexDoubleClickAction { graphVertex: GraphVertex<String> ->
-            println("Vertex contains element: " + graphVertex.underlyingVertex.element())
             if (!graphVertex.removeStyleClass("myVertex")) {
                 graphVertex.addStyleClass("myVertex")
             }
         }
         graphView!!.setEdgeDoubleClickAction { graphEdge: Edge<String, String> ->
-            println("Edge contains element: " + graphEdge.underlyingEdge.element())
             graphEdge.setStyle("-fx-stroke: black; -fx-stroke-width: 3;")
             graphEdge.stylableArrow.setStyle("-fx-stroke: black; -fx-stroke-width: 3;")
         }

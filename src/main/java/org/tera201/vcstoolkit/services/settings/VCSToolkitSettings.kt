@@ -1,4 +1,4 @@
-package com.example.umldrawer.settings
+package org.tera201.vcstoolkit.services.settings
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.PersistentStateComponent
@@ -8,26 +8,26 @@ import com.intellij.util.messages.Topic
 import com.intellij.util.xmlb.XmlSerializerUtil
 
 
-@State(name = "UMLToolkitSettingsNew", storages = [Storage("umltoolkit.xml")])
-class UMLToolkitSettings : PersistentStateComponent<UMLToolkitSettings> {
+@State(name = "VCSToolkitSettingsNew", storages = [Storage("vcs_toolkit_settings.xml")])
+class VCSToolkitSettings : PersistentStateComponent<VCSToolkitSettings> {
 
-    var repoPath:String =  "${System.getProperty("user.dir")}/UmlToolkitCache"
+    var repoPath:String =  "${System.getProperty("user.dir")}/VCSToolkitCache"
 
-    var modelPath:String = "${System.getProperty("user.dir")}/UmlToolkitCache/Models"
+    var modelPath:String = "${System.getProperty("user.dir")}/VCSToolkitCache/Models"
     var showGitLogs:Boolean = true;
 
 
     companion object {
-        fun getInstance(): UMLToolkitSettings {
-            return ApplicationManager.getApplication().getService(UMLToolkitSettings::class.java)
+        fun getInstance(): VCSToolkitSettings {
+            return ApplicationManager.getApplication().getService(VCSToolkitSettings::class.java)
         }
     }
 
-    override fun getState(): UMLToolkitSettings {
+    override fun getState(): VCSToolkitSettings {
         return this
     }
 
-    override fun loadState(state: UMLToolkitSettings) {
+    override fun loadState(state: VCSToolkitSettings) {
         XmlSerializerUtil.copyBean(state, this)
         ApplicationManager.getApplication().messageBus.syncPublisher(SettingsChangedListener.TOPIC)
             .onSettingsChange(this)
@@ -37,11 +37,11 @@ class UMLToolkitSettings : PersistentStateComponent<UMLToolkitSettings> {
 
         companion object {
             val TOPIC = Topic.create(
-                "UMLToolkitApplicationSettingsChanged",
+                "VCSToolkitApplicationSettingsChanged",
                 SettingsChangedListener::class.java
             )
         }
 
-        fun onSettingsChange(settings: UMLToolkitSettings)
+        fun onSettingsChange(settings: VCSToolkitSettings)
     }
 }

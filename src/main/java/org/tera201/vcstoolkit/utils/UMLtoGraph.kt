@@ -1,11 +1,11 @@
-package com.example.umldrawer.utils
+package org.tera201.vcstoolkit.utils
 
 import org.eclipse.uml2.uml.*
-import uml.util.nl
-import umlgraph.graph.Digraph
-import umlgraph.graph.Vertex
-import umlgraph.graphview.arrows.ArrowTypes
-import umlgraph.graphview.vertices.elements.ElementTypes
+import org.tera201.code2uml.uml.util.nl
+import org.tera201.umlgraph.graph.Digraph
+import org.tera201.umlgraph.graph.Vertex
+import org.tera201.umlgraph.graphview.arrows.ArrowTypes
+import org.tera201.umlgraph.graphview.vertices.elements.ElementTypes
 
 fun Package.toGraph(graph: Digraph<String, String>) {
     val root = graph.insertVertex(name, ElementTypes.PACKAGE)

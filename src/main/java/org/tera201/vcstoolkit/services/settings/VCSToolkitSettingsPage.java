@@ -1,4 +1,4 @@
-package com.example.umldrawer.settings;
+package org.tera201.vcstoolkit.services.settings;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileChooser.FileChooser;
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
-public class UMLToolkitSettingsPage implements Configurable {
+public class VCSToolkitSettingsPage implements Configurable {
 
     private JPanel mainWindow;
     private JLabel gitLable;
@@ -25,7 +25,7 @@ public class UMLToolkitSettingsPage implements Configurable {
     private JButton modelBrowseButton;
     private JCheckBox showLogsCheckBox;
 
-    public UMLToolkitSettingsPage() {
+    public VCSToolkitSettingsPage() {
 
         repoBrowseButton.addActionListener(e -> {
             browseFolder(repoPathTextField);
@@ -53,7 +53,7 @@ public class UMLToolkitSettingsPage implements Configurable {
 
     @Override
     public @NlsContexts.ConfigurableName String getDisplayName() {
-        return "UML Toolkit";
+        return "VCS Toolkit";
     }
 
     @Override
@@ -63,11 +63,11 @@ public class UMLToolkitSettingsPage implements Configurable {
 
     @Override
     public boolean isModified() {
-        UMLToolkitSettings settings = UMLToolkitSettings.Companion.getInstance();
+        VCSToolkitSettings settings = VCSToolkitSettings.Companion.getInstance();
         return isModified(settings);
     }
 
-    private  boolean isModified(UMLToolkitSettings settings) {
+    private  boolean isModified(VCSToolkitSettings settings) {
         return !repoPathTextField.getText().equals(settings.getRepoPath()) ||
                 !modelPathTextField.getText().equals(settings.getModelPath()) ||
                 showLogsCheckBox.isSelected() != settings.getShowGitLogs();
@@ -75,26 +75,26 @@ public class UMLToolkitSettingsPage implements Configurable {
 
     @Override
     public void apply() throws ConfigurationException {
-        UMLToolkitSettings settings = UMLToolkitSettings.Companion.getInstance();
+        VCSToolkitSettings settings = VCSToolkitSettings.Companion.getInstance();
         applySetting(settings);
         ApplicationManager.getApplication().getMessageBus()
-                .syncPublisher(UMLToolkitSettings.SettingsChangedListener.Companion.getTOPIC())
+                .syncPublisher(VCSToolkitSettings.SettingsChangedListener.Companion.getTOPIC())
                 .onSettingsChange(settings);
     }
 
     @Override
     public void reset() {
-        UMLToolkitSettings settings = UMLToolkitSettings.Companion.getInstance();
+        VCSToolkitSettings settings = VCSToolkitSettings.Companion.getInstance();
         getSettings(settings);
     }
 
-    private void applySetting(UMLToolkitSettings settings) {
+    private void applySetting(VCSToolkitSettings settings) {
         settings.setRepoPath(repoPathTextField.getText());
         settings.setModelPath(modelPathTextField.getText());
         settings.setShowGitLogs(showLogsCheckBox.isSelected());
     }
 
-    private void getSettings(UMLToolkitSettings settings) {
+    private void getSettings(VCSToolkitSettings settings) {
         repoPathTextField.setText(settings.getRepoPath());
         modelPathTextField.setText(settings.getModelPath());
         showLogsCheckBox.setSelected(settings.getShowGitLogs());

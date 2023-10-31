@@ -1,14 +1,16 @@
-package com.example.umldrawer.utils
+package org.tera201.vcstoolkit.utils
 
-import com.example.umldrawer.tabs.FXCirclePanel
+import org.tera201.vcstoolkit.tabs.FXCirclePanel
 import org.eclipse.uml2.uml.*
 import org.tera201.elements.circle.ClassCircle
 import org.tera201.elements.circle.PackageCircle
 
-fun Package.toCircle() {
-    val packageCircle = PackageCircle(name, 6000.0, 5500.0, 100.0)
+private const val height = 500.0
+private const val gap = 8000.0
+fun Package.toCircle(number: Int=0) {
+    val packageCircle = PackageCircle(name, 6000.0, 5500.0, height)
+    packageCircle.translateY = number * gap
     FXCirclePanel.circleSpace.add(packageCircle)
-//    FXCirclePanel.circleSpace.mainObject = packageCircle
     packagedElements
         .filter { !it.hasKeyword("unknown") }
         .forEach {
@@ -21,9 +23,8 @@ fun Package.toCircle() {
 
 private fun Package.generatePackage(circleParent: PackageCircle) {
     val size = ownedComments[0].body.toDouble()
-    println(size)
     val side = size / 20
-    val packageCircle = PackageCircle(name, circleParent.innerRadius/2 + 500, circleParent.innerRadius/2, 100.0)
+    val packageCircle = PackageCircle(name, circleParent.innerRadius/2 + 500, circleParent.innerRadius/2, height)
     circleParent.addObject(packageCircle)
     packagedElements
         .filter { !it.hasKeyword("unknown") }
@@ -41,7 +42,7 @@ private fun Class.generateClass(circleParent: PackageCircle) {
     val size = ownedComments[0].body.toDouble()
     val methods = (ownedComments[1].body.toDouble() + 1) * 10
     val side = size / 2
-    val classCircle = ClassCircle(name, side + methods * 10, side, 100.0)
+    val classCircle = ClassCircle(name, side + methods * 10, side, height)
     circleParent.addObject(classCircle)
 }
 
@@ -49,12 +50,12 @@ private fun Interface.generateInterface(circleParent: PackageCircle) {
     val size = ownedComments[0].body.toDouble()
     val methods = (ownedComments[1].body.toDouble() + 1) * 10
     val side = size / 2
-    val classCircle = ClassCircle(name, side + methods * 10, side, 100.0)
+    val classCircle = ClassCircle(name, side + methods * 10, side, height)
     circleParent.addObject(classCircle)
 }
 
 private fun Enumeration.generateEnumeration(circleParent: PackageCircle) {
-    val classCircle = ClassCircle(name, 1000.0, 700.0, 100.0)
+    val classCircle = ClassCircle(name, 1000.0, 700.0, height)
     circleParent.addObject(classCircle)
 }
 

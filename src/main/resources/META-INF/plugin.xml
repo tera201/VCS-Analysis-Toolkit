@@ -4,10 +4,10 @@
 <idea-plugin>
 
   <!-- Unique id for this plugin. Must stay constant for the life of the plugin. -->
-  <id>org.tera201.UMLToolkit</id>
+  <id>org.tera201.VCSToolkit</id>
 
   <!-- Text to display as name on Preferences/Settings | Plugin page -->
-  <name>SDK: UML Toolkit</name>
+  <name>SDK: VCS Toolkit</name>
 
   <!-- Indicate this plugin can be loaded in all IntelliJ Platform-based products. -->
   <depends>com.intellij.modules.platform</depends>
@@ -20,6 +20,15 @@
       See the
       <a href="https://plugins.jetbrains.com/docs/intellij/tool-windows.html">Tool Windows</a>
       for more information.
+
+      1) Open IntelliJ IDEA.
+      2) Go to "Help" > "Edit Custom VM Options."
+      3) In the custom VM options file, you can add or modify the -Xmx parameter to increase the maximum Java heap size as per your requirements.
+         For example, if you want to set the maximum heap size to 2 gigabytes, add the following line:
+          -Xmx2g
+         This will set the maximum heap size to 2 gigabytes.
+      4) Save the custom VM options file.
+      5) Restart IntelliJ IDEA for the changes to take effect.
     ]]>
   </description>
   <change-notes>
@@ -35,11 +44,12 @@
   <vendor url="https://plugins.jetbrains.com">IntelliJ Platform SDK</vendor>
 
   <extensions defaultExtensionNs="com.intellij">
-    <toolWindow id="UML Toolkit" secondary="true" icon="AllIcons.General.Modified" anchor="left"
-                factoryClass="com.example.umldrawer.UMLToolWindowFactoryKt"/>
+    <toolWindow id="VCS Toolkit" secondary="true" icon="AllIcons.General.Modified" anchor="left"
+                factoryClass="org.tera201.vcstoolkit.VCSToolWindowFactoryKt"/>
 
-    <applicationService serviceImplementation="com.example.umldrawer.settings.UMLToolkitSettings"/>
-    <applicationConfigurable instance="com.example.umldrawer.settings.UMLToolkitSettingsPage" groupId="language"/>
+    <applicationService serviceImplementation="org.tera201.vcstoolkit.services.settings.VCSToolkitSettings"/>
+    <applicationService serviceImplementation="org.tera201.vcstoolkit.services.VCSToolkitCache"/>
+    <applicationConfigurable instance="org.tera201.vcstoolkit.services.settings.VCSToolkitSettingsPage" groupId="language"/>
   </extensions>
 
 </idea-plugin>
