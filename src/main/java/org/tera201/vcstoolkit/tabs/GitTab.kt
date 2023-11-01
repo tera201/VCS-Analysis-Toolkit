@@ -1,5 +1,9 @@
 package org.tera201.vcstoolkit.tabs
 
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
+import com.intellij.notification.Notifications
 import org.tera201.vcstoolkit.helpers.SharedModel
 import org.tera201.vcstoolkit.services.VCSToolkitCache
 import org.tera201.vcstoolkit.services.settings.VCSToolkitSettings
@@ -22,11 +26,13 @@ import com.intellij.ui.ColoredTreeCellRenderer
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.treeStructure.Tree
+import com.intellij.ui.util.minimumHeight
 import com.intellij.util.PlatformIcons
 import com.intellij.util.ui.UIUtil
 import javafx.application.Platform
 import model.console.BuildModel
 import org.eclipse.uml2.uml.Model
+import org.repodriller.scm.GitRepository
 import org.repodriller.scm.SCMRepository
 import java.awt.Dimension
 import java.awt.FlowLayout
@@ -48,6 +54,8 @@ class GitPanel : JPanel() {
     private var settings: VCSToolkitSettings = VCSToolkitSettings.getInstance()
     private var cache: VCSToolkitCache = VCSToolkitCache.getInstance()
     private var myRepo: SCMRepository? = null
+    private val getButton = JButton("Get")
+    private val urlField = JTextField()
     private val analyzeButton = JButton("Analyze")
     private val saveUmlFileButton = JButton("Save UML model")
     private val getUmlFileButton = JButton("Get UML model")
@@ -64,12 +72,14 @@ class GitPanel : JPanel() {
     }
     private val handler = UMLModelHandler()
     private var isClearingSelection = false
-    val branchList = JBList<String>()
-    val tagList = JBList<String>()
+    private val branchListModel = DefaultListModel<String>()
+    private val tagListModel = DefaultListModel<String>()
+    private val branchList = JBList(branchListModel)
+    private val tagList = JBList(tagListModel)
     val modelList = JBList(modelListContent)
-    val branchListScrollPane = JBScrollPane(branchList)
-    val tagListScrollPane = JBScrollPane(tagList)
-    val modelListScrollPane = JBScrollPane(modelList)
+    private val branchListScrollPane = JBScrollPane(branchList)
+    private val tagListScrollPane = JBScrollPane(tagList)
+    private val modelListScrollPane = JBScrollPane(modelList)
     val pathJTree = Tree()
     private val projectComboBox = ComboBox<String>()
     private val openProjectButton = JButton("Open project")
@@ -95,8 +105,6 @@ class GitPanel : JPanel() {
         }
 
         this.layout = FlowLayout(FlowLayout.LEFT)
-        val getButton = JButton("Get")
-        val urlField = JTextField()
         logsJBScrollPane.isVisible = settings.showGitLogs
 
         ApplicationManager.getApplication().messageBus.connect()
@@ -107,16 +115,16 @@ class GitPanel : JPanel() {
                 }
             })
 
-        //TODO: create cache file for old values
         urlField.text = "https://github.com/arnohaase/a-foundation.git"
+        this.minimumHeight = 490
 
         this.whenSizeChanged {
             urlField.preferredSize = (Dimension(this.width - getButton.width - 40, getButton.height))
             showSplitPane.preferredSize =
-                Dimension(this.width - 20, (this.height * 2f / 3f).toInt() - 10)
+                Dimension(this.width - 20, ((this.height - 130 ) * 2f / 3f).toInt())
             logModelSplitPane.preferredSize = Dimension(
                 this.width - 140,
-                (this.height * 1f / 6f).toInt()
+                ((this.height - 130 ) * 1f / 3f).toInt()
             )
         }
 
@@ -142,12 +150,9 @@ class GitPanel : JPanel() {
             cache.projectPathMap.keys.forEach {
                 projectComboBox.addItem(it)
             }
-            projectComboBox.selectedItem = cache.lastProject
-            thread {
-                myRepo = buildModel.getRepository(cache.projectPathMap[cache.lastProject])
-                updatePathPanel()
-                populateJBList(branchList, buildModel.getBranches(myRepo).filter { it != "HEAD" })
-                populateJBList(tagList, buildModel.getTags(myRepo))
+            if (cache.lastProject != "") {
+                projectComboBox.selectedItem = cache.lastProject
+                cache.projectPathMap[cache.lastProject]?.let { updatePathPanelAndGitLists(cache.lastProject, it) }
             }
         }
 
@@ -161,19 +166,26 @@ class GitPanel : JPanel() {
 
         projectComboBox.addActionListener {
             val selectedProject = projectComboBox.selectedItem as String
-            cache.lastProject = selectedProject
             val projectPath = cache.projectPathMap[selectedProject]
-            thread {
-                myRepo = buildModel.getRepository(projectPath)
-                updatePathPanel()
-                populateJBList(branchList, buildModel.getBranches(myRepo).filter { it != "HEAD" })
-                populateJBList(tagList, buildModel.getTags(myRepo))
+            val directory = File(projectPath)
+            if (directory.exists() && directory.isDirectory) {
+                projectPath?.let { updatePathPanelAndGitLists(selectedProject, it) }
+            } else {
+                projectComboBox.removeItem(selectedProject)
+                cache.projectPathMap.remove(selectedProject)
+                projectComboBox.selectedItem = cache.lastProject
+                val group = NotificationGroupManager.getInstance().getNotificationGroup("VCSToolkitNotify")
+                val content = "The project with the specified path was not found."
+                val notification: Notification =
+                    group.createNotification("Open error", content, NotificationType.ERROR)
+                Notifications.Bus.notify(notification, null);
             }
+            cache.lastProject = selectedProject
         }
 
         openProjectButton.addActionListener {
             val descriptor = FileChooserDescriptor(false, true, false, false, false, false)
-            val toSelect = if (projectCache == null || projectCache.isEmpty()) null else LocalFileSystem.getInstance()
+            val toSelect = if (projectCache.isEmpty()) null else LocalFileSystem.getInstance()
                 .findFileByPath(projectCache)
             val selectedDirectory = FileChooser.chooseFile(descriptor, null, toSelect)
             if (selectedDirectory != null) {
@@ -186,6 +198,26 @@ class GitPanel : JPanel() {
 
         this.add(projectComboBox)
         this.add(openProjectButton)
+    }
+
+    private fun updatePathPanelAndGitLists(projectName: String, projectPath: String) {
+        thread {
+            val isRepo = File("$projectPath/.git").exists()
+            if (myRepo?.repoName != projectName && isRepo) myRepo = buildModel.getRepository(projectPath)
+            updatePathPanel()
+            if (isRepo) {
+                populateJBList(branchListModel, buildModel.getBranches(myRepo).filter { it != "HEAD" })
+                populateJBList(tagListModel, buildModel.getTags(myRepo))
+            } else {
+                val group = NotificationGroupManager.getInstance().getNotificationGroup("VCSToolkitNotify")
+                val content = "The project doesn't have git repo."
+                val notification: Notification =
+                    group.createNotification("Opps", content, NotificationType.WARNING)
+                Notifications.Bus.notify(notification, null);
+                branchListModel.clear()
+                tagListModel.clear()
+            }
+        }
     }
 
     private fun configureSplitPanes() {
@@ -245,30 +277,24 @@ class GitPanel : JPanel() {
     }
 
     private fun setupListDoubleClickAction() {
-        val branchMouseEvent = object : MouseAdapter() {
-            override fun mouseClicked(e: MouseEvent?) {
-                if (e!!.clickCount == 2) {
-                    val index = branchList.locationToIndex(e.point)
-                    if (index >= 0) {
-                        val selectedItem = branchList.model.getElementAt(index)
-                        onListItemDoubleClicked(selectedItem)
-                    }
-                }
-            }
-        }
-        val tagMouseEvent = object : MouseAdapter() {
-            override fun mouseClicked(e: MouseEvent?) {
-                if (e!!.clickCount == 2) {
-                    val index = tagList.locationToIndex(e.point)
-                    if (index >= 0) {
-                        val selectedItem = tagList.model.getElementAt(index)
-                        onListItemDoubleClicked(selectedItem)
-                    }
-                }
-            }
-        }
+        val branchMouseEvent = mouseClickListenerForGitList(branchList)
+        val tagMouseEvent = mouseClickListenerForGitList(tagList)
         branchList.addMouseListener(branchMouseEvent)
         tagList.addMouseListener(tagMouseEvent)
+    }
+
+    private fun mouseClickListenerForGitList(jbList: JBList<String>):MouseAdapter {
+        return object : MouseAdapter() {
+            override fun mouseClicked(e: MouseEvent?) {
+                if (e!!.clickCount == 2) {
+                    val index = jbList.locationToIndex(e.point)
+                    if (index >= 0) {
+                        val selectedItem = jbList.model.getElementAt(index)
+                        onListItemDoubleClicked(selectedItem)
+                    }
+                }
+            }
+        }
     }
 
     private fun onListItemDoubleClicked(item: String) {
@@ -277,10 +303,9 @@ class GitPanel : JPanel() {
         updatePathPanel()
     }
 
-    private fun populateJBList(targetPane:JBList<String>, stringList: List<String>) {
-        val listModel = DefaultListModel<String>()
-        listModel.addAll(stringList)
-        targetPane.model = listModel
+    private fun populateJBList(targetListModel: DefaultListModel<String>, stringList: List<String>) {
+        targetListModel.clear()
+        targetListModel.addAll(stringList)
     }
 
     private fun addLogPanelButtons(mainJPanel: JPanel) {
@@ -350,8 +375,8 @@ class GitPanel : JPanel() {
                 true, false,
                 false, false, false, false
             );
-            descriptor.setTitle("Get UML-model");
-            val toSelect = if (modelCache == null || modelCache.isEmpty()) null else LocalFileSystem.getInstance()
+            descriptor.setTitle("Get UML-Model");
+            val toSelect = if (modelCache.isEmpty()) null else LocalFileSystem.getInstance()
                 .findFileByPath(modelCache)
             val virtualFile = FileChooser.chooseFile(descriptor, null, toSelect)
 
@@ -387,25 +412,30 @@ class GitPanel : JPanel() {
     private fun clickGet(textField: JTextField) {
         //TODO: add regex
         if (textField.text != "") {
-            val directoryPath = "$projectCache/${buildModel.getRepoNameByUrl(textField.text)}"
+            val repoName = buildModel.getRepoNameByUrl(textField.text)
+            val directoryPath = "$projectCache/$repoName"
             val directory = File(directoryPath)
             if (directory.exists() && directory.isDirectory) {
                 logsJTextArea.append("Already exist!\n")
                 myRepo = buildModel.getRepository(textField.text, projectCache)
+                if ((0 until projectComboBox.model.size).none { i -> projectComboBox.model.getElementAt(i) == repoName }) {
+                    cache.projectPathMap[repoName] = directoryPath
+                    projectComboBox.addItem(repoName)
+                }
             } else {
                 logsJTextArea.append("Cloning: ${textField.text}\n")
                 myRepo = buildModel.createClone(textField.text, projectCache)
                 logsJTextArea.append("Cloned to ${myRepo!!.path}\n")
+                cache.projectPathMap[repoName] = directoryPath
+                projectComboBox.addItem(repoName)
             }
-            updatePathPanel()
-            populateJBList(branchList, buildModel.getBranches(myRepo).filter { it != "HEAD" })
-            populateJBList(tagList, buildModel.getTags(myRepo))
+            projectComboBox.selectedItem = repoName
         }
     }
 
     private fun updatePathPanel() {
-        val root = DefaultMutableTreeNode(myRepo!!.path)
-        buildTree(File(myRepo!!.path), root)
+        val root = DefaultMutableTreeNode(cache.projectPathMap[cache.lastProject])
+        buildTree(File(cache.projectPathMap[cache.lastProject]), root)
         pathJTree.model = DefaultTreeModel(root)
         filesTreeJBScrollPane.setViewportView(pathJTree)
         filesTreeJBScrollPane.updateUI()
