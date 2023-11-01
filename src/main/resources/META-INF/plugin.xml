@@ -37,6 +37,11 @@
   <change-notes>
     <![CDATA[
       <html>
+        <b>1.2.0</b>
+        <ul>
+          <li>Added current project into project combobox
+        </ul>
+
         <b>1.1.1</b> (11/01/2023)
         <ul>
           <li>Support for older IntelliJ Idea Products

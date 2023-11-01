@@ -137,6 +137,7 @@ class GitPanel : JPanel() {
     }
 
     private fun addProjectPane() {
+        cache.projectPathMap["Current project"] = ProjectManager.getInstance().openProjects[0].basePath.toString()
         if (cache.projectPathMap.isNotEmpty()) {
             cache.projectPathMap.keys.forEach {
                 projectComboBox.addItem(it)
