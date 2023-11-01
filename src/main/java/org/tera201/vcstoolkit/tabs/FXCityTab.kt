@@ -3,6 +3,7 @@ package org.tera201.vcstoolkit.tabs
 import com.intellij.openapi.ui.ComboBox
 import javafx.application.Platform
 import org.eclipse.uml2.uml.Model
+import org.tera201.vcstoolkit.panels.FXCityPanel
 import org.tera201.vcstoolkit.utils.toCity
 import java.awt.BorderLayout
 import java.awt.FlowLayout

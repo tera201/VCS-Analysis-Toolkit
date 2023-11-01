@@ -16,17 +16,44 @@
   <!-- Text to display as description on Preferences/Settings | Plugin page -->
   <description>
     <![CDATA[
-      1) Open IntelliJ IDEA.
-      2) Go to "Help" > "Edit Custom VM Options."
-      3) In the custom VM options file, you can add or modify the -Xmx parameter to increase the maximum Java heap size as per your requirements.
-         For example, if you want to set the maximum heap size to 2 gigabytes, add the following line:
-          -Xmx2g
-         This will set the maximum heap size to 2 gigabytes.
-      4) Save the custom VM options file.
-      5) Restart IntelliJ IDEA for the changes to take effect.
-    ]]>
+      <style>
+        .indented-paragraph {
+            text-indent: 20px;
+        }
+      </style>
+      <p class="indented-paragraph">To increase the maximum Java heap size in IntelliJ IDEA, follow these steps:</p>
+        <ul>
+          <li>Open IntelliJ IDEA.</li>
+          <li>Navigate to "Help" > "Edit Custom VM Options."</li>
+          <li>In the custom VM options file, you can add or modify the -Xmx parameter to adjust the maximum heap size based on your requirements.
+          <p>For example, if you want to set the maximum heap size to 2 gigabytes, add the following line:</p>
+               <p style="margin-left: 40px;">-Xmx2g</p>
+           This will configure the maximum heap size to be 2 gigabytes.</li>
+          <li>Save the custom VM options file.</li>
+          <li>Restart IntelliJ IDEA to apply the changes.</li>
+        </ul>
+  ]]>
   </description>
   <change-notes>
+    <![CDATA[
+      <html>
+        <b>1.1.1</b> (11/01/2023)
+        <ul>
+          <li>Support for older IntelliJ Idea Products
+          <li>Updated plugin page
+        </ul>
+
+        <b>1.1.0</b> (11/01/2023)
+        <ul>
+          <li>added a kludge to fix the bug with rendering after hiding
+        </ul>
+
+        <b>1.0.0</b> (10/31/2023)
+        <ul>
+          <li>Initial release
+        </ul>
+      </html>
+    ]]>
   </change-notes>
 
   <!-- Text to display as company information on Preferences/Settings | Plugin page -->
