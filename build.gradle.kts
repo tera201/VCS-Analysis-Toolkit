@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "org.tera201"
-version = "1.1.0-SNAPSHOT"
+version = "1.1.1-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -71,7 +71,6 @@ tasks {
     }
 
     patchPluginXml {
-        version.set("1.0.0")
-        sinceBuild.set("230.*")
+        sinceBuild.set("203.*")
     }
 }
