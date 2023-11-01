@@ -22,13 +22,11 @@ import org.tera201.umlgraph.graphview.vertices.GraphVertex
 import org.tera201.umlgraph.graphview.vertices.elements.ElementTypes
 import java.awt.BorderLayout
 import java.awt.FlowLayout
-import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JPanel
-import javax.swing.JRadioButton
 import kotlin.jvm.optionals.getOrNull
 
-class FXGraphPanel: JPanel() {
+class FXGraphTab: JPanel() {
 
     var graphView: GraphPanel<String, String>? = null
     private val fxPanel: JFXPanel = object : JFXPanel() {}

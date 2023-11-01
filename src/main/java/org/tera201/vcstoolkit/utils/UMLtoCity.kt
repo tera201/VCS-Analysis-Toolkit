@@ -1,34 +1,34 @@
 package org.tera201.vcstoolkit.utils
 
-import org.tera201.vcstoolkit.tabs.FXCityPanel
 import org.eclipse.uml2.uml.*
+import org.tera201.elements.FXSpace
 import org.tera201.elements.city.Building
 import org.tera201.elements.city.City
 import org.tera201.elements.city.Quarter
 
-fun Package.toCity() {
+fun Package.toCity(citySpace: FXSpace<Quarter>) {
     var city = City(8000.0, 20.0, 8000.0)
-    FXCityPanel.citySpace.add(city)
+    citySpace.add(city)
     packagedElements
         .filter { !it.hasKeyword("unknown") }
         .forEach {
             when (it) {
-                is Package -> it.generatePackage(null)
+                is Package -> it.generatePackage(citySpace, null)
                 is Class -> it.generateClass(null)
             }
         }
 }
 
-private fun Package.generatePackage(parentName: String?) {
+private fun Package.generatePackage(citySpace: FXSpace<Quarter>, parentName: String?) {
     val size = ownedComments[0].body.toDouble()
     val newName = if (parentName.orEmpty().isNotEmpty())  "$parentName.$name" else name
     val quarter = Quarter(newName, size, 10.0, size, 50.0)
-    FXCityPanel.citySpace.mainObject.addObject(quarter)
+    citySpace.mainObject.addObject(quarter)
     packagedElements
         .filter { !it.hasKeyword("unknown") }
         .forEach {
             when (it) {
-                is Package -> it.generatePackage(newName)
+                is Package -> it.generatePackage(citySpace, newName)
                 is Class -> it.generateClass(quarter)
                 is Interface -> it.generateInterface(quarter)
                 is Enumeration -> it.generateEnumeration(quarter)

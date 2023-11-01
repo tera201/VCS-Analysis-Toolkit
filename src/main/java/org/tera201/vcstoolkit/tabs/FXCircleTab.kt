@@ -14,7 +14,7 @@ import org.tera201.elements.circle.HollowCylinder
 import org.tera201.elements.circle.PackageCircle
 
 
-class FXCirclePanel : JFXPanel() {
+class FXCircleTab : JFXPanel() {
 
     companion object {
         var circleSpace = FXSpace<HollowCylinder>()

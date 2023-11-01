@@ -333,11 +333,11 @@ class GitPanel : JPanel() {
                     modelListContent.addAll(models.stream().map { it.name }.toList())
 
                     Platform.runLater {
-                        FXCirclePanel.circleSpace.clean()
+                        FXCircleTab.circleSpace.clean()
                         for (i in 0 until models.size) {
                             models[i].toCircle(i)
                         }
-                        FXCirclePanel.circleSpace.mainListObjects.forEach { it.updateView() }
+                        FXCircleTab.circleSpace.mainListObjects.forEach { it.updateView() }
                     }
                 }
             }
