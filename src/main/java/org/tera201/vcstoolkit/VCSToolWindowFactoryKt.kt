@@ -6,9 +6,9 @@ import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.components.JBTabbedPane
 import com.intellij.ui.content.ContentFactory
-import org.tera201.vcstoolkit.tabs.FXCirclePanel
-import org.tera201.vcstoolkit.tabs.FXCityPanel
-import org.tera201.vcstoolkit.tabs.FXGraphPanel
+import org.tera201.vcstoolkit.tabs.FXCircleTab
+import org.tera201.vcstoolkit.tabs.FXCityTab
+import org.tera201.vcstoolkit.tabs.FXGraphTab
 import org.tera201.vcstoolkit.tabs.GitPanel
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -29,9 +29,9 @@ class VCSToolWindowFactoryKt : ToolWindowFactory {
         val contentFactory = ContentFactory.getInstance()
         val jtp = JBTabbedPane()
         jtp.autoscrolls = true
-        jtp.add("FX Graph", FXGraphPanel())
-        jtp.add("FX City", FXCityPanel())
-        jtp.add("FX Circle", FXCirclePanel())
+        jtp.add("FX Graph", FXGraphTab())
+        jtp.add("FX City", FXCityTab())
+        jtp.add("FX Circle", FXCircleTab())
         jtp.add("Git", GitPanel())
         jtp.preferredSize = Dimension(500, 400)
         val content = contentFactory.createContent(jtp, "", false)
