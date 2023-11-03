@@ -11,7 +11,6 @@ import com.intellij.openapi.fileChooser.FileChooserFactory
 import com.intellij.openapi.fileChooser.FileSaverDescriptor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileTypes.FileTypeManager
-import com.intellij.openapi.observable.util.whenSizeChanged
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.vfs.LocalFileSystem
@@ -20,7 +19,6 @@ import com.intellij.ui.ColoredTreeCellRenderer
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.treeStructure.Tree
-import com.intellij.ui.util.minimumHeight
 import com.intellij.util.PlatformIcons
 import com.intellij.util.ui.UIUtil
 import javafx.application.Platform
@@ -36,10 +34,7 @@ import org.tera201.vcstoolkit.utils.toCircle
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.awt.Graphics
-import java.awt.event.KeyAdapter
-import java.awt.event.KeyEvent
-import java.awt.event.MouseAdapter
-import java.awt.event.MouseEvent
+import java.awt.event.*
 import java.io.File
 import java.io.IOException
 import javax.swing.*
@@ -228,20 +223,28 @@ class GitPanel : JPanel() {
         showSplitPane.setUI(CustomSplitPaneUI())
         vcSplitPane.setUI(CustomSplitPaneUI())
         logModelSplitPane.setUI(CustomSplitPaneUI())
-        showSplitPane.whenSizeChanged {
-            if (showSplitPane.dividerLocation != it.width / 2)
-                showSplitPane.dividerLocation = it.width / 2
-        }
-        vcSplitPane.whenSizeChanged {
-            if (vcSplitPane.dividerLocation != it.height / 2)
-                vcSplitPane.dividerLocation = it.height / 2
-        }
-        logModelSplitPane.whenSizeChanged {
-            if (logModelSplitPane.dividerLocation != it.width / 2)
-                logModelSplitPane.dividerLocation = it.width / 2
-        }
+        resizeSplitPaneDevider(showSplitPane)
+        resizeSplitPaneDevider(vcSplitPane)
+        resizeSplitPaneDevider(logModelSplitPane)
         setupListSelectionListeners()
         setupListDoubleClickAction()
+    }
+
+    private fun resizeSplitPaneDevider(jSplitPane: JSplitPane, ) {
+        jSplitPane.addComponentListener(object : ComponentAdapter() {
+            override fun componentResized(e: ComponentEvent?) {
+                super.componentResized(e)
+                if (jSplitPane.orientation == JSplitPane.HORIZONTAL_SPLIT) {
+                    val newWidth = e!!.component.width
+                    if (jSplitPane.dividerLocation != newWidth / 2)
+                        jSplitPane.dividerLocation = newWidth / 2
+                } else {
+                    val newHeight = e!!.component.height
+                    if (jSplitPane.dividerLocation != newHeight / 2)
+                        jSplitPane.dividerLocation = newHeight / 2
+                }
+            }
+        })
     }
 
     private fun setupListSelectionListeners() {
