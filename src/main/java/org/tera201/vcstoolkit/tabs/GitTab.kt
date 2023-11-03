@@ -4,12 +4,6 @@ import com.intellij.notification.Notification
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
-import org.tera201.vcstoolkit.helpers.SharedModel
-import org.tera201.vcstoolkit.services.VCSToolkitCache
-import org.tera201.vcstoolkit.services.settings.VCSToolkitSettings
-import org.tera201.vcstoolkit.utils.toCircle
-import org.tera201.code2uml.java20.console.JavaParserRunner
-import org.tera201.code2uml.uml.util.UMLModelHandler
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
@@ -32,8 +26,13 @@ import com.intellij.util.ui.UIUtil
 import javafx.application.Platform
 import model.console.BuildModel
 import org.eclipse.uml2.uml.Model
-import org.repodriller.scm.GitRepository
 import org.repodriller.scm.SCMRepository
+import org.tera201.code2uml.java20.console.JavaParserRunner
+import org.tera201.code2uml.uml.util.UMLModelHandler
+import org.tera201.vcstoolkit.helpers.SharedModel
+import org.tera201.vcstoolkit.services.VCSToolkitCache
+import org.tera201.vcstoolkit.services.settings.VCSToolkitSettings
+import org.tera201.vcstoolkit.utils.toCircle
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.awt.Graphics
@@ -116,17 +115,22 @@ class GitPanel : JPanel() {
             })
 
         urlField.text = "https://github.com/arnohaase/a-foundation.git"
-        this.minimumHeight = 490
+        this.minimumSize = Dimension(0, 200)
+        this.addComponentListener(object : ComponentAdapter() {
+            override fun componentResized(e: ComponentEvent?) {
+                super.componentResized(e)
+                val newWidth = e!!.component.width
+                val newHeight = e!!.component.height
+                urlField.preferredSize = (Dimension(newWidth - getButton.width - 40, getButton.height))
+                showSplitPane.preferredSize =
+                    Dimension(newWidth - 20, ((newHeight - 130 ) * 2f / 3f).toInt())
+                logModelSplitPane.preferredSize = Dimension(
+                    newWidth - 140,
+                    ((newHeight - 130 ) * 1f / 3f).toInt()
+                )
 
-        this.whenSizeChanged {
-            urlField.preferredSize = (Dimension(this.width - getButton.width - 40, getButton.height))
-            showSplitPane.preferredSize =
-                Dimension(this.width - 20, ((this.height - 130 ) * 2f / 3f).toInt())
-            logModelSplitPane.preferredSize = Dimension(
-                this.width - 140,
-                ((this.height - 130 ) * 1f / 3f).toInt()
-            )
-        }
+            }
+        })
 
         getButton.addActionListener {
             thread {
