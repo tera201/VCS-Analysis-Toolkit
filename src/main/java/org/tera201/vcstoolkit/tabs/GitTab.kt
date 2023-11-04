@@ -221,6 +221,7 @@ class GitPanel : JPanel() {
         Notifications.Bus.notify(notification, null);
     }
 
+    // TODO: do not create repo for external projects in save mode
     private fun updatePathPanelAndGitLists(projectName: String, projectPath: String) {
         thread {
             val isRepo = File("$projectPath/.git").exists()
