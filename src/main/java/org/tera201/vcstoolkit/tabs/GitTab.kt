@@ -221,17 +221,16 @@ class GitPanel : JPanel() {
         Notifications.Bus.notify(notification, null);
     }
 
-    // TODO: do not create repo for external projects in save mode
     private fun updatePathPanelAndGitLists(projectName: String, projectPath: String) {
         thread {
             val isRepo = File("$projectPath/.git").exists()
             if (myRepo?.repoName != projectName && isRepo) myRepo = buildModel.getRepository(projectPath)
             updatePathPanel()
-            if (isRepo) {
-                if (cache.projectPathMap[projectName]!!.isExternal && settings.externalProjectMode == 1)
-                    externalWarningNotification()
+            if (isRepo && !(cache.projectPathMap[projectName]!!.isExternal && settings.externalProjectMode == 1)) {
                 populateJBList(branchListModel, buildModel.getBranches(myRepo).filter { it != "HEAD" })
                 populateJBList(tagListModel, buildModel.getTags(myRepo))
+            } else if (cache.projectPathMap[projectName]!!.isExternal && settings.externalProjectMode == 1) {
+                externalWarningNotification()
             } else {
                 val group = NotificationGroupManager.getInstance().getNotificationGroup("VCSToolkitNotify")
                 val content = "The project doesn't have git repo."
