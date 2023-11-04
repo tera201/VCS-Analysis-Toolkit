@@ -27,6 +27,7 @@ import org.eclipse.uml2.uml.Model
 import org.repodriller.scm.SCMRepository
 import org.tera201.code2uml.java20.console.JavaParserRunner
 import org.tera201.code2uml.uml.util.UMLModelHandler
+import org.tera201.vcstoolkit.helpers.ProjectPath
 import org.tera201.vcstoolkit.helpers.SharedModel
 import org.tera201.vcstoolkit.services.VCSToolkitCache
 import org.tera201.vcstoolkit.services.settings.VCSToolkitSettings
@@ -106,6 +107,13 @@ class GitPanel : JPanel() {
                 VCSToolkitSettings.SettingsChangedListener {
                 override fun onSettingsChange(settings: VCSToolkitSettings) {
                     logsJBScrollPane.isVisible = settings.showGitLogs
+                    if (settings.externalProjectMode == 1 &&  cache.projectPathMap[projectComboBox.selectedItem]!!.isExternal) {
+                        branchListModel.clear()
+                        tagListModel.clear()
+                    } else {
+                        populateJBList(branchListModel, buildModel.getBranches(myRepo).filter { it != "HEAD" })
+                        populateJBList(tagListModel, buildModel.getTags(myRepo))
+                    }
                 }
             })
 
@@ -144,21 +152,22 @@ class GitPanel : JPanel() {
     }
 
     private fun addProjectPane() {
-        cache.projectPathMap["Current project"] = ProjectManager.getInstance().openProjects[0].basePath.toString()
+        cache.projectPathMap["Current project"] = ProjectPath(true, ProjectManager.getInstance().openProjects[0].basePath.toString(), "$projectCache/${ProjectManager.getInstance().openProjects[0].name}")
+
         if (cache.projectPathMap.isNotEmpty()) {
             cache.projectPathMap.keys.forEach {
                 projectComboBox.addItem(it)
             }
             if (cache.lastProject != "") {
                 projectComboBox.selectedItem = cache.lastProject
-                cache.projectPathMap[cache.lastProject]?.let { updatePathPanelAndGitLists(cache.lastProject, it) }
+                cache.projectPathMap[cache.lastProject]?.let { updatePathPanelAndGitLists(cache.lastProject, it.path) }
             }
         }
 
         File(projectCache).list { dir, name -> File(dir, name).isDirectory.and(name != "Models") }?.forEach {
             val path = "$projectCache/$it"
             if ((0 until projectComboBox.model.size).none { i -> projectComboBox.model.getElementAt(i) == it }) {
-                cache.projectPathMap[it] = path
+                cache.projectPathMap[it] = ProjectPath(false, path, path)
                 projectComboBox.addItem(it)
             }
         }
@@ -166,9 +175,10 @@ class GitPanel : JPanel() {
         projectComboBox.addActionListener {
             val selectedProject = projectComboBox.selectedItem as String
             val projectPath = cache.projectPathMap[selectedProject]
-            val directory = File(projectPath)
+
+            val directory = File(projectPath?.path)
             if (directory.exists() && directory.isDirectory) {
-                projectPath?.let { updatePathPanelAndGitLists(selectedProject, it) }
+                projectPath?.let { updatePathPanelAndGitLists(selectedProject, it.path) }
             } else {
                 projectComboBox.removeItem(selectedProject)
                 cache.projectPathMap.remove(selectedProject)
@@ -189,7 +199,8 @@ class GitPanel : JPanel() {
             val selectedDirectory = FileChooser.chooseFile(descriptor, null, toSelect)
             if (selectedDirectory != null) {
                 val newProjectName = selectedDirectory.name
-                cache.projectPathMap[newProjectName] = selectedDirectory.path
+                val copyPath = "$projectCache/${selectedDirectory.name}"
+                cache.projectPathMap[newProjectName] = ProjectPath(true, selectedDirectory.path, copyPath)
                 projectComboBox.addItem(newProjectName)
                 projectComboBox.selectedItem = newProjectName
             }
@@ -223,14 +234,14 @@ class GitPanel : JPanel() {
         showSplitPane.setUI(CustomSplitPaneUI())
         vcSplitPane.setUI(CustomSplitPaneUI())
         logModelSplitPane.setUI(CustomSplitPaneUI())
-        resizeSplitPaneDevider(showSplitPane)
-        resizeSplitPaneDevider(vcSplitPane)
-        resizeSplitPaneDevider(logModelSplitPane)
+        resizeSplitPaneDivider(showSplitPane)
+        resizeSplitPaneDivider(vcSplitPane)
+        resizeSplitPaneDivider(logModelSplitPane)
         setupListSelectionListeners()
         setupListDoubleClickAction()
     }
 
-    private fun resizeSplitPaneDevider(jSplitPane: JSplitPane, ) {
+    private fun resizeSplitPaneDivider(jSplitPane: JSplitPane, ) {
         jSplitPane.addComponentListener(object : ComponentAdapter() {
             override fun componentResized(e: ComponentEvent?) {
                 super.componentResized(e)
@@ -312,27 +323,18 @@ class GitPanel : JPanel() {
 
     private fun populateJBList(targetListModel: DefaultListModel<String>, stringList: List<String>) {
         targetListModel.clear()
+        if (!cache.projectPathMap[projectComboBox.selectedItem]!!.isExternal || settings.externalProjectMode != 1)
         targetListModel.addAll(stringList)
     }
 
     private fun addLogPanelButtons(mainJPanel: JPanel) {
         val logButtonsPanel = JPanel()
         logButtonsPanel.layout = BoxLayout(logButtonsPanel, BoxLayout.Y_AXIS)
-        val removeButton = JButton("Clear cache")
         val clearLogButton = JButton("Clear log")
-
-        removeButton.addActionListener {
-            filesTreeJBScrollPane.setViewportView(null)
-            filesTreeJBScrollPane.updateUI()
-            myRepo?.scm?.delete()
-            logsJTextArea.append("Removed.\n")
-        }
 
         clearLogButton.addActionListener {
             logsJTextArea.text = null
         }
-
-        logButtonsPanel.add(removeButton)
         logButtonsPanel.add(clearLogButton)
         mainJPanel.add(logButtonsPanel)
     }
@@ -426,23 +428,22 @@ class GitPanel : JPanel() {
                 logsJTextArea.append("Already exist!\n")
                 myRepo = buildModel.getRepository(textField.text, projectCache)
                 if ((0 until projectComboBox.model.size).none { i -> projectComboBox.model.getElementAt(i) == repoName }) {
-                    cache.projectPathMap[repoName] = directoryPath
                     projectComboBox.addItem(repoName)
                 }
             } else {
                 logsJTextArea.append("Cloning: ${textField.text}\n")
                 myRepo = buildModel.createClone(textField.text, projectCache)
                 logsJTextArea.append("Cloned to ${myRepo!!.path}\n")
-                cache.projectPathMap[repoName] = directoryPath
                 projectComboBox.addItem(repoName)
             }
+            cache.projectPathMap[repoName] = ProjectPath(false, directoryPath, directoryPath)
             projectComboBox.selectedItem = repoName
         }
     }
 
     private fun updatePathPanel() {
-        val root = DefaultMutableTreeNode(cache.projectPathMap[cache.lastProject])
-        buildTree(File(cache.projectPathMap[cache.lastProject]), root)
+        val root = DefaultMutableTreeNode(cache.projectPathMap[cache.lastProject]?.path)
+        buildTree(File(cache.projectPathMap[cache.lastProject]?.path), root)
         pathJTree.model = DefaultTreeModel(root)
         filesTreeJBScrollPane.setViewportView(pathJTree)
         filesTreeJBScrollPane.updateUI()
