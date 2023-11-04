@@ -137,7 +137,10 @@ class GitPanel : JPanel() {
 
         getButton.addActionListener {
             thread {
-                clickGet(urlField)
+                //TODO: add regex
+                if (urlField.text != "") {
+                    getRepoByUrl(urlField.text)
+                }
             }
         }
         setupTree()
@@ -210,12 +213,22 @@ class GitPanel : JPanel() {
         this.add(openProjectButton)
     }
 
+    private fun externalWarningNotification() {
+        val group = NotificationGroupManager.getInstance().getNotificationGroup("VCSToolkitNotify")
+        val content = "VCS for external projects was disabled. Please use the built-in VCS in the IDE manually."
+        val notification: Notification =
+            group.createNotification("VCS warning", content, NotificationType.WARNING)
+        Notifications.Bus.notify(notification, null);
+    }
+
     private fun updatePathPanelAndGitLists(projectName: String, projectPath: String) {
         thread {
             val isRepo = File("$projectPath/.git").exists()
             if (myRepo?.repoName != projectName && isRepo) myRepo = buildModel.getRepository(projectPath)
             updatePathPanel()
             if (isRepo) {
+                if (cache.projectPathMap[projectName]!!.isExternal && settings.externalProjectMode == 1)
+                    externalWarningNotification()
                 populateJBList(branchListModel, buildModel.getBranches(myRepo).filter { it != "HEAD" })
                 populateJBList(tagListModel, buildModel.getTags(myRepo))
             } else {
@@ -418,27 +431,24 @@ class GitPanel : JPanel() {
         mainJPanel.add(modelControlPanel)
     }
 
-    private fun clickGet(textField: JTextField) {
-        //TODO: add regex
-        if (textField.text != "") {
-            val repoName = buildModel.getRepoNameByUrl(textField.text)
-            val directoryPath = "$projectCache/$repoName"
-            val directory = File(directoryPath)
-            if (directory.exists() && directory.isDirectory) {
-                logsJTextArea.append("Already exist!\n")
-                myRepo = buildModel.getRepository(textField.text, projectCache)
-                if ((0 until projectComboBox.model.size).none { i -> projectComboBox.model.getElementAt(i) == repoName }) {
-                    projectComboBox.addItem(repoName)
-                }
-            } else {
-                logsJTextArea.append("Cloning: ${textField.text}\n")
-                myRepo = buildModel.createClone(textField.text, projectCache)
-                logsJTextArea.append("Cloned to ${myRepo!!.path}\n")
+    private fun getRepoByUrl(url: String) {
+        val repoName = buildModel.getRepoNameByUrl(url)
+        val directoryPath = "$projectCache/$repoName"
+        val directory = File(directoryPath)
+        if (directory.exists() && directory.isDirectory) {
+            logsJTextArea.append("Already exist!\n")
+            myRepo = buildModel.getRepository(url, projectCache)
+            if ((0 until projectComboBox.model.size).none { i -> projectComboBox.model.getElementAt(i) == repoName }) {
                 projectComboBox.addItem(repoName)
             }
-            cache.projectPathMap[repoName] = ProjectPath(false, directoryPath, directoryPath)
-            projectComboBox.selectedItem = repoName
+        } else {
+            logsJTextArea.append("Cloning: ${url}\n")
+            myRepo = buildModel.createClone(url, projectCache)
+            logsJTextArea.append("Cloned to ${myRepo!!.path}\n")
+            projectComboBox.addItem(repoName)
         }
+        cache.projectPathMap[repoName] = ProjectPath(false, directoryPath, directoryPath)
+        projectComboBox.selectedItem = repoName
     }
 
     private fun updatePathPanel() {
