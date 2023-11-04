@@ -40,8 +40,8 @@ public class VCSToolkitSettingsPage implements Configurable {
         Hashtable<Integer, JLabel> labels = new Hashtable<>();
         labels.put(0, new JLabel("Unsafe"));
         labels.put(1, new JLabel("Safe"));
-        labels.put(2, new JLabel("Deep copy"));
-        labels.put(3, new JLabel("Commit"));
+//        labels.put(2, new JLabel("Deep copy"));
+//        labels.put(3, new JLabel("Commit"));
 
         slider1.setLabelTable(labels);
     }
