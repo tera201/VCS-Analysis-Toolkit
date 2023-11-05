@@ -44,6 +44,8 @@
           <li>If project choosing not successful then notification will be sent
           <li>Support for projects without git
           <li>Set min size
+          <li>Add safe mode for external projects
+          <li>Update split panes
         </ul>
 
         <b>1.1.1</b> (11/01/2023)

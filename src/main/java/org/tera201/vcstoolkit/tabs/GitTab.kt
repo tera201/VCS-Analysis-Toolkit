@@ -16,6 +16,7 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.ui.ColorUtil
 import com.intellij.ui.ColoredTreeCellRenderer
+import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.treeStructure.Tree
@@ -78,11 +79,23 @@ class GitPanel : JPanel() {
     val pathJTree = Tree()
     private val projectComboBox = ComboBox<String>()
     private val openProjectButton = JButton("Open project")
-    private val vcSplitPane = JSplitPane(JSplitPane.VERTICAL_SPLIT, branchListScrollPane, tagListScrollPane)
+    private val vcSplitPane = JBSplitter(true, 0.5f).apply {
+        this.firstComponent = branchListScrollPane
+        this.secondComponent = tagListScrollPane
+        this.dividerWidth = 1
+    }
     private val filesTreeJBScrollPane =
         JBScrollPane(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED)
-    private val showSplitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, filesTreeJBScrollPane, vcSplitPane)
-    private val logModelSplitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, logsJBScrollPane, modelListScrollPane)
+    private val showSplitPane = JBSplitter(false, 0.5f).apply {
+        this.firstComponent = filesTreeJBScrollPane
+        this.secondComponent = vcSplitPane
+        this.dividerWidth = 1
+    }
+    private val logModelSplitPane = JBSplitter(false, 0.5f).apply {
+        this.firstComponent = logsJBScrollPane
+        this.secondComponent = modelListScrollPane
+    this.dividerWidth = 1
+    }
     private val projectCache = "${System.getProperty("user.dir")}/VCSToolkitCache/"
     private val modelCache = "${System.getProperty("user.dir")}/VCSToolkitCache/Models"
     
@@ -246,12 +259,6 @@ class GitPanel : JPanel() {
     }
 
     private fun configureSplitPanes() {
-        showSplitPane.setUI(CustomSplitPaneUI())
-        vcSplitPane.setUI(CustomSplitPaneUI())
-        logModelSplitPane.setUI(CustomSplitPaneUI())
-        resizeSplitPaneDivider(showSplitPane)
-        resizeSplitPaneDivider(vcSplitPane)
-        resizeSplitPaneDivider(logModelSplitPane)
         setupListSelectionListeners()
         setupListDoubleClickAction()
     }
