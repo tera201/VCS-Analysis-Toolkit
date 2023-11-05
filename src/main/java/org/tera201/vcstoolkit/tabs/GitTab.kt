@@ -266,23 +266,6 @@ class GitPanel : JPanel() {
         setupListDoubleClickAction()
     }
 
-    private fun resizeSplitPaneDivider(jSplitPane: JSplitPane, ) {
-        jSplitPane.addComponentListener(object : ComponentAdapter() {
-            override fun componentResized(e: ComponentEvent?) {
-                super.componentResized(e)
-                if (jSplitPane.orientation == JSplitPane.HORIZONTAL_SPLIT) {
-                    val newWidth = e!!.component.width
-                    if (jSplitPane.dividerLocation != newWidth / 2)
-                        jSplitPane.dividerLocation = newWidth / 2
-                } else {
-                    val newHeight = e!!.component.height
-                    if (jSplitPane.dividerLocation != newHeight / 2)
-                        jSplitPane.dividerLocation = newHeight / 2
-                }
-            }
-        })
-    }
-
     private fun setupListSelectionListeners() {
         branchList.addClearSelectorByAnotherList(tagList)
         tagList.addClearSelectorByAnotherList(branchList)
@@ -527,19 +510,5 @@ private fun onTreeNodeDoubleClicked(node: DefaultMutableTreeNode?) {
         // TODO: should be current project (not first)
         ProjectManager.getInstance().openProjects.firstOrNull()
             ?.let { FileEditorManager.getInstance(it).openFile(virtualFile, true) }
-    }
-}
-
-class CustomSplitPaneUI : BasicSplitPaneUI() {
-    override fun createDefaultDivider(): BasicSplitPaneDivider {
-        return object : BasicSplitPaneDivider(this) {
-            override fun paint(g: Graphics) {
-                val bgColor = UIUtil.getPanelBackground()
-                val borderColor = ColorUtil.darker(bgColor, 1)
-                g.color = borderColor
-                g.fillRect(0, 0, size.width, size.height)
-                super.paint(g)
-            }
-        }
     }
 }
