@@ -19,6 +19,7 @@ import com.intellij.ui.ColoredTreeCellRenderer
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
+import com.intellij.ui.components.JBTextArea
 import com.intellij.ui.treeStructure.Tree
 import com.intellij.util.PlatformIcons
 import com.intellij.util.ui.UIUtil
@@ -56,7 +57,9 @@ class GitPanel : JPanel() {
     private val saveUmlFileButton = JButton("Save UML model")
     private val getUmlFileButton = JButton("Get UML model")
     private val buildModel = BuildModel()
-    private val logsJTextArea = JTextArea()
+    private val logsJTextArea = JBTextArea().apply {
+        this.isEditable = false
+    }
     val logsJBScrollPane = JBScrollPane(
         logsJTextArea,
         JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
