@@ -1,4 +1,4 @@
-package org.tera201.vcstoolkit.tabs
+package org.tera201.vcstoolkit.panels
 
 import javafx.application.Platform
 import javafx.embed.swing.JFXPanel
