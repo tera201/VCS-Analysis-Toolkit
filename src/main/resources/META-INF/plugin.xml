@@ -45,6 +45,7 @@
           <li>Support for projects without git
           <li>Set min size
           <li>Add safe mode for external projects
+          <li>Add Commit mode for all project
           <li>Update split panes
         </ul>
 

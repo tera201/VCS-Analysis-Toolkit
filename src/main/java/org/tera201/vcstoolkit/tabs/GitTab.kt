@@ -14,7 +14,6 @@ import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.vfs.LocalFileSystem
-import com.intellij.ui.ColorUtil
 import com.intellij.ui.ColoredTreeCellRenderer
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBList
@@ -22,7 +21,6 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextArea
 import com.intellij.ui.treeStructure.Tree
 import com.intellij.util.PlatformIcons
-import com.intellij.util.ui.UIUtil
 import javafx.application.Platform
 import model.console.BuildModel
 import org.eclipse.uml2.uml.Model
@@ -36,13 +34,10 @@ import org.tera201.vcstoolkit.services.settings.VCSToolkitSettings
 import org.tera201.vcstoolkit.utils.toCircle
 import java.awt.Dimension
 import java.awt.FlowLayout
-import java.awt.Graphics
 import java.awt.event.*
 import java.io.File
 import java.io.IOException
 import javax.swing.*
-import javax.swing.plaf.basic.BasicSplitPaneDivider
-import javax.swing.plaf.basic.BasicSplitPaneUI
 import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeModel
 import kotlin.concurrent.thread
@@ -325,7 +320,9 @@ class GitPanel : JPanel() {
 
     private fun onListItemDoubleClicked(item: String) {
         println("Double clicked on item: $item")
+        myRepo?.scm?.createCommit("VCSToolkit: save message")
         buildModel.checkout(myRepo, item)
+        myRepo?.scm?.resetLastCommitsWithMessage("VCSToolkit: save message")
         updatePathPanel()
     }
 
