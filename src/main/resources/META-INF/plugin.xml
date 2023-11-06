@@ -37,6 +37,21 @@
   <change-notes>
     <![CDATA[
       <html>
+        <b>1.2.0</b>
+        <ul>
+          <li>Added current project into project combobox
+          <li>After cloning the project it will be added to combobox and selected
+          <li>If project choosing not successful then notification will be sent
+          <li>Support for projects without git
+          <li>Set min size
+          <li>Add safe mode for external projects
+          <li>Add Commit mode for all project
+          <li>Update split panes
+          <li>Implement "Get uml model" button
+          <li>Add cache for git url field
+          <li>Upgrade selecting for Circle view
+        </ul>
+
         <b>1.1.1</b> (11/01/2023)
         <ul>
           <li>Support for older IntelliJ Idea Products
@@ -66,6 +81,11 @@
     <applicationService serviceImplementation="org.tera201.vcstoolkit.services.settings.VCSToolkitSettings"/>
     <applicationService serviceImplementation="org.tera201.vcstoolkit.services.VCSToolkitCache"/>
     <applicationConfigurable instance="org.tera201.vcstoolkit.services.settings.VCSToolkitSettingsPage" groupId="language"/>
+    <notificationGroup
+            id="VCSToolkitNotify"
+            displayType="BALLOON"
+            toolWindowId="VCS Toolkit"
+    />
   </extensions>
 
 </idea-plugin>
