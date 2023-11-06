@@ -52,7 +52,8 @@ class GitPanel : JPanel() {
     private val saveUmlFileButton = JButton("Save UML model")
     private val getUmlFileButton = JButton("Get UML model")
     private val buildModel = BuildModel()
-    private val logsJTextArea = JBTextArea().apply {
+    // TODO: problems with JBTextArea (IDEA freeze) when analyzing one branch
+    private val logsJTextArea = JTextArea().apply {
         this.isEditable = false
     }
     val logsJBScrollPane = JBScrollPane(
@@ -61,7 +62,7 @@ class GitPanel : JPanel() {
         JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
     )
     companion object {
-        val models = ArrayList<Model>()
+        var models = ArrayList<Model>()
         val modelListContent = SharedModel()
     }
     private val handler = UMLModelHandler()
@@ -128,7 +129,7 @@ class GitPanel : JPanel() {
                 }
             })
 
-        urlField.text = "https://github.com/arnohaase/a-foundation.git"
+        urlField.text = cache.urlField
         this.minimumSize = Dimension(0, 200)
         this.addComponentListener(object : ComponentAdapter() {
             override fun componentResized(e: ComponentEvent?) {
@@ -150,6 +151,7 @@ class GitPanel : JPanel() {
             thread {
                 //TODO: add regex
                 if (urlField.text != "") {
+                    cache.urlField = urlField.text
                     getRepoByUrl(urlField.text)
                 }
             }
@@ -395,6 +397,19 @@ class GitPanel : JPanel() {
 
             if (virtualFile != null) {
                 logsJTextArea.append("Get model from file: ${virtualFile.path}\n")
+                val modelList = handler.loadListModelFromFile(virtualFile.path)
+                if (modelList != null)
+                    models = modelList as ArrayList<Model>
+                    modelListContent.clear()
+                    modelListContent.addAll(models.stream().map { it.name }.toList())
+
+                    Platform.runLater {
+                        FXCircleTab.circleSpace.clean()
+                        for (i in 0 until models.size) {
+                            models[i].toCircle(i)
+                        }
+                        FXCircleTab.circleSpace.mainListObjects.forEach { it.updateView() }
+                    }
             }
         }
 //

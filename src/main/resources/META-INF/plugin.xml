@@ -47,6 +47,8 @@
           <li>Add safe mode for external projects
           <li>Add Commit mode for all project
           <li>Update split panes
+          <li>Implement "Get uml model" button
+          <li>Add cache for git url field
         </ul>
 
         <b>1.1.1</b> (11/01/2023)
