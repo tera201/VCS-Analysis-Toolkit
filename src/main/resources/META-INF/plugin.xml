@@ -43,6 +43,7 @@
           <li>Added threading for analyzing
           <li>Added git auth
           <li>Update VFS after branch switching
+          <li>fix commit/unsafe mode
         </ul>
         <b>1.2.0</b>
         <ul>

@@ -16,6 +16,7 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.ColoredTreeCellRenderer
+import com.intellij.ui.JBColor
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
@@ -34,9 +35,7 @@ import org.tera201.vcstoolkit.helpers.SharedModel
 import org.tera201.vcstoolkit.services.VCSToolkitCache
 import org.tera201.vcstoolkit.services.settings.VCSToolkitSettings
 import org.tera201.vcstoolkit.utils.toCircle
-import java.awt.BorderLayout
-import java.awt.Dimension
-import java.awt.FlowLayout
+import java.awt.*
 import java.awt.event.*
 import java.io.File
 import java.io.IOException
@@ -76,14 +75,26 @@ class GitPanel : JPanel() {
     private val tagList = JBList(tagListModel)
     val modelList = JBList(modelListContent)
     private val branchListScrollPane = JBScrollPane(branchList)
+    private val branchPane = JPanel().apply {
+        val label = JLabel("Branches")
+        this.layout = BorderLayout()
+        this.add(label, BorderLayout.NORTH)
+        this.add(branchListScrollPane, BorderLayout.CENTER)
+    }
     private val tagListScrollPane = JBScrollPane(tagList)
+    private val tagPane = JPanel().apply {
+        val label = JLabel("Tags")
+        this.layout = BorderLayout()
+        this.add(label, BorderLayout.NORTH)
+        this.add(tagListScrollPane, BorderLayout.CENTER)
+    }
     private val modelListScrollPane = JBScrollPane(modelList)
     val pathJTree = Tree()
     private val projectComboBox = ComboBox<String>()
     private val openProjectButton = JButton("Open project")
     private val vcSplitPane = JBSplitter(true, 0.5f).apply {
-        this.firstComponent = branchListScrollPane
-        this.secondComponent = tagListScrollPane
+        this.firstComponent = branchPane
+        this.secondComponent = tagPane
         this.dividerWidth = 1
     }
     private val filesTreeJBScrollPane =
