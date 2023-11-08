@@ -14,6 +14,7 @@ import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.ColoredTreeCellRenderer
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBList
@@ -25,13 +26,15 @@ import javafx.application.Platform
 import model.console.BuildModel
 import org.eclipse.uml2.uml.Model
 import org.repodriller.scm.SCMRepository
-import org.tera201.code2uml.java20.console.JavaParserRunner
+import org.tera201.code2uml.AnalyzerBuilder
+import org.tera201.code2uml.Language
 import org.tera201.code2uml.uml.util.UMLModelHandler
 import org.tera201.vcstoolkit.helpers.ProjectPath
 import org.tera201.vcstoolkit.helpers.SharedModel
 import org.tera201.vcstoolkit.services.VCSToolkitCache
 import org.tera201.vcstoolkit.services.settings.VCSToolkitSettings
 import org.tera201.vcstoolkit.utils.toCircle
+import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.awt.event.*
@@ -85,8 +88,14 @@ class GitPanel : JPanel() {
     }
     private val filesTreeJBScrollPane =
         JBScrollPane(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED)
+    private val filesTreePane = JPanel().apply {
+        val label = JLabel("Current")
+        this.layout = BorderLayout()
+        this.add(label, BorderLayout.NORTH)
+        this.add(filesTreeJBScrollPane, BorderLayout.CENTER)
+    }
     private val showSplitPane = JBSplitter(false, 0.5f).apply {
-        this.firstComponent = filesTreeJBScrollPane
+        this.firstComponent = filesTreePane
         this.secondComponent = vcSplitPane
         this.dividerWidth = 1
     }
@@ -122,7 +131,7 @@ class GitPanel : JPanel() {
                     if (settings.externalProjectMode == 1 &&  cache.projectPathMap[projectComboBox.selectedItem]!!.isExternal) {
                         branchListModel.clear()
                         tagListModel.clear()
-                    } else {
+                    } else if (myRepo != null) {
                         populateJBList(branchListModel, buildModel.getBranches(myRepo).filter { it != "HEAD" })
                         populateJBList(tagListModel, buildModel.getTags(myRepo))
                     }
@@ -163,7 +172,7 @@ class GitPanel : JPanel() {
         this.add(showSplitPane)
         addLogPanelButtons(this)
         this.add(logModelSplitPane)
-        addModelControlPanel(this)
+        addModelControlPanel()
         addProjectPane()
     }
 
@@ -322,9 +331,15 @@ class GitPanel : JPanel() {
 
     private fun onListItemDoubleClicked(item: String) {
         println("Double clicked on item: $item")
+        val fileSystem = LocalFileSystem.getInstance()
+        val virtualFile: VirtualFile? = fileSystem.findFileByPath(myRepo!!.path)
+        val virtualFileGit: VirtualFile? = fileSystem.findFileByPath("${myRepo!!.path}/.git}")
         myRepo?.scm?.createCommit("VCSToolkit: save message")
         buildModel.checkout(myRepo, item)
+        cache.versionLabel = item
         myRepo?.scm?.resetLastCommitsWithMessage("VCSToolkit: save message")
+        virtualFile?.refresh(false, true)
+        virtualFileGit?.refresh(false, true)
         updatePathPanel()
     }
 
@@ -345,32 +360,29 @@ class GitPanel : JPanel() {
         mainJPanel.add(logButtonsPanel)
     }
 
-    private fun addModelControlPanel(mainJPanel: JPanel) {
+    private fun addModelControlPanel() {
         val modelControlPanel = JPanel()
         analyzeButton.addActionListener {
             if (myRepo != null) {
-                val javaParserRunner = JavaParserRunner()
                 thread {
+                    val startTime = System.currentTimeMillis()
                     val allList = branchList.selectedValuesList + tagList.selectedValuesList
                     models.clear()
                     modelListContent.clear()
-
+                    logsJTextArea.append("Start analyzing.\n")
                     for (i in allList) {
                         buildModel.checkout(myRepo, i)
-                        val javaFiles = javaParserRunner.collectFiles(myRepo!!.path)
-                        logsJTextArea.append("Start analyzing $i.\n")
-                        if (allList.size > 1) {
-                            models.add(javaParserRunner.buildModel(i, javaFiles))
-                            saveUmlFileButton.text = "Save UML model pack"
-                        }
-                        else {
-                            models.add(javaParserRunner.buildModel(i, javaFiles, logsJTextArea))
-                            saveUmlFileButton.text = "Save UML model"
-                        }
-                        logsJTextArea.append("End analyzing $i.\n")
+                        logsJTextArea.append("\t*modeling: $i\n")
+                        val analyzerBuilder = AnalyzerBuilder(Language.Java, i, myRepo!!.path)
+                            .textArea(logsJTextArea).threads(4)
+                        models.add(analyzerBuilder.build())
                         logsJTextArea.caret.dot = logsJTextArea.text.length
                     }
-
+                    if (allList.size == 1) saveUmlFileButton.text = "Save UML model"
+                    else saveUmlFileButton.text = "Save UML model pack"
+                    val endTime = System.currentTimeMillis()
+                    val executionTime = (endTime - startTime) / 1000.0
+                    logsJTextArea.append("End analyzing. Execution time: $executionTime sec.\n")
                     modelListContent.addAll(models.stream().map { it.name }.toList())
 
                     Platform.runLater {
@@ -381,8 +393,7 @@ class GitPanel : JPanel() {
                         FXCircleTab.circleSpace.mainListObjects.forEach { it.updateView() }
                     }
                 }
-            }
-            else logsJTextArea.append("Get some repo for analyzing.\n")
+            } else logsJTextArea.append("Get some repo for analyzing.\n")
         }
 
         getUmlFileButton.addActionListener {
@@ -434,7 +445,7 @@ class GitPanel : JPanel() {
         modelControlPanel.add(analyzeButton)
         modelControlPanel.add(saveUmlFileButton)
         modelControlPanel.add(getUmlFileButton)
-        mainJPanel.add(modelControlPanel)
+        this.add(modelControlPanel)
     }
 
     private fun getRepoByUrl(url: String) {
@@ -449,7 +460,9 @@ class GitPanel : JPanel() {
             }
         } else {
             logsJTextArea.append("Cloning: ${url}\n")
-            myRepo = buildModel.createClone(url, projectCache)
+            if (settings.username.equals(""))
+                myRepo = buildModel.createClone(url, projectCache)
+            else myRepo = buildModel.createClone(url, projectCache, settings.username, settings.password)
             logsJTextArea.append("Cloned to ${myRepo!!.path}\n")
             projectComboBox.addItem(repoName)
         }

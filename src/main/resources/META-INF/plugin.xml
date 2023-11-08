@@ -37,6 +37,13 @@
   <change-notes>
     <![CDATA[
       <html>
+        <b>1.3.0</b>
+        <ul>
+          <li>Added current project into project combobox
+          <li>Added threading for analyzing
+          <li>Added git auth
+          <li>Update VFS after branch switching
+        </ul>
         <b>1.2.0</b>
         <ul>
           <li>Added current project into project combobox
