@@ -16,11 +16,9 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.ColoredTreeCellRenderer
-import com.intellij.ui.JBColor
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
-import com.intellij.ui.components.JBTextArea
 import com.intellij.ui.treeStructure.Tree
 import com.intellij.util.PlatformIcons
 import javafx.application.Platform
@@ -99,10 +97,10 @@ class GitPanel : JPanel() {
     }
     private val filesTreeJBScrollPane =
         JBScrollPane(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED)
+    private val currentBranchOrTagLabel = JLabel("Current")
     private val filesTreePane = JPanel().apply {
-        val label = JLabel("Current")
         this.layout = BorderLayout()
-        this.add(label, BorderLayout.NORTH)
+        this.add(currentBranchOrTagLabel, BorderLayout.NORTH)
         this.add(filesTreeJBScrollPane, BorderLayout.CENTER)
     }
     private val showSplitPane = JBSplitter(false, 0.5f).apply {
@@ -115,6 +113,7 @@ class GitPanel : JPanel() {
         this.secondComponent = modelListScrollPane
     this.dividerWidth = 1
     }
+    private var analyzing = false
     private val projectCache = "${System.getProperty("user.dir")}/VCSToolkitCache/"
     private val modelCache = "${System.getProperty("user.dir")}/VCSToolkitCache/Models"
     
@@ -262,6 +261,8 @@ class GitPanel : JPanel() {
             if (isRepo && !(cache.projectPathMap[projectName]!!.isExternal && settings.externalProjectMode == 1)) {
                 populateJBList(branchListModel, buildModel.getBranches(myRepo).filter { it != "HEAD" })
                 populateJBList(tagListModel, buildModel.getTags(myRepo))
+                if (myRepo?.scm?.currentBranchOrTagName != null)
+                    currentBranchOrTagLabel.text = myRepo?.scm?.currentBranchOrTagName
             } else if (cache.projectPathMap[projectName]!!.isExternal && settings.externalProjectMode == 1) {
                 branchListModel.clear()
                 tagListModel.clear()
@@ -329,12 +330,18 @@ class GitPanel : JPanel() {
     private fun mouseClickListenerForGitList(jbList: JBList<String>):MouseAdapter {
         return object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent?) {
-                if (e!!.clickCount == 2) {
+                if (e!!.clickCount == 2 && !analyzing) {
                     val index = jbList.locationToIndex(e.point)
                     if (index >= 0) {
                         val selectedItem = jbList.model.getElementAt(index)
                         onListItemDoubleClicked(selectedItem)
                     }
+                } else if (analyzing) {
+                    val group = NotificationGroupManager.getInstance().getNotificationGroup("VCSToolkitNotify")
+                    val content = "You cannot checkout while the analyzer is running"
+                    val notification: Notification =
+                        group.createNotification("Checkout freeze", content, NotificationType.WARNING)
+                    Notifications.Bus.notify(notification, null);
                 }
             }
         }
@@ -342,13 +349,18 @@ class GitPanel : JPanel() {
 
     private fun onListItemDoubleClicked(item: String) {
         println("Double clicked on item: $item")
+        checkoutTo(item)
+    }
+
+    private fun checkoutTo(item:String) {
         val fileSystem = LocalFileSystem.getInstance()
         val virtualFile: VirtualFile? = fileSystem.findFileByPath(myRepo!!.path)
         val virtualFileGit: VirtualFile? = fileSystem.findFileByPath("${myRepo!!.path}/.git}")
         if (settings.externalProjectMode == 2)
             myRepo?.scm?.createCommit("VCSToolkit: save message")
         buildModel.checkout(myRepo, item)
-        cache.versionLabel = item
+        if (myRepo?.scm?.currentBranchOrTagName != null)
+            currentBranchOrTagLabel.text = myRepo?.scm?.currentBranchOrTagName
         if (settings.externalProjectMode == 2)
             myRepo?.scm?.resetLastCommitsWithMessage("VCSToolkit: save message")
         virtualFile?.refresh(false, true)
@@ -378,24 +390,26 @@ class GitPanel : JPanel() {
         analyzeButton.addActionListener {
             if (myRepo != null) {
                 thread {
+                    analyzing = true
                     val startTime = System.currentTimeMillis()
                     val allList = branchList.selectedValuesList + tagList.selectedValuesList
                     models.clear()
                     modelListContent.clear()
                     logsJTextArea.append("Start analyzing.\n")
                     for (i in allList) {
-                        buildModel.checkout(myRepo, i)
                         logsJTextArea.append("\t*modeling: $i\n")
+                        logsJTextArea.caret.dot = logsJTextArea.text.length
+                        checkoutTo(i)
                         val analyzerBuilder = AnalyzerBuilder(Language.Java, i, myRepo!!.path)
                             .textArea(logsJTextArea).threads(4)
                         models.add(analyzerBuilder.build())
-                        logsJTextArea.caret.dot = logsJTextArea.text.length
                     }
                     if (allList.size == 1) saveUmlFileButton.text = "Save UML model"
                     else saveUmlFileButton.text = "Save UML model pack"
                     val endTime = System.currentTimeMillis()
                     val executionTime = (endTime - startTime) / 1000.0
                     logsJTextArea.append("End analyzing. Execution time: $executionTime sec.\n")
+                    analyzing = false
                     modelListContent.addAll(models.stream().map { it.name }.toList())
 
                     Platform.runLater {
