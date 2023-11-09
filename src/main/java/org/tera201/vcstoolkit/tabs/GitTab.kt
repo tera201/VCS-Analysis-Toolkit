@@ -264,6 +264,15 @@ class GitPanel : JPanel() {
                 if (myRepo?.scm?.currentBranchOrTagName != null)
                     currentBranchOrTagLabel.text = myRepo?.scm?.currentBranchOrTagName
             } else if (cache.projectPathMap[projectName]!!.isExternal && settings.externalProjectMode == 1) {
+                val isRepo = File("$projectPath/.git").exists()
+                val splitPath = projectPath.split("/")
+                val lastDirectory = splitPath[splitPath.size - 1]
+                var name = lastDirectory
+                if (isRepo) {
+                    myRepo = buildModel.getRepository(projectPath)
+                    name = myRepo!!.scm.currentBranchOrTagName
+                }
+                currentBranchOrTagLabel.text = name
                 branchListModel.clear()
                 tagListModel.clear()
                 externalWarningNotification()
@@ -390,6 +399,7 @@ class GitPanel : JPanel() {
         analyzeButton.addActionListener {
             if (myRepo != null) {
                 thread {
+                    val projectPath = cache.projectPathMap[cache.lastProject]?.path
                     analyzing = true
                     val startTime = System.currentTimeMillis()
                     val allList = branchList.selectedValuesList + tagList.selectedValuesList
@@ -406,6 +416,13 @@ class GitPanel : JPanel() {
                     }
                     if (allList.size == 1) saveUmlFileButton.text = "Save UML model"
                     else saveUmlFileButton.text = "Save UML model pack"
+                    if (allList.isEmpty() && projectPath != null) {
+                        saveUmlFileButton.text = "Save UML model"
+                        logsJTextArea.append("\t*modeling: ${currentBranchOrTagLabel.text}\n")
+                        val analyzerBuilder = AnalyzerBuilder(Language.Java, currentBranchOrTagLabel.text, projectPath)
+                            .textArea(logsJTextArea).threads(4)
+                        models.add(analyzerBuilder.build())
+                    }
                     val endTime = System.currentTimeMillis()
                     val executionTime = (endTime - startTime) / 1000.0
                     logsJTextArea.append("End analyzing. Execution time: $executionTime sec.\n")

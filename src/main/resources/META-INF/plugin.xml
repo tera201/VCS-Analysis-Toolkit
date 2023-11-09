@@ -45,6 +45,7 @@
           <li>fix checkout for the analyzer
           <li>block checkout while the analyzer is running
           <li>Added labels for git panel
+          <li>Analyzing without choosing tag or branch
         </ul>
         <b>1.2.0</b>
         <ul>
