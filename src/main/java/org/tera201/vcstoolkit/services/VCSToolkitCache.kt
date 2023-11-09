@@ -14,7 +14,6 @@ class VCSToolkitCache : PersistentStateComponent<VCSToolkitCache> {
     var urlField: String = "https://github.com/arnohaase/a-foundation.git"
     var lastProject: String = ""
     var projectPathMap: MutableMap<String, ProjectPath> = hashMapOf()
-    var versionLabel: String = ""
 
 
     companion object {
