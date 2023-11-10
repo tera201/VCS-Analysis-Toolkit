@@ -13,6 +13,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.ColoredTreeCellRenderer
@@ -114,8 +115,6 @@ class GitPanel : JPanel() {
     this.dividerWidth = 1
     }
     private var analyzing = false
-    private val projectCache = "${System.getProperty("user.dir")}/VCSToolkitCache/"
-    private val modelCache = "${System.getProperty("user.dir")}/VCSToolkitCache/Models"
     
     init {
         initGit()
@@ -124,8 +123,8 @@ class GitPanel : JPanel() {
     private fun initGit() {
 
         try {
-            File(projectCache).mkdirs()
-            File(modelCache).mkdirs()
+            File(settings.repoPath).mkdirs()
+            File(settings.modelPath).mkdirs()
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -186,7 +185,7 @@ class GitPanel : JPanel() {
     }
 
     private fun addProjectPane() {
-        cache.projectPathMap["Current project"] = ProjectPath(true, ProjectManager.getInstance().openProjects[0].basePath.toString(), "$projectCache/${ProjectManager.getInstance().openProjects[0].name}")
+        cache.projectPathMap["Current project"] = ProjectPath(true, ProjectManager.getInstance().openProjects[0].basePath.toString(), "${settings.repoPath}/${ProjectManager.getInstance().openProjects[0].name}")
 
         if (cache.projectPathMap.isNotEmpty()) {
             cache.projectPathMap.keys.forEach {
@@ -198,8 +197,8 @@ class GitPanel : JPanel() {
             }
         }
 
-        File(projectCache).list { dir, name -> File(dir, name).isDirectory.and(name != "Models") }?.forEach {
-            val path = "$projectCache/$it"
+        File(settings.repoPath).list { dir, name -> File(dir, name).isDirectory.and(name != "Models") }?.forEach {
+            val path = "${settings.repoPath}/$it"
             if ((0 until projectComboBox.model.size).none { i -> projectComboBox.model.getElementAt(i) == it }) {
                 cache.projectPathMap[it] = ProjectPath(false, path, path)
                 projectComboBox.addItem(it)
@@ -228,12 +227,12 @@ class GitPanel : JPanel() {
 
         openProjectButton.addActionListener {
             val descriptor = FileChooserDescriptor(false, true, false, false, false, false)
-            val toSelect = if (projectCache.isEmpty()) null else LocalFileSystem.getInstance()
-                .findFileByPath(projectCache)
+            val toSelect = if (settings.repoPath.isEmpty()) null else LocalFileSystem.getInstance()
+                .findFileByPath(settings.repoPath)
             val selectedDirectory = FileChooser.chooseFile(descriptor, null, toSelect)
             if (selectedDirectory != null) {
                 val newProjectName = selectedDirectory.name
-                val copyPath = "$projectCache/${selectedDirectory.name}"
+                val copyPath = "${settings.repoPath}/${selectedDirectory.name}"
                 cache.projectPathMap[newProjectName] = ProjectPath(true, selectedDirectory.path, copyPath)
                 projectComboBox.addItem(newProjectName)
                 projectComboBox.selectedItem = newProjectName
@@ -449,8 +448,8 @@ class GitPanel : JPanel() {
                 false, false, false, false
             );
             descriptor.setTitle("Get UML-Model");
-            val toSelect = if (modelCache.isEmpty()) null else LocalFileSystem.getInstance()
-                .findFileByPath(modelCache)
+            val toSelect = if (settings.modelPath.isNotEmpty()) null else LocalFileSystem.getInstance()
+                .findFileByPath(settings.modelPath)
             val virtualFile = FileChooser.chooseFile(descriptor, null, toSelect)
 
             if (virtualFile != null) {
@@ -478,10 +477,12 @@ class GitPanel : JPanel() {
                 title, "Choose the destination file",
                 ".json"
             );
-            val toSelect = if (modelCache.isEmpty()) null else LocalFileSystem.getInstance()
-                .findFileByPath(modelCache)
+            val toSelect = if (settings.modelPath.isNotEmpty()) null else LocalFileSystem.getInstance()
+                .findFileByPath(settings.modelPath)
             val fileSaverDialog = FileChooserFactory.getInstance().createSaveFileDialog(descriptor, null)
-            val virtualFileWrapper = fileSaverDialog.save(toSelect, "$modelCache/${cache.lastProject}Model$fileNameExt.json")
+            val fileName = if(SystemInfo.isMac) "${cache.lastProject}Model$fileNameExt.json"
+            else "${cache.lastProject}Model$fileNameExt"
+            val virtualFileWrapper = fileSaverDialog.save(toSelect, fileName)
             if (virtualFileWrapper != null) {
                 val fileToSave = virtualFileWrapper.file
                 logsJTextArea.append("Save as file: ${fileToSave.absolutePath}\n")
@@ -497,19 +498,19 @@ class GitPanel : JPanel() {
 
     private fun getRepoByUrl(url: String) {
         val repoName = buildModel.getRepoNameByUrl(url)
-        val directoryPath = "$projectCache/$repoName"
+        val directoryPath = "${settings.repoPath}/$repoName"
         val directory = File(directoryPath)
         if (directory.exists() && directory.isDirectory) {
             logsJTextArea.append("Already exist!\n")
-            myRepo = buildModel.getRepository(url, projectCache)
+            myRepo = buildModel.getRepository(url, settings.repoPath)
             if ((0 until projectComboBox.model.size).none { i -> projectComboBox.model.getElementAt(i) == repoName }) {
                 projectComboBox.addItem(repoName)
             }
         } else {
             logsJTextArea.append("Cloning: ${url}\n")
             if (settings.username.equals(""))
-                myRepo = buildModel.createClone(url, projectCache)
-            else myRepo = buildModel.createClone(url, projectCache, settings.username, settings.password)
+                myRepo = buildModel.createClone(url, settings.repoPath)
+            else myRepo = buildModel.createClone(url, settings.repoPath, settings.username, settings.password)
             logsJTextArea.append("Cloned to ${myRepo!!.path}\n")
             projectComboBox.addItem(repoName)
         }
