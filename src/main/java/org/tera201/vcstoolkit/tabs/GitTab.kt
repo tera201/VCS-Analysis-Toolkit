@@ -459,7 +459,7 @@ class GitPanel : JPanel() {
                 false, false, false, false
             );
             descriptor.setTitle("Get UML-Model");
-            val toSelect = if (settings.modelPath.isNotEmpty()) null else LocalFileSystem.getInstance()
+            val toSelect = if (settings.modelPath.isEmpty()) null else LocalFileSystem.getInstance()
                 .findFileByPath(settings.modelPath)
             val virtualFile = FileChooser.chooseFile(descriptor, null, toSelect)
 
@@ -492,7 +492,7 @@ class GitPanel : JPanel() {
                 title, "Choose the destination file",
                 "json"
             );
-            val toSelect = if (settings.modelPath.isNotEmpty()) null else LocalFileSystem.getInstance()
+            val toSelect = if (settings.modelPath.isEmpty()) null else LocalFileSystem.getInstance()
                 .findFileByPath(settings.modelPath)
             val fileSaverDialog = FileChooserFactory.getInstance().createSaveFileDialog(descriptor, null)
             val fileName = if(SystemInfo.isMac) "${cache.lastProject}Model$fileNameExt.json"
