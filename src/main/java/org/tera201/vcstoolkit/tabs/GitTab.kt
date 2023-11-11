@@ -490,7 +490,7 @@ class GitPanel : JPanel() {
             val fileNameExt = if (models.size == 1) "" else "Pack"
             val descriptor = FileSaverDescriptor(
                 title, "Choose the destination file",
-                ".json"
+                "json"
             );
             val toSelect = if (settings.modelPath.isNotEmpty()) null else LocalFileSystem.getInstance()
                 .findFileByPath(settings.modelPath)
