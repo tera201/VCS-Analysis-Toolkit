@@ -115,6 +115,7 @@ class GitPanel : JPanel() {
     this.dividerWidth = 1
     }
     private var analyzing = false
+    private val notificationGroup = NotificationGroupManager.getInstance().getNotificationGroup("VCSToolkitNotify")
     
     init {
         initGit()
@@ -216,11 +217,7 @@ class GitPanel : JPanel() {
                 projectComboBox.removeItem(selectedProject)
                 cache.projectPathMap.remove(selectedProject)
                 projectComboBox.selectedItem = cache.lastProject
-                val group = NotificationGroupManager.getInstance().getNotificationGroup("VCSToolkitNotify")
-                val content = "The project with the specified path was not found."
-                val notification: Notification =
-                    group.createNotification("Open error", content, NotificationType.ERROR)
-                Notifications.Bus.notify(notification, null);
+                createNotification("Oops", "The project with the specified path was not found.", NotificationType.ERROR)
             }
             cache.lastProject = selectedProject
         }
@@ -243,12 +240,20 @@ class GitPanel : JPanel() {
         this.add(openProjectButton)
     }
 
-    private fun externalWarningNotification() {
-        val group = NotificationGroupManager.getInstance().getNotificationGroup("VCSToolkitNotify")
-        val content = "VCS for external projects was disabled. Please use the built-in VCS in the IDE manually."
+    private fun createNotification(title:String, message:String, notificationType: NotificationType) {
         val notification: Notification =
-            group.createNotification("VCS warning", content, NotificationType.WARNING)
-        Notifications.Bus.notify(notification, null);
+            notificationGroup.createNotification("VCSToolkit - $title", message, notificationType)
+        Notifications.Bus.notify(notification, null)
+    }
+
+    private fun createExceptionNotification(e:Exception) {
+        val content = "message: ${e.message}\nstackTrace: ${e.stackTrace.joinToString("\n")}"
+        createNotification(e.javaClass.simpleName, content, NotificationType.ERROR)
+    }
+
+    private fun externalWarningNotification() {
+        createNotification("warning", "VCS for external projects was disabled. " +
+                "Please use the built-in VCS in the IDE manually.", NotificationType.WARNING)
     }
 
     private fun updatePathPanelAndGitLists(projectName: String, projectPath: String) {
@@ -267,11 +272,7 @@ class GitPanel : JPanel() {
                 tagListModel.clear()
                 externalWarningNotification()
             } else {
-                val group = NotificationGroupManager.getInstance().getNotificationGroup("VCSToolkitNotify")
-                val content = "The project doesn't have git repo."
-                val notification: Notification =
-                    group.createNotification("Opps", content, NotificationType.WARNING)
-                Notifications.Bus.notify(notification, null);
+                createNotification("Opps", "The project doesn't have git repo.", NotificationType.WARNING)
                 currentBranchOrTagLabel.text = getProjectNameOrCurrentBranchOrTag(projectPath, isRepo)
                 branchListModel.clear()
                 tagListModel.clear()
@@ -348,11 +349,8 @@ class GitPanel : JPanel() {
                         onListItemDoubleClicked(selectedItem)
                     }
                 } else if (analyzing) {
-                    val group = NotificationGroupManager.getInstance().getNotificationGroup("VCSToolkitNotify")
-                    val content = "You cannot checkout while the analyzer is running"
-                    val notification: Notification =
-                        group.createNotification("Checkout freeze", content, NotificationType.WARNING)
-                    Notifications.Bus.notify(notification, null);
+                    createNotification("Checkout freeze",
+                        "You cannot checkout while the analyzer is running", NotificationType.WARNING)
                 }
             }
         }
@@ -367,13 +365,17 @@ class GitPanel : JPanel() {
         val fileSystem = LocalFileSystem.getInstance()
         val virtualFile: VirtualFile? = fileSystem.findFileByPath(myRepo!!.path)
         val virtualFileGit: VirtualFile? = fileSystem.findFileByPath("${myRepo!!.path}/.git}")
-        if (settings.externalProjectMode == 2)
-            myRepo?.scm?.createCommit("VCSToolkit: save message")
-        buildModel.checkout(myRepo, item)
-        if (myRepo?.scm?.currentBranchOrTagName != null)
-            currentBranchOrTagLabel.text = myRepo?.scm?.currentBranchOrTagName
-        if (settings.externalProjectMode == 2)
-            myRepo?.scm?.resetLastCommitsWithMessage("VCSToolkit: save message")
+        try {
+            if (settings.externalProjectMode == 2)
+                myRepo?.scm?.createCommit("VCSToolkit: save message")
+            buildModel.checkout(myRepo, item)
+            if (myRepo?.scm?.currentBranchOrTagName != null)
+                currentBranchOrTagLabel.text = myRepo?.scm?.currentBranchOrTagName
+            if (settings.externalProjectMode == 2)
+                myRepo?.scm?.resetLastCommitsWithMessage("VCSToolkit: save message")
+        } catch (e:Exception) {
+            createExceptionNotification(e)
+        }
         virtualFile?.refresh(false, true)
         virtualFileGit?.refresh(false, true)
         updatePathPanel()
@@ -412,18 +414,27 @@ class GitPanel : JPanel() {
                         logsJTextArea.append("\t*modeling: $i\n")
                         logsJTextArea.caret.dot = logsJTextArea.text.length
                         checkoutTo(i)
-                        val analyzerBuilder = AnalyzerBuilder(Language.Java, i, myRepo!!.path)
-                            .textArea(logsJTextArea).threads(4)
-                        models.add(analyzerBuilder.build())
+                        try {
+                            val analyzerBuilder = AnalyzerBuilder(Language.Java, i, myRepo!!.path)
+                                .textArea(logsJTextArea).threads(4)
+                            models.add(analyzerBuilder.build())
+                        } catch (e:Exception) {
+                            createExceptionNotification(e)
+                        }
                     }
                     if (allList.size == 1) saveUmlFileButton.text = "Save UML model"
                     else saveUmlFileButton.text = "Save UML model pack"
                     if (allList.isEmpty() && projectPath != null) {
                         saveUmlFileButton.text = "Save UML model"
                         logsJTextArea.append("\t*modeling: ${currentBranchOrTagLabel.text}\n")
-                        val analyzerBuilder = AnalyzerBuilder(Language.Java, currentBranchOrTagLabel.text, projectPath)
-                            .textArea(logsJTextArea).threads(4)
-                        models.add(analyzerBuilder.build())
+                        try {
+                            val analyzerBuilder =
+                                AnalyzerBuilder(Language.Java, currentBranchOrTagLabel.text, projectPath)
+                                    .textArea(logsJTextArea).threads(4)
+                            models.add(analyzerBuilder.build())
+                        } catch (e:Exception) {
+                            createExceptionNotification(e)
+                        }
                     }
                     val endTime = System.currentTimeMillis()
                     val executionTime = (endTime - startTime) / 1000.0
@@ -454,9 +465,10 @@ class GitPanel : JPanel() {
 
             if (virtualFile != null) {
                 logsJTextArea.append("Get model from file: ${virtualFile.path}\n")
-                val modelList = handler.loadListModelFromFile(virtualFile.path)
-                if (modelList != null)
-                    models = modelList as ArrayList<Model>
+                try {
+                    val modelList = handler.loadListModelFromFile(virtualFile.path)
+                    if (modelList != null)
+                        models = modelList as ArrayList<Model>
                     modelListContent.clear()
                     modelListContent.addAll(models.stream().map { it.name }.toList())
 
@@ -467,6 +479,9 @@ class GitPanel : JPanel() {
                         }
                         FXCircleTab.circleSpace.mainListObjects.forEach { it.updateView() }
                     }
+                } catch (e: Exception) {
+                    createExceptionNotification(e)
+                }
             }
         }
 //
@@ -486,7 +501,11 @@ class GitPanel : JPanel() {
             if (virtualFileWrapper != null) {
                 val fileToSave = virtualFileWrapper.file
                 logsJTextArea.append("Save as file: ${fileToSave.absolutePath}\n")
-                handler.saveModelToFile(models, fileToSave.absolutePath)
+                try {
+                    handler.saveModelToFile(models, fileToSave.absolutePath)
+                } catch (e: Exception) {
+                    createExceptionNotification(e)
+                }
             }
         }
 
@@ -500,19 +519,23 @@ class GitPanel : JPanel() {
         val repoName = buildModel.getRepoNameByUrl(url)
         val directoryPath = "${settings.repoPath}/$repoName"
         val directory = File(directoryPath)
-        if (directory.exists() && directory.isDirectory) {
-            logsJTextArea.append("Already exist!\n")
-            myRepo = buildModel.getRepository(url, settings.repoPath)
-            if ((0 until projectComboBox.model.size).none { i -> projectComboBox.model.getElementAt(i) == repoName }) {
+        try {
+            if (directory.exists() && directory.isDirectory) {
+                logsJTextArea.append("Already exist!\n")
+                myRepo = buildModel.getRepository(url, settings.repoPath)
+                if ((0 until projectComboBox.model.size).none { i -> projectComboBox.model.getElementAt(i) == repoName }) {
+                    projectComboBox.addItem(repoName)
+                }
+            } else {
+                logsJTextArea.append("Cloning: ${url}\n")
+                if (settings.username.equals(""))
+                    myRepo = buildModel.createClone(url, settings.repoPath)
+                else myRepo = buildModel.createClone(url, settings.repoPath, settings.username, settings.password)
+                logsJTextArea.append("Cloned to ${myRepo!!.path}\n")
                 projectComboBox.addItem(repoName)
             }
-        } else {
-            logsJTextArea.append("Cloning: ${url}\n")
-            if (settings.username.equals(""))
-                myRepo = buildModel.createClone(url, settings.repoPath)
-            else myRepo = buildModel.createClone(url, settings.repoPath, settings.username, settings.password)
-            logsJTextArea.append("Cloned to ${myRepo!!.path}\n")
-            projectComboBox.addItem(repoName)
+        } catch (e: Exception) {
+            createExceptionNotification(e)
         }
         cache.projectPathMap[repoName] = ProjectPath(false, directoryPath, directoryPath)
         projectComboBox.selectedItem = repoName
