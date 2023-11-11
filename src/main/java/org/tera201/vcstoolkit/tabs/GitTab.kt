@@ -443,11 +443,15 @@ class GitPanel : JPanel() {
                     modelListContent.addAll(models.stream().map { it.name }.toList())
 
                     Platform.runLater {
-                        FXCircleTab.circleSpace.clean()
-                        for (i in 0 until models.size) {
-                            models[i].toCircle(i)
+                        try {
+                            FXCircleTab.circleSpace.clean()
+                            for (i in 0 until models.size) {
+                                models[i].toCircle(i)
+                            }
+                            FXCircleTab.circleSpace.mainListObjects.forEach { it.updateView() }
+                        } catch (e:Exception) {
+                            createExceptionNotification(e)
                         }
-                        FXCircleTab.circleSpace.mainListObjects.forEach { it.updateView() }
                     }
                 }
             } else logsJTextArea.append("Get some repo for analyzing.\n")
@@ -473,11 +477,15 @@ class GitPanel : JPanel() {
                     modelListContent.addAll(models.stream().map { it.name }.toList())
 
                     Platform.runLater {
-                        FXCircleTab.circleSpace.clean()
-                        for (i in 0 until models.size) {
-                            models[i].toCircle(i)
+                        try {
+                            FXCircleTab.circleSpace.clean()
+                            for (i in 0 until models.size) {
+                                models[i].toCircle(i)
+                            }
+                            FXCircleTab.circleSpace.mainListObjects.forEach { it.updateView() }
+                        } catch (e:Exception) {
+                            createExceptionNotification(e)
                         }
-                        FXCircleTab.circleSpace.mainListObjects.forEach { it.updateView() }
                     }
                 } catch (e: Exception) {
                     createExceptionNotification(e)
