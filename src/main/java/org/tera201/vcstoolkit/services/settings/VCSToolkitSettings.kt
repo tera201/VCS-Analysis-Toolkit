@@ -18,6 +18,8 @@ class VCSToolkitSettings : PersistentStateComponent<VCSToolkitSettings> {
     var password: String = ""
     var showGitLogs:Boolean = true
     var externalProjectMode:Int = 0
+    var circleScrollSpeed:Int = 5
+    var cityScrollSpeed:Int = 5
 
 
     companion object {
