@@ -51,11 +51,14 @@ class FXCityPanel : JFXPanel() {
         mainSubScene.widthProperty().bind(stackPane.widthProperty())
 
         mainSubScene.scrollSpeed = settings.circleScrollSpeed
+        mainSubScene.isDynamicScrollSpeed = settings.cityDynamicScrollSpeed
+
         ApplicationManager.getApplication().messageBus.connect()
             .subscribe(VCSToolkitSettings.SettingsChangedListener.TOPIC, object :
                 VCSToolkitSettings.SettingsChangedListener {
                 override fun onSettingsChange(settings: VCSToolkitSettings) {
                     mainSubScene.scrollSpeed = settings.circleScrollSpeed
+                    mainSubScene.isDynamicScrollSpeed = settings.cityDynamicScrollSpeed
                 }
             })
 

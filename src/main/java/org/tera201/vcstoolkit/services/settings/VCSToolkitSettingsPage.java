@@ -12,6 +12,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.Hashtable;
 
 public class VCSToolkitSettingsPage implements Configurable {
@@ -34,6 +36,8 @@ public class VCSToolkitSettingsPage implements Configurable {
     private JLabel circlePaneLable;
     private JLabel scrollSpeedLable;
     private JSlider cityScrollSpeedSlider;
+    private JCheckBox circleDynamicSpeedCheckBox;
+    private JCheckBox cityDynamicSpeedCheckBox;
 
     public VCSToolkitSettingsPage() {
 
@@ -56,7 +60,12 @@ public class VCSToolkitSettingsPage implements Configurable {
             scrollSpeedSliderLabels.put(i, new JLabel(String.valueOf(i)));
         }
         circleScrollSpeedSlider.setLabelTable(scrollSpeedSliderLabels);
+        circleDynamicSpeedCheckBox.addItemListener(e -> circleScrollSpeedSlider.setEnabled(e.getStateChange() != ItemEvent.SELECTED));
+        circleScrollSpeedSlider.setEnabled(!circleDynamicSpeedCheckBox.isSelected());
+
         cityScrollSpeedSlider.setLabelTable(scrollSpeedSliderLabels);
+        cityDynamicSpeedCheckBox.addItemListener(e -> cityScrollSpeedSlider.setEnabled(e.getStateChange() != ItemEvent.SELECTED));
+        cityScrollSpeedSlider.setEnabled(!cityDynamicSpeedCheckBox.isSelected());
     }
 
     private void browseFolder(@NotNull final JTextField target) {
@@ -98,7 +107,9 @@ public class VCSToolkitSettingsPage implements Configurable {
                 !usernameField.getText().equals(settings.getUsername()) ||
                 !String.valueOf(passwordField.getPassword()).equals(settings.getPassword()) ||
                 circleScrollSpeedSlider.getValue() != settings.getCircleScrollSpeed() ||
-                cityScrollSpeedSlider.getValue() != settings.getCityScrollSpeed();
+                cityScrollSpeedSlider.getValue() != settings.getCityScrollSpeed() ||
+                cityDynamicSpeedCheckBox.isSelected() != settings.getCityDynamicScrollSpeed() ||
+                circleDynamicSpeedCheckBox.isSelected() != settings.getCircleDynamicScrollSpeed();
     }
 
     @Override
@@ -125,6 +136,8 @@ public class VCSToolkitSettingsPage implements Configurable {
         settings.setPassword(String.valueOf(passwordField.getPassword()));
         settings.setCircleScrollSpeed(circleScrollSpeedSlider.getValue());
         settings.setCityScrollSpeed(cityScrollSpeedSlider.getValue());
+        settings.setCircleDynamicScrollSpeed(circleDynamicSpeedCheckBox.isSelected());
+        settings.setCityDynamicScrollSpeed(cityDynamicSpeedCheckBox.isSelected());
     }
 
     private void getSettings(VCSToolkitSettings settings) {
@@ -136,6 +149,8 @@ public class VCSToolkitSettingsPage implements Configurable {
         passwordField.setText(settings.getPassword());
         circleScrollSpeedSlider.setValue(settings.getCircleScrollSpeed());
         cityScrollSpeedSlider.setValue(settings.getCityScrollSpeed());
+        circleDynamicSpeedCheckBox.setSelected(settings.getCircleDynamicScrollSpeed());
+        cityDynamicSpeedCheckBox.setSelected(settings.getCityDynamicScrollSpeed());
     }
 
 }

@@ -63,6 +63,7 @@ class FXCircleTab : JFXPanel() {
                 VCSToolkitSettings.SettingsChangedListener {
                 override fun onSettingsChange(settings: VCSToolkitSettings) {
                     mainSubScene.scrollSpeed = settings.circleScrollSpeed
+                    mainSubScene.isDynamicScrollSpeed = settings.circleDynamicScrollSpeed
                 }
             })
 

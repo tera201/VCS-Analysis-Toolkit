@@ -19,7 +19,9 @@ class VCSToolkitSettings : PersistentStateComponent<VCSToolkitSettings> {
     var showGitLogs:Boolean = true
     var externalProjectMode:Int = 0
     var circleScrollSpeed:Int = 5
+    var circleDynamicScrollSpeed:Boolean = false;
     var cityScrollSpeed:Int = 5
+    var cityDynamicScrollSpeed:Boolean = false;
 
 
     companion object {
