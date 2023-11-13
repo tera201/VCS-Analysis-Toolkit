@@ -14,8 +14,14 @@ class VCSToolkitSettings : PersistentStateComponent<VCSToolkitSettings> {
     var repoPath:String =  "${System.getProperty("user.dir")}/VCSToolkitCache"
 
     var modelPath:String = "${System.getProperty("user.dir")}/VCSToolkitCache/Models"
+    var username: String = ""
+    var password: String = ""
     var showGitLogs:Boolean = true
     var externalProjectMode:Int = 0
+    var circleScrollSpeed:Int = 5
+    var circleDynamicScrollSpeed:Boolean = false;
+    var cityScrollSpeed:Int = 5
+    var cityDynamicScrollSpeed:Boolean = false;
 
 
     companion object {

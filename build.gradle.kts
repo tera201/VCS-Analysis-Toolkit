@@ -1,12 +1,12 @@
 plugins {
     id("java")
-    id("org.jetbrains.intellij") version "1.15.0"
+    id("org.jetbrains.intellij") version "1.16.0"
     id("org.jetbrains.kotlin.jvm") version "1.8.10"
     id("org.openjfx.javafxplugin") version "0.0.14"
 }
 
 group = "org.tera201"
-version = "1.2.0-SNAPSHOT"
+version = "1.3.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -25,9 +25,9 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.10")
     implementation(fileTree(mapOf("dir" to "lib", "include" to listOf("*.jar"))))
     implementation("org.tera201:javafx-uml-graph:0.0.1-SNAPSHOT")
-    implementation("org.tera201:code-to-uml:0.0.2-SNAPSHOT")
-    implementation("org.tera201:swrminer:0.0.2-SNAPSHOT")
-    implementation("org.tera201:javafx-code-modeling-tool:1.0.0-SNAPSHOT")
+    implementation("org.tera201:code-to-uml:0.1.0-SNAPSHOT")
+    implementation("org.tera201:swrminer:0.2.0-SNAPSHOT")
+    implementation("org.tera201:javafx-code-modeling-tool:1.2.0-SNAPSHOT")
 }
 
 javafx {
@@ -70,6 +70,6 @@ tasks {
         kotlinOptions.apiVersion = "1.8"
     }
     patchPluginXml {
-        sinceBuild.set("203.*")
+        sinceBuild.set("221.*")
     }
 }
