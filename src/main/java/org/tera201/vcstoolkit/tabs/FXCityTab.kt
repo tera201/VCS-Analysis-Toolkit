@@ -34,7 +34,7 @@ class FXCityTab : JPanel() {
                 if (model != null) {
                         fxCity.citySpace.clean()
                         model!!.toCity(fxCity.citySpace)
-                        fxCity.citySpace.mainObject.updateView()
+                        fxCity.citySpace.updateView()
                     }
                 }
             }
