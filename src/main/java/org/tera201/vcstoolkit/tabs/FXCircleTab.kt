@@ -58,6 +58,8 @@ class FXCircleTab : JFXPanel() {
         mainSubScene.widthProperty().bind(stackPane.widthProperty())
 
         mainSubScene.scrollSpeed = settings.circleScrollSpeed
+        mainSubScene.isDynamicScrollSpeed = settings.circleDynamicScrollSpeed
+
         ApplicationManager.getApplication().messageBus.connect()
             .subscribe(VCSToolkitSettings.SettingsChangedListener.TOPIC, object :
                 VCSToolkitSettings.SettingsChangedListener {
