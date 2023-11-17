@@ -2,6 +2,7 @@ package org.tera201.vcstoolkit.tabs
 
 import com.intellij.openapi.ui.ComboBox
 import javafx.application.Platform
+import javafx.embed.swing.JFXPanel
 import org.eclipse.uml2.uml.Model
 import org.tera201.vcstoolkit.panels.FXCityPanel
 import org.tera201.vcstoolkit.utils.toCity
@@ -11,7 +12,7 @@ import javax.swing.JPanel
 import kotlin.jvm.optionals.getOrNull
 
 
-class FXCityTab : JPanel() {
+class FXCityTab : JPanel(), FXTab {
     private val modelComboBox = ComboBox(GitPanel.modelListContent)
     private var model: Model? = null
     private val topPanel = JPanel()
@@ -39,5 +40,9 @@ class FXCityTab : JPanel() {
                 }
             }
         }
+    }
+
+    override fun setJFXPanel(panel:JFXPanel) {
+        this.add(panel, BorderLayout.CENTER)
     }
 }

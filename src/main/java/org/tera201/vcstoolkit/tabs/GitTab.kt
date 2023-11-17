@@ -22,7 +22,6 @@ import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.treeStructure.Tree
 import com.intellij.util.PlatformIcons
-import javafx.application.Platform
 import model.console.BuildModel
 import org.eclipse.uml2.uml.Model
 import org.repodriller.scm.SCMRepository
@@ -33,7 +32,6 @@ import org.tera201.vcstoolkit.helpers.ProjectPath
 import org.tera201.vcstoolkit.helpers.SharedModel
 import org.tera201.vcstoolkit.services.VCSToolkitCache
 import org.tera201.vcstoolkit.services.settings.VCSToolkitSettings
-import org.tera201.vcstoolkit.utils.toCircle
 import java.awt.*
 import java.awt.event.*
 import java.io.File
@@ -43,7 +41,7 @@ import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeModel
 import kotlin.concurrent.thread
 
-class GitPanel : JPanel() {
+class GitPanel(val fxCircleTab: FXCircleTab) : JPanel() {
     private var settings: VCSToolkitSettings = VCSToolkitSettings.getInstance()
     private var cache: VCSToolkitCache = VCSToolkitCache.getInstance()
     private var myRepo: SCMRepository? = null
@@ -441,18 +439,11 @@ class GitPanel : JPanel() {
                     logsJTextArea.append("End analyzing. Execution time: $executionTime sec.\n")
                     analyzing = false
                     modelListContent.addAll(models.stream().map { it.name }.toList())
-
-                    Platform.runLater {
                         try {
-                            FXCircleTab.circleSpace.clean()
-                            for (i in 0 until models.size) {
-                                models[i].toCircle(i)
-                            }
-                            FXCircleTab.circleSpace.updateView()
+                            fxCircleTab.renderByModel(models)
                         } catch (e:Exception) {
                             createExceptionNotification(e)
                         }
-                    }
                 }
             } else logsJTextArea.append("Get some repo for analyzing.\n")
         }
@@ -476,17 +467,7 @@ class GitPanel : JPanel() {
                     modelListContent.clear()
                     modelListContent.addAll(models.stream().map { it.name }.toList())
 
-                    Platform.runLater {
-                        try {
-                            FXCircleTab.circleSpace.clean()
-                            for (i in 0 until models.size) {
-                                models[i].toCircle(i)
-                            }
-                            FXCircleTab.circleSpace.updateView()
-                        } catch (e:Exception) {
-                            createExceptionNotification(e)
-                        }
-                    }
+                    fxCircleTab.renderByModel(models)
                 } catch (e: Exception) {
                     createExceptionNotification(e)
                 }
