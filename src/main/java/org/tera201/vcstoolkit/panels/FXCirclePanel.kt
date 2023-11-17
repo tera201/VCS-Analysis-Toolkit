@@ -16,11 +16,10 @@ import org.tera201.elements.circle.PackageCircle
 import org.tera201.vcstoolkit.services.settings.VCSToolkitSettings
 
 
-class FXCirlePanel : JFXPanel() {
+class FXCirclePanel : JFXPanel() {
     private val SCENE_WIDTH = 800.0
     private val SCENE_HEIGHT = 600.0
     private var settings: VCSToolkitSettings = VCSToolkitSettings.getInstance()
-    private lateinit var scene2: Scene
     var circleSpace = FXSpace<HollowCylinder>()
 
     init {

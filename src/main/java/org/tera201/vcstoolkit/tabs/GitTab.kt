@@ -11,7 +11,6 @@ import com.intellij.openapi.fileChooser.FileChooserFactory
 import com.intellij.openapi.fileChooser.FileSaverDescriptor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileTypes.FileTypeManager
-import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.vfs.LocalFileSystem
@@ -41,9 +40,9 @@ import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeModel
 import kotlin.concurrent.thread
 
-class GitPanel(val fxCircleTab: FXCircleTab) : JPanel() {
+class GitPanel(val tabManager: TabManager, val modelListContent:SharedModel) : JPanel() {
     private var settings: VCSToolkitSettings = VCSToolkitSettings.getInstance()
-    private var cache: VCSToolkitCache = VCSToolkitCache.getInstance()
+    private var cache: VCSToolkitCache = VCSToolkitCache.getInstance(tabManager.getCurrentProject())
     private var myRepo: SCMRepository? = null
     private val getButton = JButton("Get")
     private val urlField = JTextField()
@@ -60,10 +59,7 @@ class GitPanel(val fxCircleTab: FXCircleTab) : JPanel() {
         JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
         JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
     )
-    companion object {
-        var models = ArrayList<Model>()
-        val modelListContent = SharedModel()
-    }
+    private var models = ArrayList<Model>()
     private val handler = UMLModelHandler()
     private var isClearingSelection = false
     private val branchListModel = DefaultListModel<String>()
@@ -117,6 +113,11 @@ class GitPanel(val fxCircleTab: FXCircleTab) : JPanel() {
     
     init {
         initGit()
+    }
+
+
+    fun getModelList():ArrayList<Model> {
+        return models
     }
 
     private fun initGit() {
@@ -184,7 +185,9 @@ class GitPanel(val fxCircleTab: FXCircleTab) : JPanel() {
     }
 
     private fun addProjectPane() {
-        cache.projectPathMap["Current project"] = ProjectPath(true, ProjectManager.getInstance().openProjects[0].basePath.toString(), "${settings.repoPath}/${ProjectManager.getInstance().openProjects[0].name}")
+        println(tabManager.project.basePath.toString())
+        println(tabManager.project.name)
+        cache.projectPathMap["Current project"] = ProjectPath(true, tabManager.project.basePath.toString(), "${settings.repoPath}/${tabManager.project.name}")
 
         if (cache.projectPathMap.isNotEmpty()) {
             cache.projectPathMap.keys.forEach {
@@ -440,7 +443,7 @@ class GitPanel(val fxCircleTab: FXCircleTab) : JPanel() {
                     analyzing = false
                     modelListContent.addAll(models.stream().map { it.name }.toList())
                         try {
-                            fxCircleTab.renderByModel(models)
+                            (tabManager.getTabMap()[TabEnum.CIRCLE] as FXCircleTab).renderByModel(models)
                         } catch (e:Exception) {
                             createExceptionNotification(e)
                         }
@@ -466,8 +469,7 @@ class GitPanel(val fxCircleTab: FXCircleTab) : JPanel() {
                         models = modelList as ArrayList<Model>
                     modelListContent.clear()
                     modelListContent.addAll(models.stream().map { it.name }.toList())
-
-                    fxCircleTab.renderByModel(models)
+                    (tabManager.getTabMap()[TabEnum.CIRCLE] as FXCircleTab).renderByModel(models)
                 } catch (e: Exception) {
                     createExceptionNotification(e)
                 }
@@ -586,14 +588,13 @@ class GitPanel(val fxCircleTab: FXCircleTab) : JPanel() {
             }
         })
     }
-}
 
-private fun onTreeNodeDoubleClicked(node: DefaultMutableTreeNode?) {
-    val filePath = node?.userObject.toString()
-    val virtualFile = LocalFileSystem.getInstance().findFileByPath(filePath)
-    if (virtualFile != null) {
-        // TODO: should be current project (not first)
-        ProjectManager.getInstance().openProjects.firstOrNull()
-            ?.let { FileEditorManager.getInstance(it).openFile(virtualFile, true) }
+    private fun onTreeNodeDoubleClicked(node: DefaultMutableTreeNode?) {
+        val filePath = node?.userObject.toString()
+        val virtualFile = LocalFileSystem.getInstance().findFileByPath(filePath)
+        if (virtualFile != null) {
+            // TODO: should be current project (not first)
+            FileEditorManager.getInstance(tabManager.getCurrentProject()).openFile(virtualFile, true)
+        }
     }
 }

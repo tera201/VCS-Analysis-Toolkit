@@ -4,6 +4,7 @@ import com.intellij.openapi.ui.ComboBox
 import javafx.application.Platform
 import javafx.embed.swing.JFXPanel
 import org.eclipse.uml2.uml.Model
+import org.tera201.vcstoolkit.helpers.SharedModel
 import org.tera201.vcstoolkit.panels.FXCityPanel
 import org.tera201.vcstoolkit.utils.toCity
 import java.awt.BorderLayout
@@ -12,8 +13,8 @@ import javax.swing.JPanel
 import kotlin.jvm.optionals.getOrNull
 
 
-class FXCityTab : JPanel(), FXTab {
-    private val modelComboBox = ComboBox(GitPanel.modelListContent)
+class FXCityTab(val tabManager: TabManager, val modelListContent:SharedModel) : JPanel(), FXTab {
+    private val modelComboBox = ComboBox(modelListContent)
     private var model: Model? = null
     private val topPanel = JPanel()
 
@@ -30,7 +31,7 @@ class FXCityTab : JPanel(), FXTab {
         modelComboBox.addActionListener {
             if (modelComboBox.selectedItem != null) {
                 val selectedModelName = modelComboBox.selectedItem as String
-                model = GitPanel.models.stream().filter { it.name == selectedModelName }.findAny().getOrNull()
+                model = (tabManager.getTabMap()[TabEnum.GIT] as GitPanel).getModelList().stream().filter { it.name == selectedModelName }.findAny().getOrNull()
                 Platform.runLater {
                 if (model != null) {
                         fxCity.citySpace.clean()

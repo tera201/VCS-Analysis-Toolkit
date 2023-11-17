@@ -34,14 +34,8 @@ class VCSToolWindowFactoryKt : ToolWindowFactory {
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         val contentFactory = ContentFactory.getInstance()
         SwingUtilities.invokeLater {
-            val jtp = JBTabbedPane()
-            val circleTab = FXCircleTab()
-            jtp.autoscrolls = true
-            jtp.add(TabEnum.GRAPH.value, FXGraphTab())
-            jtp.add(TabEnum.CITY.value, FXCityTab())
-            jtp.add(TabEnum.CIRCLE.value,  circleTab)
-            jtp.add(TabEnum.GIT.value, GitPanel(circleTab))
-            jtp.preferredSize = Dimension(500, 400)
+            val tabManager = TabManager(project)
+            val jtp = tabManager.getJBTabbedPane()
 
             val fullScreenAction = FullScreenAction(jtp)
             val showSettingsAction = ShowSettingsAction()
