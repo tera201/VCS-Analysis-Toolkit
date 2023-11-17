@@ -7,15 +7,11 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
-import com.intellij.ui.components.JBTabbedPane
 import com.intellij.ui.content.ContentFactory
-import io.ktor.util.*
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import org.tera201.vcstoolkit.action.FullScreenAction
-import org.tera201.vcstoolkit.action.ShowSettingsAction
+import org.tera201.vcstoolkit.action.ActionManager
 import org.tera201.vcstoolkit.tabs.*
-import java.awt.Dimension
 import javax.swing.SwingUtilities
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
@@ -36,20 +32,18 @@ class VCSToolWindowFactoryKt : ToolWindowFactory {
         SwingUtilities.invokeLater {
             val tabManager = TabManager(project)
             val jtp = tabManager.getJBTabbedPane()
-
-            val fullScreenAction = FullScreenAction(jtp)
-            val showSettingsAction = ShowSettingsAction()
-
-            val listButtonsFx = listOf(fullScreenAction, showSettingsAction)
-            val listButtons = listOf(showSettingsAction)
+            val actionManager = ActionManager(jtp, toolWindow)
 
             jtp.addChangeListener(object : ChangeListener {
                 override fun stateChanged(e: ChangeEvent?) {
                     val selectedTab = jtp.getTitleAt(jtp.selectedIndex)
-                    if (selectedTab == TabEnum.CITY.value || selectedTab == TabEnum.CIRCLE.value)
-                        toolWindow.setTitleActions(listButtonsFx)
+                    if ((selectedTab == TabEnum.CITY.value || selectedTab == TabEnum.CIRCLE.value) &&
+                        actionManager.openedFxTabs[selectedTab] == null)
+                        actionManager.setToolBarWithExpand()
+                    else if (actionManager.openedFxTabs[selectedTab] != null)
+                        actionManager.setToolBarWithCollapse()
                     else
-                        toolWindow.setTitleActions(listButtons)
+                        actionManager.setDefaultToolBar()
                 }
 
             })
@@ -58,11 +52,11 @@ class VCSToolWindowFactoryKt : ToolWindowFactory {
                 .subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, object : FileEditorManagerListener {
                     override fun fileClosed(source: FileEditorManager, file: VirtualFile) {
                         if (file.extension == null && (file.name == TabEnum.CITY.value || file.name == TabEnum.CIRCLE.value)) {
-                            val fullScreenTabInfo = fullScreenAction.openedFxTabs[file.name]
+                            val fullScreenTabInfo = actionManager.openedFxTabs[file.name]
                         if (fullScreenTabInfo != null) {
                                 val fxTab = jtp.getComponentAt(fullScreenTabInfo.index) as FXTab
                                 fxTab.setJFXPanel(fullScreenTabInfo.jfxPanel)
-                                fullScreenAction.openedFxTabs.remove(file.name)
+                                actionManager.openedFxTabs.remove(file.name)
                             }
                         }
                     }
