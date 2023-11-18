@@ -402,8 +402,8 @@ class GitPanel(val tabManager: TabManager, val modelListContent:SharedModel) : J
     private fun addModelControlPanel() {
         val modelControlPanel = JPanel()
         analyzeButton.addActionListener {
-            if (myRepo != null) {
-                thread {
+            thread {
+                if (myRepo != null) {
                     val projectPath = cache.projectPathMap[cache.lastProject]?.path
                     analyzing = true
                     val startTime = System.currentTimeMillis()
@@ -447,8 +447,33 @@ class GitPanel(val tabManager: TabManager, val modelListContent:SharedModel) : J
                         } catch (e:Exception) {
                             createExceptionNotification(e)
                         }
-                }
-            } else logsJTextArea.append("Get some repo for analyzing.\n")
+                } else if (cache.projectPathMap[cache.lastProject] != null) {
+                    val projectPath = cache.projectPathMap[cache.lastProject]?.path
+                    if (projectPath != null) {
+                        analyzing = true
+                        val startTime = System.currentTimeMillis()
+                        models.clear()
+                        modelListContent.clear()
+                        logsJTextArea.append("Start analyzing.\n")
+                        saveUmlFileButton.text = "Save UML model"
+                        logsJTextArea.append("\t*modeling: ${currentBranchOrTagLabel.text}\n")
+                        try {
+                            val analyzerBuilder =
+                                AnalyzerBuilder(Language.Java, currentBranchOrTagLabel.text, projectPath)
+                                    .textArea(logsJTextArea).threads(4)
+                            models.add(analyzerBuilder.build())
+                        } catch (e:Exception) {
+                            createExceptionNotification(e)
+                        }
+
+                        val endTime = System.currentTimeMillis()
+                        val executionTime = (endTime - startTime) / 1000.0
+                        logsJTextArea.append("End analyzing. Execution time: $executionTime sec.\n")
+                        analyzing = false
+                        modelListContent.addAll(models.stream().map { it.name }.toList())
+                    }
+                } else logsJTextArea.append("Get some repo or project for analyzing.\n")
+            }
         }
 
         getUmlFileButton.addActionListener {
@@ -552,7 +577,6 @@ class GitPanel(val tabManager: TabManager, val modelListContent:SharedModel) : J
             rootTree.add(node)
         }
     }
-
 
     private fun setupTree() {
         pathJTree.cellRenderer = object : ColoredTreeCellRenderer() {
