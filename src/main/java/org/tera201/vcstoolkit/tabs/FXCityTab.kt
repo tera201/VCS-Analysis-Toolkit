@@ -46,4 +46,12 @@ class FXCityTab(private val tabManager: TabManager, modelListContent:SharedModel
     override fun setJFXPanel(panel:JFXPanel) {
         this.add(panel, BorderLayout.CENTER)
     }
+
+    override fun setExpandMode() {
+        TODO("Not yet implemented")
+    }
+
+    override fun setCollapseMode() {
+        TODO("Not yet implemented")
+    }
 }
