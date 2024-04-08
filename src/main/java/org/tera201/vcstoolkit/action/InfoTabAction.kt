@@ -7,10 +7,12 @@ import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.util.containers.stream
 import javafx.embed.swing.JFXPanel
 import org.tera201.vcstoolkit.helpers.FullScreenTabInfo
+import org.tera201.vcstoolkit.info.InfoPage
 import java.util.function.Supplier
 import javax.swing.JComponent
+import javax.swing.JPanel
 
-class ExpandTabAction(private val actionManager: ActionManager) : DumbAwareAction(Supplier {"Expand tab"}, AllIcons.General.ExpandComponentHover) {
+class InfoTabAction(private val actionManager: ActionManager) : DumbAwareAction(Supplier {"Open stat"}, AllIcons.General.Information) {
     override fun actionPerformed(event: AnActionEvent) {
         val selectedIndex = actionManager.jtp.selectedIndex
         val selectedTabTitle = actionManager.jtp.getTitleAt(selectedIndex)
@@ -18,11 +20,12 @@ class ExpandTabAction(private val actionManager: ActionManager) : DumbAwareActio
 
         event.project?.let {
             val jfxPanel = (content as JComponent).components.stream().filter { it is JFXPanel }.findAny().get() as JFXPanel
+            val infoPanel = InfoPage()
             val editor = JComponentEditorProvider.openEditor(
-                it, selectedTabTitle,
-                jfxPanel as JComponent
+                it, selectedTabTitle+"Info",
+                infoPanel.component
             )
-            actionManager.openedFxTabs.set(selectedTabTitle, FullScreenTabInfo(selectedIndex, jfxPanel, editor[0].file))
+            actionManager.openedFxTabs.set(selectedTabTitle+"Info", FullScreenTabInfo(selectedIndex, JFXPanel(), editor[0].file))
             actionManager.setToolBarWithCollapse()
         }
     }
