@@ -43,7 +43,7 @@ import kotlin.concurrent.thread
 class GitTab(private val tabManager: TabManager, val modelListContent:SharedModel) : JPanel() {
     private var settings: VCSToolkitSettings = VCSToolkitSettings.getInstance()
     private var cache: VCSToolkitCache = VCSToolkitCache.getInstance(tabManager.getCurrentProject())
-    private var myRepo: SCMRepository? = null
+    var myRepo: SCMRepository? = null
     private val getButton = JButton("Get")
     private val urlField = JTextField()
     private val analyzeButton = JButton("Analyze")

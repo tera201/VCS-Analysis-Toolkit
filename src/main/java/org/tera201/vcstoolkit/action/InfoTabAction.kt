@@ -8,19 +8,20 @@ import com.intellij.util.containers.stream
 import javafx.embed.swing.JFXPanel
 import org.tera201.vcstoolkit.helpers.FullScreenTabInfo
 import org.tera201.vcstoolkit.info.InfoPage
+import org.tera201.vcstoolkit.tabs.TabManager
 import java.util.function.Supplier
 import javax.swing.JComponent
 import javax.swing.JPanel
 
-class InfoTabAction(private val actionManager: ActionManager) : DumbAwareAction(Supplier {"Open stat"}, AllIcons.General.Information) {
+class InfoTabAction(private val actionManager: ActionManager, private val tabManager: TabManager) : DumbAwareAction(Supplier {"Open stat"}, AllIcons.General.Information) {
     override fun actionPerformed(event: AnActionEvent) {
         val selectedIndex = actionManager.jtp.selectedIndex
         val selectedTabTitle = actionManager.jtp.getTitleAt(selectedIndex)
         val content = actionManager.jtp.selectedComponent
 
         event.project?.let {
-            val jfxPanel = (content as JComponent).components.stream().filter { it is JFXPanel }.findAny().get() as JFXPanel
-            val infoPanel = InfoPage()
+//            val jfxPanel = (content as JComponent).components.stream().filter { it is JFXPanel }.findAny().get() as JFXPanel
+            val infoPanel = InfoPage(tabManager)
             val editor = JComponentEditorProvider.openEditor(
                 it, selectedTabTitle+"Info",
                 infoPanel.component
