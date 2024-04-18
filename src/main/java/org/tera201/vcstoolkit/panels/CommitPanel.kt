@@ -95,8 +95,6 @@ class CommitPanel internal constructor(private var year: Int) : JPanel() {
             date = date.plusWeeks(1)
         }
 
-        weeksPerMonths.forEach { println(it) }
-
         gbc.gridx = 1
         gbc.gridwidth = weeksPerMonths[0]
         months.forEachIndexed { index, month ->

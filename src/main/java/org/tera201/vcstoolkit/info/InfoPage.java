@@ -101,13 +101,8 @@ public class InfoPage {
         splitter.setFirstComponent(commitPanels.get(Integer.parseInt(yearList.getSelectedValue())));
         splitter.setSecondComponent(listScrollPane);
 
-//        splitPane.setLeftComponent(commitPanels.get(Integer.parseInt(yearList.getSelectedValue())));
-//        splitPane.setRightComponent(listScrollPane);
-//        SwingUtilities.invokeLater(() -> splitPane.setDividerLocation(0.9));
-
         yearList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-//                    splitPane.setLeftComponent(commitPanels.get(Integer.parseInt(yearList.getSelectedValue())));
                     splitter.setFirstComponent(commitPanels.get(Integer.parseInt(yearList.getSelectedValue())));
             }
         });
@@ -154,8 +149,9 @@ public class InfoPage {
 
             DateCalculator dcal = new DateCalculator(date, dateEnd);
             long diff = dcal.getDifferenceDays();
+            long valuesCount = categoryDataset.getColumnKeys().size();
 
-            double d = Math.ceil((diff / 10f));
+            double d = Math.ceil((valuesCount / 20f));
             lineChart.setLegendRenderer(new ChartLegendRenderer() {
                 @Override
                 public Component getLegendComponent(Object legend, int index) {
@@ -170,7 +166,7 @@ public class InfoPage {
             System.err.println(e);
         }
 
-        lineChart.setValuesFormat(new DecimalFormat("byte #,##0.##"));
+        lineChart.setValuesFormat(new DecimalFormat("#,##0.## B"));
 
         lineChart.setCategoryDataset(categoryDataset);
         lineChart.getChartColor().addColor(Color.decode("#38bdf8"), Color.decode("#fb7185"), Color.decode("#34d399"));
