@@ -12,14 +12,15 @@ import org.tera201.vcstoolkit.tabs.GitTab;
 import org.tera201.vcstoolkit.tabs.TabEnum;
 import org.tera201.vcstoolkit.tabs.TabManager;
 import org.tera201.vcstoolkit.utils.DateCalculator;
-import raven.chart.ChartLegendRenderer;
-import raven.chart.data.category.DefaultCategoryDataset;
-import raven.chart.data.pie.DefaultPieDataset;
-import raven.chart.line.LineChart;
-import raven.chart.pie.PieChart;
+import org.tera201.chart.ChartLegendRenderer;
+import org.tera201.chart.data.category.DefaultCategoryDataset;
+import org.tera201.chart.data.pie.DefaultPieDataset;
+import org.tera201.chart.line.LineChart;
+import org.tera201.chart.pie.PieChart;
 
 import javax.swing.*;
 import java.awt.*;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -141,7 +142,7 @@ public class InfoPage {
         )).values().stream().sorted(Comparator.comparingInt(CommitSize::getDate)).forEach(commitSize -> {
             Date date = new Date((long) commitSize.getDate() * 1000);
             String formattedDate = df.format(date);
-            categoryDataset.addValue(commitSize.getProjectSize(), "Project", formattedDate);
+            categoryDataset.addValue(commitSize.getProjectSize(), "Project ", formattedDate);
         });
 
         /**
@@ -168,6 +169,8 @@ public class InfoPage {
         } catch (ParseException e) {
             System.err.println(e);
         }
+
+        lineChart.setValuesFormat(new DecimalFormat("byte #,##0.##"));
 
         lineChart.setCategoryDataset(categoryDataset);
         lineChart.getChartColor().addColor(Color.decode("#38bdf8"), Color.decode("#fb7185"), Color.decode("#34d399"));
