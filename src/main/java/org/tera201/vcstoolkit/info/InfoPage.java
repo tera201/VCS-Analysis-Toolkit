@@ -45,16 +45,23 @@ public class InfoPage {
         GitTab gitTab = (GitTab) tabManager.getTabMap().get(TabEnum.GIT);
         Map<String, CommitSize> commitSizeMap = gitTab.getMyRepo().getScm().repositorySize();
         BlameManager blameManager  = gitTab.getMyRepo().getScm().blameManager();
+        intPieChart(blameManager);
+        initCalendarPane(commitSizeMap);
+        initLineChart(commitSizeMap);
+    }
+
+    private void updateLabels(BlameManager blameManager) {
 //        authorLabel.setText(blameManager.getRootPackageInfo().);
         rowsLabel.setText(String.valueOf(blameManager.getRootPackageInfo().getLineCount()));
         sizeLabel.setText(String.valueOf(blameManager.getRootPackageInfo().getLineSize()));
         revisionLabel.setText(blameManager.getRootPackageInfo().findLatestCommit().name());
+    }
 
+    private void intPieChart(BlameManager blameManager) {
         chartPanel.putClientProperty(FlatClientProperties.STYLE, ""
-                        + "border:5,5,5,5;"
-                        + "background:null");
+                + "border:5,5,5,5;"
+                + "background:null");
         chartPanel.setLayout(new MigLayout("wrap,fill,gap 10", "fill"));
-
         PieChart pieChart1 = new PieChart();
         JLabel header1 = new JLabel("Authors impact");
         header1.putClientProperty(FlatClientProperties.STYLE, ""
@@ -65,12 +72,18 @@ public class InfoPage {
                 + "border:5,5,5,5,$Component.borderColor,,20");
         pieChart1.setDataset(createPieData(blameManager));
         chartPanel.add(pieChart1, "split 3,height 290");
+    }
 
-        JSplitPane splitPane = new JSplitPane();
-        JBSplitter splitter = new JBSplitter(false, 0.95f);
-        splitter.setDividerWidth(1);
+    private void initLineChart(Map<String, CommitSize> commitSizeMap) {
+        lineChart = new LineChart();
+        lineChart.setChartType(LineChart.ChartType.CURVE);
+        lineChart.putClientProperty(FlatClientProperties.STYLE, ""
+                + "border:5,5,5,5,$Component.borderColor,,20");
+        linechartScrollPane.setViewportView(lineChart);
+        createLineChartData(commitSizeMap.values());
+    }
 
-        splitPane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
+    private void initCalendarPane(Map<String, CommitSize> commitSizeMap) {
         Map<Integer, CommitPanel> commitPanels = new HashMap<>();
 
         DefaultListModel<String> listModel = new DefaultListModel<>();
@@ -96,6 +109,11 @@ public class InfoPage {
         });
         yearList.setSelectedIndex(0);
 
+        JBSplitter splitter = new JBSplitter(false, 0.95f);
+        splitter.setDividerWidth(1);
+
+
+
         JScrollPane listScrollPane = new JBScrollPane(yearList);
 
         splitter.setFirstComponent(commitPanels.get(Integer.parseInt(yearList.getSelectedValue())));
@@ -103,20 +121,11 @@ public class InfoPage {
 
         yearList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-                    splitter.setFirstComponent(commitPanels.get(Integer.parseInt(yearList.getSelectedValue())));
+                splitter.setFirstComponent(commitPanels.get(Integer.parseInt(yearList.getSelectedValue())));
             }
         });
 
-
         commitScrollPanel.setViewportView(splitter);
-
-
-        lineChart = new LineChart();
-        lineChart.setChartType(LineChart.ChartType.CURVE);
-        lineChart.putClientProperty(FlatClientProperties.STYLE, ""
-                + "border:5,5,5,5,$Component.borderColor,,20");
-        linechartScrollPane.setViewportView(lineChart);
-        createLineChartData(commitSizeMap.values());
     }
 
     private DefaultPieDataset createPieData(BlameManager blameManager) {
