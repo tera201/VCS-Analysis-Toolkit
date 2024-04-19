@@ -12,11 +12,11 @@ import org.tera201.vcstoolkit.tabs.GitTab;
 import org.tera201.vcstoolkit.tabs.TabEnum;
 import org.tera201.vcstoolkit.tabs.TabManager;
 import org.tera201.vcstoolkit.utils.DateCalculator;
-import org.tera201.chart.ChartLegendRenderer;
-import org.tera201.chart.data.category.DefaultCategoryDataset;
-import org.tera201.chart.data.pie.DefaultPieDataset;
-import org.tera201.chart.line.LineChart;
-import org.tera201.chart.pie.PieChart;
+import org.tera201.swing.chart.ChartLegendRenderer;
+import org.tera201.swing.chart.data.category.DefaultCategoryDataset;
+import org.tera201.swing.chart.data.pie.DefaultPieDataset;
+import org.tera201.swing.chart.line.LineChart;
+import org.tera201.swing.chart.pie.PieChart;
 
 import javax.swing.*;
 import java.awt.*;
