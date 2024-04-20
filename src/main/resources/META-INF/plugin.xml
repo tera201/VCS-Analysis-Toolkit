@@ -38,6 +38,10 @@
     <![CDATA[
       <html>
         <b>1.4.0</b>
+          <li> Added support for 2024.1
+          <li> Added bar chart
+          <li> Added commit calendar
+          <li> Added line chart
           <li> Added info button for stat
           <li> Added template for stat
           <li> Fixed text of tip

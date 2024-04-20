@@ -9,6 +9,7 @@ import org.tera201.vcstoolkit.helpers.FullScreenTabInfo
 import org.tera201.vcstoolkit.info.InfoPage
 import org.tera201.vcstoolkit.tabs.TabManager
 import java.util.function.Supplier
+import kotlin.concurrent.thread
 
 class InfoTabAction(private val actionManager: ActionManager, private val tabManager: TabManager) : DumbAwareAction(Supplier {"Open stat"}, AllIcons.General.Information) {
     override fun actionPerformed(event: AnActionEvent) {
@@ -20,6 +21,7 @@ class InfoTabAction(private val actionManager: ActionManager, private val tabMan
 //            val jfxPanel = (content as JComponent).components.stream().filter { it is JFXPanel }.findAny().get() as JFXPanel
             val infoPanel = InfoPage(tabManager)
             val editor = JComponentEditorProviderUtils.openEditor(it, selectedTabTitle+"Info", infoPanel.component)
+            thread { infoPanel.open() }
             actionManager.openedFxTabs.set(selectedTabTitle+"Info", FullScreenTabInfo(selectedIndex, JFXPanel(), editor[0].file))
             actionManager.setToolBarWithCollapse()
         }

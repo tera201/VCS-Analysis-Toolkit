@@ -7,6 +7,7 @@ import com.intellij.ui.components.JBScrollPane;
 import net.miginfocom.swing.MigLayout;
 import org.repodriller.scm.BlameManager;
 import org.repodriller.scm.CommitSize;
+import org.tera201.swing.spinner.SpinnerProgress;
 import org.tera201.vcstoolkit.panels.CommitPanel;
 import org.tera201.vcstoolkit.tabs.GitTab;
 import org.tera201.vcstoolkit.tabs.TabEnum;
@@ -37,21 +38,44 @@ public class InfoPage {
     private JLabel rowsLabel;
     private JLabel sizeLabel;
     private JLabel revisionLabel;
+    private JPanel labelPane;
+    private JPanel SpinnerPanel;
+    private SpinnerProgress spinner;
     LineChart lineChart = new LineChart();
     private TabManager tabManager;
 
     public InfoPage(TabManager tabManager) {
         this.tabManager = tabManager;
+        initSpinner();
+    }
+
+    public void open() throws InterruptedException {
         GitTab gitTab = (GitTab) tabManager.getTabMap().get(TabEnum.GIT);
         Map<String, CommitSize> commitSizeMap = gitTab.getMyRepo().getScm().repositorySize();
         BlameManager blameManager  = gitTab.getMyRepo().getScm().blameManager();
+
+        spinner.setIndeterminate(false);
+        Thread.sleep(500);
+        labelPane.setVisible(true);
+        updateLabels(blameManager);
+        Thread.sleep(500);
         intPieChart(blameManager);
+        Thread.sleep(500);
         initCalendarPane(commitSizeMap);
+        Thread.sleep(500);
         initLineChart(commitSizeMap);
     }
 
+    private void initSpinner() {
+        SpinnerPanel = new JPanel(new MigLayout("fill, insets 0, align center center", "[center]"));
+        spinner = new SpinnerProgress(100, 10);
+        SpinnerPanel.add(spinner);
+        spinner.setIndeterminate(true);
+        linechartScrollPane.setViewportView(SpinnerPanel);
+        labelPane.setVisible(false);
+    }
+
     private void updateLabels(BlameManager blameManager) {
-//        authorLabel.setText(blameManager.getRootPackageInfo().);
         rowsLabel.setText(String.valueOf(blameManager.getRootPackageInfo().getLineCount()));
         sizeLabel.setText(String.valueOf(blameManager.getRootPackageInfo().getLineSize()));
         revisionLabel.setText(blameManager.getRootPackageInfo().findLatestCommit().name());
@@ -72,6 +96,7 @@ public class InfoPage {
                 + "border:5,5,5,5,$Component.borderColor,,20");
         pieChart1.setDataset(createPieData(blameManager));
         chartPanel.add(pieChart1, "split 3,height 290");
+        pieChart1.startAnimation();
     }
 
     private void initLineChart(Map<String, CommitSize> commitSizeMap) {
@@ -81,6 +106,7 @@ public class InfoPage {
                 + "border:5,5,5,5,$Component.borderColor,,20");
         linechartScrollPane.setViewportView(lineChart);
         createLineChartData(commitSizeMap.values());
+        lineChart.startAnimation();
     }
 
     private void initCalendarPane(Map<String, CommitSize> commitSizeMap) {
@@ -186,7 +212,7 @@ public class InfoPage {
         lineChart.setHeader(header);
     }
 
-    public JComponent getComponent() {
+    public JPanel getComponent() {
         return panel1;
     }
 }
