@@ -35,7 +35,7 @@ dependencies {
 
 javafx {
     version = "20"
-    modules("javafx.controls")
+    modules = listOf("javafx.controls", "javafx.fxml", "javafx.graphics", "javafx.swing", "javafx.web", "javafx.media", "javafx.base")
 }
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
