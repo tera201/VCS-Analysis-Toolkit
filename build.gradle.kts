@@ -26,7 +26,7 @@ dependencies {
     implementation(fileTree(mapOf("dir" to "lib", "include" to listOf("*.jar"))))
     implementation("org.tera201:javafx-uml-graph:0.0.1-SNAPSHOT")
     implementation("org.tera201:code-to-uml:0.1.0-SNAPSHOT")
-    implementation("org.tera201:swrminer:0.3.0-SNAPSHOT")
+    implementation("org.tera201:swrminer:0.3.1-SNAPSHOT")
     implementation("org.tera201:javafx-code-modeling-tool:1.2.1-SNAPSHOT")
     implementation("org.tera201:swing-components:1.1-SNAPSHOT")
     implementation("com.formdev:flatlaf:3.4.1")

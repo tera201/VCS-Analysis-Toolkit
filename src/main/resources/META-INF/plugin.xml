@@ -37,7 +37,10 @@
   <change-notes>
     <![CDATA[
       <html>
+        <b>1.4.1</b>
+        </ul>
         <b>1.4.0</b>
+          <li> Added loading spinner for info page
           <li> Added support for 2024.1
           <li> Added bar chart
           <li> Added commit calendar

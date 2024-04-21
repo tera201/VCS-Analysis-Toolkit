@@ -5,8 +5,10 @@ import com.intellij.ui.JBSplitter;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
 import net.miginfocom.swing.MigLayout;
-import org.repodriller.scm.BlameManager;
-import org.repodriller.scm.CommitSize;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.repodriller.scm.entities.BlameManager;
+import org.repodriller.scm.entities.CommitSize;
+import org.repodriller.scm.entities.DeveloperInfo;
 import org.tera201.swing.spinner.SpinnerProgress;
 import org.tera201.vcstoolkit.panels.CommitPanel;
 import org.tera201.vcstoolkit.tabs.GitTab;
@@ -20,7 +22,11 @@ import org.tera201.swing.chart.line.LineChart;
 import org.tera201.swing.chart.pie.PieChart;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -36,8 +42,10 @@ public class InfoPage {
     private JLabel authorLabel;
     private JLabel curAuthorLabel;
     private JLabel rowsLabel;
-    private JLabel sizeLabel;
+    private JLabel rowSizeLabel;
     private JLabel revisionLabel;
+    private JPanel mainInfoPane;
+    private JLabel sizeLabel;
     private JPanel labelPane;
     private JPanel SpinnerPanel;
     private SpinnerProgress spinner;
@@ -49,17 +57,27 @@ public class InfoPage {
         initSpinner();
     }
 
-    public void open() throws InterruptedException {
+    private int getPaddingInPixels(float padding) {
+        Toolkit toolkit = Toolkit.getDefaultToolkit();
+        int dpi = toolkit.getScreenResolution();
+        double cmToInch = 0.393701;
+        return  (int)(dpi * cmToInch * padding);
+    }
+
+    public void open() throws InterruptedException, GitAPIException, IOException {
         GitTab gitTab = (GitTab) tabManager.getTabMap().get(TabEnum.GIT);
-        Map<String, CommitSize> commitSizeMap = gitTab.getMyRepo().getScm().repositorySize();
+        Map<String, CommitSize> commitSizeMap = gitTab.getMyRepo().getScm().currentRepositorySize();
         BlameManager blameManager  = gitTab.getMyRepo().getScm().blameManager();
+        Map<String, DeveloperInfo> developerInfoMap = gitTab.getMyRepo().getScm().getDeveloperInfo();
+//        Map<String, DeveloperInfo> developerInfoMap2 = gitTab.getMyRepo().getScm().getDeveloperInfo("a-foundation-benchmark");
+
 
         spinner.setIndeterminate(false);
         Thread.sleep(500);
-        labelPane.setVisible(true);
+        mainInfoPane.setVisible(true);
         updateLabels(blameManager);
         Thread.sleep(500);
-        intPieChart(blameManager);
+        intPieChart(blameManager, developerInfoMap);
         Thread.sleep(500);
         initCalendarPane(commitSizeMap);
         Thread.sleep(500);
@@ -72,16 +90,30 @@ public class InfoPage {
         SpinnerPanel.add(spinner);
         spinner.setIndeterminate(true);
         linechartScrollPane.setViewportView(SpinnerPanel);
-        labelPane.setVisible(false);
+        mainInfoPane.setVisible(false);
     }
 
     private void updateLabels(BlameManager blameManager) {
         rowsLabel.setText(String.valueOf(blameManager.getRootPackageInfo().getLineCount()));
-        sizeLabel.setText(String.valueOf(blameManager.getRootPackageInfo().getLineSize()));
-        revisionLabel.setText(blameManager.getRootPackageInfo().findLatestCommit().name());
+        rowSizeLabel.setText(String.valueOf(blameManager.getRootPackageInfo().getLineSize()));
+        setShortTextForLabel(revisionLabel, blameManager.getRootPackageInfo().findLatestCommit().name(), 6);
+        labelPane.setBorder(new EmptyBorder( getPaddingInPixels(0.5f), getPaddingInPixels(0.5f), 0, 0));
     }
 
-    private void intPieChart(BlameManager blameManager) {
+    private void setShortTextForLabel(JLabel label, String text, int width) {
+        String shortenedText = text.substring(0, width) + "...";
+        label.setText(shortenedText);
+        label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        label.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                label.setText(label.getText().equals(text) ? shortenedText : text);
+            }
+        });
+
+    }
+
+    private void intPieChart(BlameManager blameManager, Map<String, DeveloperInfo> developerInfoMap) {
         chartPanel.putClientProperty(FlatClientProperties.STYLE, ""
                 + "border:5,5,5,5;"
                 + "background:null");
@@ -94,8 +126,8 @@ public class InfoPage {
         pieChart1.getChartColor().addColor(Color.decode("#f87171"), Color.decode("#fb923c"), Color.decode("#fbbf24"), Color.decode("#a3e635"), Color.decode("#34d399"), Color.decode("#22d3ee"), Color.decode("#818cf8"), Color.decode("#c084fc"));
         pieChart1.putClientProperty(FlatClientProperties.STYLE, ""
                 + "border:5,5,5,5,$Component.borderColor,,20");
-        pieChart1.setDataset(createPieData(blameManager));
-        chartPanel.add(pieChart1, "split 3,height 290");
+        pieChart1.setDataset(createPieData(developerInfoMap));
+        chartPanel.add(pieChart1, "split 5,height 360");
         pieChart1.startAnimation();
     }
 
@@ -157,6 +189,12 @@ public class InfoPage {
     private DefaultPieDataset createPieData(BlameManager blameManager) {
         DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
         blameManager.getRootPackageInfo().getAuthorInfo().forEach((s, blameAuthorInfo) -> {dataset.addValue(s, blameAuthorInfo.getLineCount());});
+        return dataset;
+    }
+
+    private DefaultPieDataset createPieData(Map<String, DeveloperInfo> developerInfoMap) {
+        DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
+        developerInfoMap.values().forEach(developerInfo -> dataset.addValue(developerInfo.getName(), developerInfo.getChanges()));
         return dataset;
     }
 
