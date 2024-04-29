@@ -348,7 +348,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
         }
     }
 
-    private fun checkoutTo(item:String) {
+    public fun checkoutTo(item:String) {
         val fileSystem = LocalFileSystem.getInstance()
         val virtualFile: VirtualFile? = fileSystem.findFileByPath(myRepo!!.path)
         val virtualFileGit: VirtualFile? = fileSystem.findFileByPath("${myRepo!!.path}/.git}")

@@ -11,9 +11,7 @@ import org.repodriller.scm.entities.CommitSize;
 import org.repodriller.scm.entities.DeveloperInfo;
 import org.tera201.swing.spinner.SpinnerProgress;
 import org.tera201.vcstoolkit.panels.CommitPanel;
-import org.tera201.vcstoolkit.tabs.GitTab;
-import org.tera201.vcstoolkit.tabs.TabEnum;
-import org.tera201.vcstoolkit.tabs.TabManager;
+import org.tera201.vcstoolkit.tabs.*;
 import org.tera201.vcstoolkit.utils.DateCalculator;
 import org.tera201.swing.chart.ChartLegendRenderer;
 import org.tera201.swing.chart.data.category.DefaultCategoryDataset;
@@ -50,10 +48,11 @@ public class InfoPage {
     private JPanel SpinnerPanel;
     private SpinnerProgress spinner;
     LineChart lineChart = new LineChart();
-    private TabManager tabManager;
+    private final TabManager tabManager;
 
     public InfoPage(TabManager tabManager) {
         this.tabManager = tabManager;
+        System.out.println(InfoPageUtilsKt.getPathByTab(tabManager));
         initSpinner();
     }
 
@@ -66,18 +65,18 @@ public class InfoPage {
 
     public void open() throws InterruptedException, GitAPIException, IOException {
         GitTab gitTab = (GitTab) tabManager.getTabMap().get(TabEnum.GIT);
-        Map<String, CommitSize> commitSizeMap = gitTab.getMyRepo().getScm().currentRepositorySize();
-        BlameManager blameManager  = gitTab.getMyRepo().getScm().blameManager();
-        Map<String, DeveloperInfo> developerInfoMap = gitTab.getMyRepo().getScm().getDeveloperInfo();
+        Map<String, CommitSize> commitSizeMap = gitTab.getMyRepo().getScm().repositorySize(InfoPageUtilsKt.getPathByTab(tabManager));
+//        BlameManager blameManager  = gitTab.getMyRepo().getScm().blameManager();
+        Map<String, DeveloperInfo> developerInfoMap = gitTab.getMyRepo().getScm().getDeveloperInfo(InfoPageUtilsKt.getPathByTab(tabManager));
 //        Map<String, DeveloperInfo> developerInfoMap2 = gitTab.getMyRepo().getScm().getDeveloperInfo("a-foundation-benchmark");
 
 
         spinner.setIndeterminate(false);
         Thread.sleep(500);
         mainInfoPane.setVisible(true);
-        updateLabels(blameManager);
+        updateLabels(developerInfoMap);
         Thread.sleep(500);
-        intPieChart(blameManager, developerInfoMap);
+        intPieChart(developerInfoMap);
         Thread.sleep(500);
         initCalendarPane(commitSizeMap);
         Thread.sleep(500);
@@ -93,10 +92,10 @@ public class InfoPage {
         mainInfoPane.setVisible(false);
     }
 
-    private void updateLabels(BlameManager blameManager) {
-        rowsLabel.setText(String.valueOf(blameManager.getRootPackageInfo().getLineCount()));
-        rowSizeLabel.setText(String.valueOf(blameManager.getRootPackageInfo().getLineSize()));
-        setShortTextForLabel(revisionLabel, blameManager.getRootPackageInfo().findLatestCommit().name(), 6);
+    private void updateLabels(Map<String, DeveloperInfo> developerInfoMap) {
+        rowsLabel.setText(String.valueOf(developerInfoMap.values().stream().mapToLong(DeveloperInfo::getActualLinesOwner).sum()));
+        rowSizeLabel.setText(String.valueOf(developerInfoMap.values().stream().mapToLong(DeveloperInfo::getActualLinesSize).sum()));
+//        setShortTextForLabel(revisionLabel, blameManager.getRootPackageInfo().findLatestCommit().name(), 6);
         labelPane.setBorder(new EmptyBorder( getPaddingInPixels(0.5f), getPaddingInPixels(0.5f), 0, 0));
     }
 
@@ -113,7 +112,7 @@ public class InfoPage {
 
     }
 
-    private void intPieChart(BlameManager blameManager, Map<String, DeveloperInfo> developerInfoMap) {
+    private void intPieChart(Map<String, DeveloperInfo> developerInfoMap) {
         chartPanel.putClientProperty(FlatClientProperties.STYLE, ""
                 + "border:5,5,5,5;"
                 + "background:null");

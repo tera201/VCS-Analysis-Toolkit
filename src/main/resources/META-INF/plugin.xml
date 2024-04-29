@@ -38,6 +38,10 @@
     <![CDATA[
       <html>
         <b>1.4.1</b>
+          <li> Updated info page
+          <li> Added info page for circle selected object
+          <li> Added info page for city selected object
+          <li> Added info page for git selected file
         </ul>
         <b>1.4.0</b>
           <li> Added loading spinner for info page

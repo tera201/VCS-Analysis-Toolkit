@@ -1,18 +1,17 @@
 package org.tera201.vcstoolkit.utils
 
-import org.tera201.vcstoolkit.tabs.FXCircleTab
 import org.eclipse.uml2.uml.*
 import org.tera201.elements.FXSpace
 import org.tera201.elements.circle.ClassCircle
 import org.tera201.elements.circle.HollowCylinder
 import org.tera201.elements.circle.PackageCircle
-import org.tera201.elements.city.Quarter
 
 private const val height = 500.0
 private const val gap = 8000.0
 fun Package.toCircle(circleSpace: FXSpace<HollowCylinder>, number: Int=0) {
     val packageCircle = PackageCircle(name, 6000.0, 5500.0, height)
     packageCircle.translateY = number * gap
+    packageCircle.filePath = this.getEAnnotation("ResourcePath")?.details?.get("path")
     circleSpace.add(packageCircle)
     packagedElements
         .filter { !it.hasKeyword("unknown") }
@@ -28,6 +27,7 @@ private fun Package.generatePackage(circleParent: PackageCircle) {
     val size = if (ownedComments.isEmpty()) 700 else ownedComments[0].body.toDouble()
     val packageCircle = PackageCircle(name, circleParent.innerRadius/2 + 500, circleParent.innerRadius/2, height)
     circleParent.addObject(packageCircle)
+    packageCircle.filePath = this.getEAnnotation("ResourcePath")?.details?.get("path")
     packagedElements
         .filter { !it.hasKeyword("unknown") }
         .forEach {
@@ -45,6 +45,7 @@ private fun Class.generateClass(circleParent: PackageCircle) {
     val methods = if (ownedComments.size > 1) (ownedComments[1].body.toDouble() + 1) * 10 else 10.0
     val side =  size / 2
     val classCircle = ClassCircle(name, side + methods * 10, side, height)
+    classCircle.filePath = this.getEAnnotation("ResourcePath")?.details?.get("path")
     circleParent.addObject(classCircle)
 }
 
@@ -53,11 +54,13 @@ private fun Interface.generateInterface(circleParent: PackageCircle) {
     val methods = if (ownedComments.size > 1) (ownedComments[1].body.toDouble() + 1) * 10 else 10.0
     val side = size / 2
     val classCircle = ClassCircle(name, side + methods * 10, side, height)
+    classCircle.filePath = this.getEAnnotation("ResourcePath")?.details?.get("path")
     circleParent.addObject(classCircle)
 }
 
 private fun Enumeration.generateEnumeration(circleParent: PackageCircle) {
     val classCircle = ClassCircle(name, 1000.0, 700.0, height)
+    classCircle.filePath = this.getEAnnotation("ResourcePath")?.details?.get("path")
     circleParent.addObject(classCircle)
 }
 
