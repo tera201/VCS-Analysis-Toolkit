@@ -22,11 +22,11 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.treeStructure.Tree
 import com.intellij.util.PlatformIcons
 import model.console.BuildModel
-import org.eclipse.uml2.uml.Model
 import org.repodriller.scm.SCMRepository
 import org.tera201.code2uml.AnalyzerBuilder
 import org.tera201.code2uml.Language
 import org.tera201.code2uml.uml.util.UMLModelHandler
+import org.tera201.code2uml.util.messages.DataBaseUtil
 import org.tera201.vcstoolkit.helpers.ProjectPath
 import org.tera201.vcstoolkit.helpers.SharedModel
 import org.tera201.vcstoolkit.services.VCSToolkitCache
@@ -44,6 +44,8 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
     private var settings: VCSToolkitSettings = VCSToolkitSettings.getInstance()
     private var cache: VCSToolkitCache = VCSToolkitCache.getInstance(tabManager.getCurrentProject())
     var myRepo: SCMRepository? = null
+    val dateBaseURL = "${settings.modelPath}/model.db"
+    val dataBaseUtil = DataBaseUtil(dateBaseURL)
     private val getButton = JButton("Get")
     private val urlField = JTextField()
     private val analyzeButton = JButton("Analyze")
@@ -59,7 +61,9 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
         JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
         JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
     )
-    var models = ArrayList<Model>()
+    var models = ArrayList<Int>()
+    var modelsIdMap = HashMap<String, Int>()
+
     private val handler = UMLModelHandler()
     private var isClearingSelection = false
     private val branchListModel = DefaultListModel<String>()
@@ -414,7 +418,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
                     val executionTime = (System.currentTimeMillis() - startTime) / 1000.0
                     logsJTextArea.append("End analyzing. Execution time: $executionTime sec.\n")
                     analyzing = false
-                    modelListContent.addAll(models.stream().map { it.name }.toList())
+                    modelListContent.addAll(modelsIdMap.keys)
                     buildCircle()
                 }else logsJTextArea.append("Get some repo or project for analyzing.\n")
             }
@@ -438,10 +442,10 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
                 try {
                     val modelList = handler.loadListModelFromFile(virtualFile.path)
                     if (modelList != null)
-                        models = modelList as ArrayList<Model>
+                        models = modelList as ArrayList<Int>
                     modelListContent.clear()
-                    modelListContent.addAll(models.stream().map { it.name }.toList())
-                    (tabManager.getTabMap()[TabEnum.CIRCLE] as FXCircleTab).renderByModel(models)
+                    modelListContent.addAll(modelsIdMap.keys)
+                    (tabManager.getTabMap()[TabEnum.CIRCLE] as FXCircleTab).renderByModel(models, dataBaseUtil)
                 } catch (e: Exception) {
                     createExceptionNotification(e)
                 }
@@ -478,7 +482,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
 
     private fun buildCircle() {
         try {
-            (tabManager.getTabMap()[TabEnum.CIRCLE] as FXCircleTab).renderByModel(models)
+            (tabManager.getTabMap()[TabEnum.CIRCLE] as FXCircleTab).renderByModel(models, dataBaseUtil)
         } catch (e:Exception) {
             createExceptionNotification(e)
         }
@@ -487,12 +491,16 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
     private fun analyze(isGit: Boolean, name: String, projectPath: String) {
         logsJTextArea.append("\t*modeling: ${currentBranchOrTagLabel.text}\n")
         logsJTextArea.caret.dot = logsJTextArea.text.length
+        models.clear()
+        modelsIdMap.clear()
         try {
             if (isGit) checkoutTo(name)
             val analyzerBuilder =
-                AnalyzerBuilder(Language.Java, name, projectPath)
+                AnalyzerBuilder(Language.Java, name, projectPath, dateBaseURL)
                     .textArea(logsJTextArea).threads(4)
-            models.add(analyzerBuilder.build())
+            val modelId = analyzerBuilder.buildDB()
+            models.add(modelId)
+            modelsIdMap.put(name, modelId)
         } catch (e:Exception) {
             createExceptionNotification(e)
         }

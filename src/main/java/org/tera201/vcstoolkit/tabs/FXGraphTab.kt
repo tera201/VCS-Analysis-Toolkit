@@ -53,7 +53,7 @@ class FXGraphTab(private val tabManager: TabManager, modelListContent:SharedMode
         modelComboBox.addActionListener {
             if (modelComboBox.selectedItem != null) {
                 val selectedModelName = modelComboBox.selectedItem as String
-                model = (tabManager.getTabMap()[TabEnum.GIT] as GitTab).models.stream().filter { it.name == selectedModelName }.findAny().getOrNull()
+//                model = (tabManager.getTabMap()[TabEnum.GIT] as GitTab).models.stream().filter { it.name == selectedModelName }.findAny().getOrNull()
             }
         }
 

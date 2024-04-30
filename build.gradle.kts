@@ -25,7 +25,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.10")
     implementation(fileTree(mapOf("dir" to "lib", "include" to listOf("*.jar"))))
     implementation("org.tera201:javafx-uml-graph:0.0.1-SNAPSHOT")
-    implementation("org.tera201:code-to-uml:0.2.0-SNAPSHOT")
+    implementation("org.tera201:code-to-uml:1.0.0-SNAPSHOT")
     implementation("org.tera201:swrminer:0.3.1-SNAPSHOT")
     implementation("org.tera201:javafx-code-modeling-tool:1.2.2-SNAPSHOT")
     implementation("org.tera201:swing-components:1.1-SNAPSHOT")
@@ -46,6 +46,9 @@ intellij {
 }
 
 tasks {
+    runIde {
+        jvmArgs("-Xms256m", "-Xmx3048m")
+    }
     // Set the JVM compatibility versions
     withType<JavaCompile> {
         sourceCompatibility = "17"
