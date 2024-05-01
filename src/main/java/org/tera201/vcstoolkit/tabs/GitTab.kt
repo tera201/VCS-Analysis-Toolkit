@@ -409,6 +409,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
                     val startTime = System.currentTimeMillis()
                     val allList = branchList.selectedValuesList + tagList.selectedValuesList
                     models.clear()
+                    modelsIdMap.clear()
                     modelListContent.clear()
                     logsJTextArea.append("Start analyzing.\n")
                     allList.forEach { analyze(true, it, myRepo!!.path) }
@@ -492,8 +493,6 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
         logsJTextArea.append("\t*modeling: ${currentBranchOrTagLabel.text}\n")
         logsJTextArea.caret.dot = logsJTextArea.text.length
         val selectedProject = if (projectComboBox.selectedItem == "Current project")  tabManager.project.name else projectComboBox.selectedItem as String
-        models.clear()
-        modelsIdMap.clear()
         try {
             if (isGit) checkoutTo(name)
             val analyzerBuilder =
