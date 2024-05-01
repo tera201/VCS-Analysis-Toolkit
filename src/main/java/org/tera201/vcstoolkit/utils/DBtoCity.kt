@@ -19,7 +19,7 @@ private fun generatePackage(citySpace: FXSpace<Quarter>, parentName: String?, da
     val newName = if (parentName.orEmpty().isNotEmpty())  "$parentName.${packageDB.name}" else packageDB.name
     val quarter = Quarter(newName, size, 10.0, size, 50.0)
     citySpace.mainObject.addObject(quarter)
-    quarter.filePath = packageDB.filePath
+//    quarter.filePath = packageDB.filePath
     dataBaseUtil.getClassIdsByPackageId(id).forEach { generateClass(quarter, dataBaseUtil, it) }
     dataBaseUtil.getInterfacesIdsByPackageId(id).forEach { generateInterface(quarter, dataBaseUtil, it) }
     dataBaseUtil.getEnumerationsIdsByPackageId(id).forEach { generateEnumeration(quarter, dataBaseUtil, it) }

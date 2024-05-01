@@ -491,12 +491,13 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
     private fun analyze(isGit: Boolean, name: String, projectPath: String) {
         logsJTextArea.append("\t*modeling: ${currentBranchOrTagLabel.text}\n")
         logsJTextArea.caret.dot = logsJTextArea.text.length
+        val selectedProject = if (projectComboBox.selectedItem == "Current project")  tabManager.project.name else projectComboBox.selectedItem as String
         models.clear()
         modelsIdMap.clear()
         try {
             if (isGit) checkoutTo(name)
             val analyzerBuilder =
-                AnalyzerBuilder(Language.Java, name, projectPath, dateBaseURL)
+                AnalyzerBuilder(Language.Java, selectedProject, name, projectPath, dateBaseURL)
                     .textArea(logsJTextArea).threads(4)
             val modelId = analyzerBuilder.buildDB()
             models.add(modelId)

@@ -26,7 +26,7 @@ private fun generatePackage(circleParent: PackageCircle, dataBaseUtil: DataBaseU
         packageDB.childrenId.forEach { generatePackage(circleParent, dataBaseUtil, it) }
     } else {
         val packageCircle = PackageCircle(packageDB.packageName, circleParent.innerRadius/2 + 500, circleParent.innerRadius/2, height)
-        packageCircle.filePath = packageDB.filePath
+//        packageCircle.filePath = packageDB.filePath
         circleParent.addObject(packageCircle)
         classes.forEach { generateClass(packageCircle, dataBaseUtil, it) }
         interfaces.forEach { generateInterface(packageCircle, dataBaseUtil, it) }
