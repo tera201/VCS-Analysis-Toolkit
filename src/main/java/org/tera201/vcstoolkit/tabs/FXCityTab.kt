@@ -14,8 +14,9 @@ import kotlin.jvm.optionals.getOrNull
 
 
 class FXCityTab(private val tabManager: TabManager, modelListContent:SharedModel) : JPanel(), FXTab {
-    private val modelComboBox = ComboBox(modelListContent)
+    val modelComboBox = ComboBox(modelListContent)
     private var model: Model? = null
+    val fxCity:FXCityPanel
     private val topPanel = JPanel()
 
     init {
@@ -23,7 +24,7 @@ class FXCityTab(private val tabManager: TabManager, modelListContent:SharedModel
         topPanel.layout = FlowLayout(FlowLayout.LEFT)
         topPanel.add(modelComboBox)
         this.add(topPanel, BorderLayout.NORTH)
-        val fxCity = FXCityPanel()
+        fxCity = FXCityPanel()
         this.add(fxCity, BorderLayout.CENTER)
         // TODO: help with render javafx after plugin hide state - have no idea how
         FXCityPanel()
