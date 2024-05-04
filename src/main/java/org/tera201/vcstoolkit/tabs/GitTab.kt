@@ -49,8 +49,6 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
     private val getButton = JButton("Get")
     private val urlField = JTextField()
     private val analyzeButton = JButton("Analyze")
-    private val saveUmlFileButton = JButton("Save UML model")
-    private val getUmlFileButton = JButton("Get UML model")
     private val buildModel = BuildModel()
     // TODO: problems with JBTextArea (IDEA freeze) when analyzing one branch
     private val logsJTextArea = JTextArea().apply {
@@ -392,11 +390,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
     private fun addModelControlPanel() {
         val modelControlPanel = JPanel()
         listenerForAnalyzeButton()
-        listenerForGetUmlFileButton()
-        listenerForSaveUmlButton()
         modelControlPanel.add(analyzeButton)
-        modelControlPanel.add(saveUmlFileButton)
-        modelControlPanel.add(getUmlFileButton)
         this.add(modelControlPanel)
     }
 
@@ -413,8 +407,6 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
                     modelListContent.clear()
                     logsJTextArea.append("Start analyzing.\n")
                     allList.forEach { analyze(true, it, myRepo!!.path) }
-                    if (allList.size == 1 || allList.isEmpty()) saveUmlFileButton.text = "Save UML model"
-                    else saveUmlFileButton.text = "Save UML model pack"
                     if (allList.isEmpty() && projectPath != null) analyze(false, currentBranchOrTagLabel.text, projectPath)
                     val executionTime = (System.currentTimeMillis() - startTime) / 1000.0
                     logsJTextArea.append("End analyzing. Execution time: $executionTime sec.\n")
@@ -422,61 +414,6 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
                     modelListContent.addAll(modelsIdMap.keys)
                     buildCircle()
                 }else logsJTextArea.append("Get some repo or project for analyzing.\n")
-            }
-        }
-    }
-
-    private fun listenerForGetUmlFileButton() {
-        getUmlFileButton.addActionListener {
-            val descriptor = FileChooserDescriptor(
-                true, false,
-                false, false, false, false
-            );
-            descriptor.setTitle("Get UML-Model");
-            createDirectoryIfNotExists(settings.modelPath)
-            val toSelect = if (settings.modelPath.isEmpty()) null else LocalFileSystem.getInstance()
-                .findFileByPath(settings.modelPath)
-            val virtualFile = FileChooser.chooseFile(descriptor, null, toSelect)
-
-            if (virtualFile != null) {
-                logsJTextArea.append("Get model from file: ${virtualFile.path}\n")
-                try {
-                    val modelList = handler.loadListModelFromFile(virtualFile.path)
-                    if (modelList != null)
-                        models = modelList as ArrayList<Int>
-                    modelListContent.clear()
-                    modelListContent.addAll(modelsIdMap.keys)
-                    (tabManager.getTabMap()[TabEnum.CIRCLE] as FXCircleTab).renderByModel(models, dataBaseUtil)
-                } catch (e: Exception) {
-                    createExceptionNotification(e)
-                }
-            }
-        }
-    }
-
-    private fun listenerForSaveUmlButton() {
-        saveUmlFileButton.addActionListener {
-            val title =  if (models.size == 1) "SAVE UML-MODEL" else "SAVE UML-MODEL PACK"
-            val fileNameExt = if (models.size == 1) "" else "Pack"
-            val descriptor = FileSaverDescriptor(
-                title, "Choose the destination file",
-                "json"
-            )
-            createDirectoryIfNotExists(settings.modelPath)
-            val toSelect = if (settings.modelPath.isEmpty()) null else LocalFileSystem.getInstance()
-                .findFileByPath(settings.modelPath)
-            val fileSaverDialog = FileChooserFactory.getInstance().createSaveFileDialog(descriptor, null)
-            val fileName = if(SystemInfo.isMac) "${cache.lastProject}Model$fileNameExt.json"
-            else "${cache.lastProject}Model$fileNameExt"
-            val virtualFileWrapper = fileSaverDialog.save(toSelect, fileName)
-            if (virtualFileWrapper != null) {
-                val fileToSave = virtualFileWrapper.file
-                logsJTextArea.append("Save as file: ${fileToSave.absolutePath}\n")
-                try {
-                    handler.saveModelToFile(models, fileToSave.absolutePath)
-                } catch (e: Exception) {
-                    createExceptionNotification(e)
-                }
             }
         }
     }
