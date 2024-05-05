@@ -38,6 +38,12 @@
     <![CDATA[
       <html>
         <b>1.4.1</b>
+          <li> Fixed calculations for circle view
+          <li> Analyzing time have significant reduced for almost similar branches
+          <li> Model safes in DB
+          <li> Removed buttons for safe/load model
+          <li> Removed background for graph
+          <li> Fixed dragging on graph view
           <li> Updated info page
           <li> Added info page for circle selected object
           <li> Added info page for city selected object
