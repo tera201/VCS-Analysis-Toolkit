@@ -24,7 +24,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.10")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.10")
     implementation(fileTree(mapOf("dir" to "lib", "include" to listOf("*.jar"))))
-    implementation("org.tera201:javafx-uml-graph:0.0.1-SNAPSHOT")
+    implementation("org.tera201:javafx-uml-graph:0.0.2-SNAPSHOT")
     implementation("org.tera201:code-to-uml:1.1.0-SNAPSHOT")
     implementation("org.tera201:swrminer:0.3.1-SNAPSHOT")
     implementation("org.tera201:javafx-code-modeling-tool:1.2.2-SNAPSHOT")
