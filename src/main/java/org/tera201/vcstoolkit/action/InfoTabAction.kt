@@ -11,6 +11,7 @@ import com.intellij.openapi.project.DumbAwareAction
 import javafx.embed.swing.JFXPanel
 import org.tera201.vcstoolkit.helpers.FullScreenTabInfo
 import org.tera201.vcstoolkit.info.InfoPage
+import org.tera201.vcstoolkit.info.InfoTabPage
 import org.tera201.vcstoolkit.tabs.*
 import java.util.function.Supplier
 import kotlin.concurrent.thread
@@ -45,10 +46,10 @@ class InfoTabAction(private val actionManager: ActionManager, private val tabMan
         else {
 
             event.project?.let {
-                val infoPanel = InfoPage(tabManager)
+                val infoTabPanel = InfoTabPage(tabManager)
                 val editor =
-                    JComponentEditorProviderUtils.openEditor(it, selectedTabTitle + "Info", infoPanel.component)
-                thread { infoPanel.open() }
+                    JComponentEditorProviderUtils.openEditor(it, selectedTabTitle + "Info", infoTabPanel)
+                thread { infoTabPanel.start() }
                 actionManager.openedFxTabs.set(
                     selectedTabTitle + "Info",
                     FullScreenTabInfo(actionManager.jtp.selectedIndex, JFXPanel(), editor[0].file)
