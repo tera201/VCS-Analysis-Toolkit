@@ -45,10 +45,12 @@ public class InfoPage {
     private JPanel mainInfoPane;
     private JLabel sizeLabel;
     private JPanel labelPane;
+    private JLabel mainInfoLabel;
     private JPanel SpinnerPanel;
     private SpinnerProgress spinner;
     LineChart lineChart = new LineChart();
     private final TabManager tabManager;
+    private String lastPathNode;
 
     public InfoPage(TabManager tabManager) {
         this.tabManager = tabManager;
@@ -65,16 +67,18 @@ public class InfoPage {
 
     public void open() throws InterruptedException, GitAPIException, IOException {
         GitTab gitTab = (GitTab) tabManager.getTabMap().get(TabEnum.GIT);
-        Map<String, CommitSize> commitSizeMap = gitTab.getMyRepo().getScm().repositorySize(InfoPageUtilsKt.getPathByTab(tabManager));
+        String path = InfoPageUtilsKt.getPathByTab(tabManager);
+        lastPathNode = path.substring(path.lastIndexOf("/") + 1);
+        Map<String, CommitSize> commitSizeMap = gitTab.getMyRepo().getScm().repositorySize(path);
 //        BlameManager blameManager  = gitTab.getMyRepo().getScm().blameManager();
-        Map<String, DeveloperInfo> developerInfoMap = gitTab.getMyRepo().getScm().getDeveloperInfo(InfoPageUtilsKt.getPathByTab(tabManager));
+        Map<String, DeveloperInfo> developerInfoMap = gitTab.getMyRepo().getScm().getDeveloperInfo(path);
 //        Map<String, DeveloperInfo> developerInfoMap2 = gitTab.getMyRepo().getScm().getDeveloperInfo("a-foundation-benchmark");
 
 
         spinner.setIndeterminate(false);
         Thread.sleep(500);
         mainInfoPane.setVisible(true);
-        updateLabels(developerInfoMap);
+        updateLabels(developerInfoMap, commitSizeMap);
         Thread.sleep(500);
         intPieChart(developerInfoMap);
         Thread.sleep(500);
@@ -92,10 +96,14 @@ public class InfoPage {
         mainInfoPane.setVisible(false);
     }
 
-    private void updateLabels(Map<String, DeveloperInfo> developerInfoMap) {
+    private void updateLabels(Map<String, DeveloperInfo> developerInfoMap, Map<String, CommitSize> commitSizeMap) {
+        mainInfoLabel.setText(lastPathNode);
+        authorLabel.setText(commitSizeMap.values().stream().min(Comparator.comparingInt(CommitSize::getDate)).get().getAuthorName());
+        sizeLabel.setText(String.valueOf(commitSizeMap.values().stream().max(Comparator.comparingInt(CommitSize::getDate)).get().getProjectSize()));
+        curAuthorLabel.setText(developerInfoMap.values().stream().max(Comparator.comparingLong(DeveloperInfo::getActualLinesOwner)).get().getName());
         rowsLabel.setText(String.valueOf(developerInfoMap.values().stream().mapToLong(DeveloperInfo::getActualLinesOwner).sum()));
         rowSizeLabel.setText(String.valueOf(developerInfoMap.values().stream().mapToLong(DeveloperInfo::getActualLinesSize).sum()));
-//        setShortTextForLabel(revisionLabel, blameManager.getRootPackageInfo().findLatestCommit().name(), 6);
+        setShortTextForLabel(revisionLabel, commitSizeMap.values().stream().max(Comparator.comparingInt(CommitSize::getDate)).get().getName(), 6);
         labelPane.setBorder(new EmptyBorder( getPaddingInPixels(0.5f), getPaddingInPixels(0.5f), 0, 0));
     }
 
