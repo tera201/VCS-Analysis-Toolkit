@@ -30,7 +30,7 @@ class TabManager (val project:Project) {
     }
 
     fun getTabMap() : HashMap<TabEnum, JPanel> {
-        return tabMap;
+        return tabMap
     }
 
     fun getCurrentProject(): Project {

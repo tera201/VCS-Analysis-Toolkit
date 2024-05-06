@@ -7,12 +7,9 @@ import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
-import com.intellij.openapi.fileChooser.FileChooserFactory
-import com.intellij.openapi.fileChooser.FileSaverDescriptor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.ui.ComboBox
-import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.ColoredTreeCellRenderer
@@ -25,7 +22,6 @@ import model.console.BuildModel
 import org.repodriller.scm.SCMRepository
 import org.tera201.code2uml.AnalyzerBuilder
 import org.tera201.code2uml.Language
-import org.tera201.code2uml.uml.util.UMLModelHandler
 import org.tera201.code2uml.util.messages.DataBaseUtil
 import org.tera201.vcstoolkit.helpers.ProjectPath
 import org.tera201.vcstoolkit.helpers.SharedModel
@@ -62,7 +58,6 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
     var models = ArrayList<Int>()
     var modelsIdMap = HashMap<String, Int>()
 
-    private val handler = UMLModelHandler()
     private var isClearingSelection = false
     private val branchListModel = DefaultListModel<String>()
     private val tagListModel = DefaultListModel<String>()
@@ -351,9 +346,6 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
     }
 
     public fun checkoutTo(item:String) {
-        val fileSystem = LocalFileSystem.getInstance()
-        val virtualFile: VirtualFile? = fileSystem.findFileByPath(myRepo!!.path)
-        val virtualFileGit: VirtualFile? = fileSystem.findFileByPath("${myRepo!!.path}/.git}")
         try {
             if (settings.externalProjectMode == 2)
                 myRepo?.scm?.createCommit("VCSToolkit: save message")
@@ -365,8 +357,11 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
         } catch (e:Exception) {
             createExceptionNotification(e)
         }
-        virtualFile?.refresh(false, true)
-        virtualFileGit?.refresh(false, true)
+//        val fileSystem = LocalFileSystem.getInstance()
+//        val virtualFile: VirtualFile? = fileSystem.findFileByPath(myRepo!!.path)
+//        val virtualFileGit: VirtualFile? = fileSystem.findFileByPath("${myRepo!!.path}/.git}")
+//        virtualFile?.refresh(false, true)
+//        virtualFileGit?.refresh(false, true)
         updatePathPanel()
     }
 
@@ -481,8 +476,10 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
         val root = DefaultMutableTreeNode(cache.projectPathMap[cache.lastProject]?.path)
         buildTree(File(cache.projectPathMap[cache.lastProject]?.path), root)
         pathJTree.model = DefaultTreeModel(root)
-        filesTreeJBScrollPane.setViewportView(pathJTree)
-        filesTreeJBScrollPane.updateUI()
+        SwingUtilities.invokeLater {
+            filesTreeJBScrollPane.setViewportView(pathJTree)
+            filesTreeJBScrollPane.updateUI()
+        }
     }
 
     private fun buildTree(file: File, rootTree: DefaultMutableTreeNode) {

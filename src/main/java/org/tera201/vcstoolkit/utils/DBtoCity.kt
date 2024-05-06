@@ -10,19 +10,19 @@ fun toCity(citySpace: FXSpace<Quarter>, modelId:Int, dataBaseUtil: DataBaseUtil)
     val model = dataBaseUtil.getModel(modelId)
     var city = City(8000.0, 20.0, 8000.0, model.name)
     citySpace.add(city)
-    dataBaseUtil.getRootPackageIds(modelId).forEach { generatePackage(citySpace, null, dataBaseUtil, it, modelId) }
+    dataBaseUtil.getRootPackageIds(modelId).forEach { generatePackage(city, null, dataBaseUtil, it, modelId) }
 }
 
-private fun generatePackage(citySpace: FXSpace<Quarter>, parentName: String?, dataBaseUtil: DataBaseUtil, id:Int, modelId: Int) {
+private fun generatePackage(city: City, parentName: String?, dataBaseUtil: DataBaseUtil, id:Int, modelId: Int) {
     val packageDB = dataBaseUtil.getPackage(id, modelId)
     val size = packageDB.size.toDouble()
     val newName = if (parentName.orEmpty().isNotEmpty())  "$parentName.${packageDB.name}" else packageDB.name
     val quarter = Quarter(newName, size, 10.0, size, 50.0)
-    citySpace.mainObject.addObject(quarter)
+    city.addObject(quarter)
     dataBaseUtil.getClassIdsByPackageId(modelId, id).forEach { generateClass(quarter, dataBaseUtil, it, modelId) }
     dataBaseUtil.getInterfacesIdsByPackageId(modelId, id).forEach { generateInterface(quarter, dataBaseUtil, it, modelId) }
     dataBaseUtil.getEnumerationsIdsByPackageId(modelId, id).forEach { generateEnumeration(quarter, dataBaseUtil, it, modelId) }
-    packageDB.childrenId.forEach { generatePackage(citySpace, newName, dataBaseUtil, it, modelId) }
+    packageDB.childrenId.forEach { generatePackage(city, newName, dataBaseUtil, it, modelId) }
 }
 
 private fun generateClass(quarter: Quarter?, dataBaseUtil: DataBaseUtil, id:Int, modelId: Int) {
