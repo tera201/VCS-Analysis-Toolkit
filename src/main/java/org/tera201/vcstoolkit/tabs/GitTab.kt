@@ -41,7 +41,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
     private var cache: VCSToolkitCache = VCSToolkitCache.getInstance(tabManager.getCurrentProject())
     var myRepo: SCMRepository? = null
     val dateBaseURL = "${settings.modelPath}/model.db"
-    val dataBaseUtil = DataBaseUtil(dateBaseURL)
+    val dataBaseUtil:DataBaseUtil
     private val getButton = JButton("Get")
     private val urlField = JTextField()
     private val analyzeButton = JButton("Analyze")
@@ -115,6 +115,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
         } catch (e: IOException) {
             e.printStackTrace()
         }
+        dataBaseUtil = DataBaseUtil(dateBaseURL)
 
         this.layout = FlowLayout(FlowLayout.LEFT)
         logsJBScrollPane.isVisible = settings.showGitLogs
