@@ -68,7 +68,7 @@ public class InfoPage {
     public void open() throws InterruptedException, GitAPIException, IOException {
         GitTab gitTab = (GitTab) tabManager.getTabMap().get(TabEnum.GIT);
         String path = InfoPageUtilsKt.getPathByTab(tabManager);
-        lastPathNode = path.substring(path.lastIndexOf("/") + 1);
+        lastPathNode = (path != null) ? path.substring(path.lastIndexOf("/") + 1) : null;
         Map<String, CommitSize> commitSizeMap = gitTab.getMyRepo().getScm().repositorySize(path);
 //        BlameManager blameManager  = gitTab.getMyRepo().getScm().blameManager();
         Map<String, DeveloperInfo> developerInfoMap = gitTab.getMyRepo().getScm().getDeveloperInfo(path);
