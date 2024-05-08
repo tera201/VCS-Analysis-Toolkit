@@ -27,7 +27,7 @@ class FXCityTab(private val tabManager: TabManager, modelListContent:SharedModel
         fxCity = FXCityPanel()
         this.add(fxCity, BorderLayout.CENTER)
         // TODO: help with render javafx after plugin hide state - have no idea how
-//        FXCityPanel()
+        FXCityPanel()
 
         modelComboBox.addActionListener {
             if (modelComboBox.selectedItem != null) {
