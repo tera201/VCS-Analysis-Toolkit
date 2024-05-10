@@ -11,7 +11,6 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.vfs.LocalFileSystem
-import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.ColoredTreeCellRenderer
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBList
@@ -27,7 +26,9 @@ import org.tera201.vcstoolkit.helpers.ProjectPath
 import org.tera201.vcstoolkit.helpers.SharedModel
 import org.tera201.vcstoolkit.services.VCSToolkitCache
 import org.tera201.vcstoolkit.services.settings.VCSToolkitSettings
-import java.awt.*
+import java.awt.BorderLayout
+import java.awt.Dimension
+import java.awt.FlowLayout
 import java.awt.event.*
 import java.io.File
 import java.io.IOException
@@ -172,6 +173,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
         this.add(logModelSplitPane)
         addModelControlPanel()
         addProjectPane()
+        createPopupMenu()
     }
 
     private fun addProjectPane() {
@@ -305,6 +307,38 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
                 }
             }
         })
+    }
+
+    private fun createPopupMenu() {
+        val popupMenu = JPopupMenu()
+        val menuItemDeleteFromDB = JMenuItem("Delete From DB")
+        popupMenu.add(menuItemDeleteFromDB)
+        modelList.addMouseListener(object : MouseAdapter() {
+            override fun mouseClicked(e: MouseEvent) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    val index: Int = modelList.locationToIndex(e.point)
+                    if (index != -1) {
+                        modelList.setSelectedIndex(index)
+                        popupMenu.show(modelList, e.x, e.y)
+                    }
+                }
+            }
+        })
+
+        menuItemDeleteFromDB.addActionListener { e: ActionEvent? ->
+            val selectedIndex: Int = modelList.getSelectedIndex()
+            val modelId = modelsIdMap[modelListContent.getElementAt(selectedIndex)]
+            if (selectedIndex != -1) {
+                modelList.remove(selectedIndex)
+                modelListContent.removeAt(selectedIndex)
+                if (modelId != null) {
+                    dataBaseUtil.deleteModel(modelId)
+                }
+            }
+        }
+        menuItemDeleteFromDB.addActionListener { e: ActionEvent? ->
+
+        }
     }
 
     fun JBList<String>.addClearSelectorByAnotherList(anotherList: JBList<String>) {
