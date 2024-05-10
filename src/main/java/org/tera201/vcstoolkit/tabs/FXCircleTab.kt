@@ -33,7 +33,7 @@ class FXCircleTab(val tabManager: TabManager) : JPanel(), FXTab {
             for (i in 0 until models.size) {
                toCircle(fxCircle.circleSpace, i, models[i], dataBaseUtil)
             }
-            fxCircle.circleSpace.updateView()
+            fxCircle.circleSpace.updateView(true)
         }
     }
 
