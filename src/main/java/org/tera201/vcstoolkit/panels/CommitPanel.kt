@@ -15,6 +15,7 @@ import javax.swing.JPanel
 
 class CommitPanel internal constructor(private var year: Int) : JPanel() {
     private var daysInYear: Int = Year.of(year).length()
+    private var offset:Int = LocalDate.ofYearDay(year, 1).getDayOfWeek().value - 1
     private var panels: Array<JPanel?> = arrayOfNulls(daysInYear)
     private val dayCommit = IntArray(daysInYear)
 
@@ -23,7 +24,7 @@ class CommitPanel internal constructor(private var year: Int) : JPanel() {
         val gbc = GridBagConstraints()
         gbc.fill = GridBagConstraints.BOTH
         var date = LocalDate.ofYearDay(year, 1)
-        val offset = date.getDayOfWeek().value - 1 // offset for 1st week of year
+        offset = date.getDayOfWeek().value - 1 // offset for 1st week of year
         gbc.weightx = 10.0
         gbc.weighty = 10.0
 
@@ -43,12 +44,12 @@ class CommitPanel internal constructor(private var year: Int) : JPanel() {
         }
 
         // Fill the calendar with day panels
-        for (i in 0 until daysInYear) {
+        for (i in offset until daysInYear + offset) {
             val dayPanel =
                 createDayPanel(date.month.getDisplayName(TextStyle.FULL, Locale.getDefault()), date.dayOfMonth)
             gbc.gridx = i / 7 + 1
             gbc.gridy = i % 7 + 1
-            panels[i] = dayPanel
+            panels[i - offset] = dayPanel
             this.add(dayPanel, gbc.clone())
             date = date.plusDays(1)
         }
