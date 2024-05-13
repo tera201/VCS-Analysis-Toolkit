@@ -5,7 +5,6 @@ import com.intellij.ui.JBSplitter;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
 import net.miginfocom.swing.MigLayout;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.repodriller.scm.entities.BlameManager;
 import org.repodriller.scm.entities.CommitSize;
 import org.repodriller.scm.entities.DeveloperInfo;
@@ -24,7 +23,6 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -65,25 +63,17 @@ public class InfoPage {
         return  (int)(dpi * cmToInch * padding);
     }
 
-    public void open() throws InterruptedException, GitAPIException, IOException {
-        GitTab gitTab = (GitTab) tabManager.getTabMap().get(TabEnum.GIT);
+    public void open(Map<String, CommitSize> commitSizeMap, Map<String, DeveloperInfo> developerInfoMap) throws InterruptedException {
         String path = InfoPageUtilsKt.getPathByTab(tabManager);
         lastPathNode = (path != null) ? path.substring(path.lastIndexOf("/") + 1) : null;
-        Map<String, CommitSize> commitSizeMap = gitTab.getMyRepo().getScm().repositorySize(path);
-//        BlameManager blameManager  = gitTab.getMyRepo().getScm().blameManager();
-        Map<String, DeveloperInfo> developerInfoMap = gitTab.getMyRepo().getScm().getDeveloperInfo(path);
-//        Map<String, DeveloperInfo> developerInfoMap2 = gitTab.getMyRepo().getScm().getDeveloperInfo("a-foundation-benchmark");
 
 
         spinner.setIndeterminate(false);
-        Thread.sleep(500);
+        Thread.sleep(100);
         mainInfoPane.setVisible(true);
         updateLabels(developerInfoMap, commitSizeMap);
-        Thread.sleep(500);
         intPieChart(developerInfoMap);
-        Thread.sleep(500);
         initCalendarPane(commitSizeMap);
-        Thread.sleep(500);
         initLineChart(commitSizeMap);
     }
 
