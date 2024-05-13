@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "org.tera201"
-version = "1.4.0-SNAPSHOT"
+version = "1.5.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -26,9 +26,9 @@ dependencies {
     implementation(fileTree(mapOf("dir" to "lib", "include" to listOf("*.jar"))))
     implementation("org.tera201:javafx-uml-graph:0.0.2-SNAPSHOT")
     implementation("org.tera201:code-to-uml:1.1.0-SNAPSHOT")
-    implementation("org.tera201:swrminer:0.3.1-SNAPSHOT")
+    implementation("org.tera201:swrminer:0.4.0-SNAPSHOT")
     implementation("org.tera201:javafx-code-modeling-tool:1.2.2-SNAPSHOT")
-    implementation("org.tera201:swing-components:1.1.1-SNAPSHOT")
+    implementation("org.tera201:swing-components:1.1.2-SNAPSHOT")
     implementation("com.formdev:flatlaf:3.4.1")
     implementation("com.formdev:flatlaf-extras:3.4.1")
     implementation("org.xerial:sqlite-jdbc:3.45.3.0")

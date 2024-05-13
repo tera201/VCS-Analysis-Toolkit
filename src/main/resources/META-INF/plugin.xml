@@ -37,6 +37,9 @@
   <change-notes>
     <![CDATA[
       <html>
+        <b>1.5.0</b>
+          <li> Added authors tab page for info
+          <li> Added experimental optimization for circle view
         <b>1.4.1</b>
           <li> Fixed calculations for circle view
           <li> Analyzing time have significant reduced for almost similar branches
