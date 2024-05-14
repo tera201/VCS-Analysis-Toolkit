@@ -23,6 +23,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -41,6 +42,7 @@ public class AuthorInfoPage {
     private JLabel emailLabel;
     private JPanel barChartByMonthPanel;
     private JPanel barChartByHoursPanel;
+    private JLabel lastActivityLabel;
 
     private final TabManager tabManager;
     private JPanel spinnerPanel;
@@ -70,7 +72,8 @@ public class AuthorInfoPage {
         intPieChart(createPieDataLines(developerInfoMap.get(email)), linesPiePanel, "Line actions");
         initCalendarPane(commitSizeMap);
         createBarChart(barChartByHoursPanel, createBarDataByHours(commitSizeMap), "Commit by hours");
-        createBarChart(barChartByDayPanel, createBarDataByDay(commitSizeMap), "Commit by day");
+        createBarChart(barChartByDayPanel, createBarDataByDay(commitSizeMap), "Commit by day of week");
+        createBarChart(barChartByMonthPanel, createBarDataByDayOfMouth(commitSizeMap), "Commit by day of month");
         createBarChart(barChartByMonthPanel, createBarDataByMonth(commitSizeMap), "Commit by month");
 
     }
@@ -78,11 +81,18 @@ public class AuthorInfoPage {
     private void updateLabels(Map<String, DeveloperInfo> developerInfoMap, Map<String, CommitSize> commitSizeMap) {
         authorNameLabel.setText(developerInfoMap.get(email).getName());
         commitCountLabel.setText(String.valueOf(developerInfoMap.get(email).getCommits().size()));
-        commitFrequencyLabel.setText("");
-        avgCommitTimeLabel.setText("");
         createdBranchesLabel.setText("");
         double lines = developerInfoMap.values().stream().mapToDouble(DeveloperInfo::getActualLinesOwner).sum();
-        ownerPercentageLabel.setText(String.valueOf(((developerInfoMap.get(email).getActualLinesOwner()) / lines) * 100));
+        ownerPercentageLabel.setText(String.format("%.2f", ((developerInfoMap.get(email).getActualLinesOwner()) / lines) * 100));
+        List<Integer> commitDates = commitSizeMap.values().stream().filter(it -> Objects.equals(it.getAuthorEmail(), email)).map(CommitSize::getDate).sorted().toList();
+        List<Integer> differences = new ArrayList<>();
+        for (int i = 1; i < commitDates.size(); i++) {
+            differences.add(commitDates.get(i) - commitDates.get(i - 1));
+        }
+        lastActivityLabel.setText(DateUtils.Companion.getStringDate(commitDates.stream().max(Integer::max).get()));
+        double daysCount = commitDates.stream().map(DateUtils.Companion::timestampToLocalDate).collect(Collectors.toSet()).size();
+        commitFrequencyLabel.setText(String.format("%.2f", differences.size()/daysCount) + " per day");
+        avgCommitTimeLabel.setText(String.format("%.2f",  differences.stream().mapToInt(Integer::intValue).sum() / (24 * 3600.0 * differences.size())) + " day");
     }
 
     private void initCalendarPane(Map<String, CommitSize> commitSizeMap) {
@@ -212,7 +222,16 @@ public class AuthorInfoPage {
         int[] commitCount = new int[24];
         commitSizeMap.values().stream().filter(it -> Objects.equals(it.getAuthorEmail(), email)).map(CommitSize::getDate)
                 .forEach(it -> commitCount[DateUtils.Companion.getHourOfDay(it)]++);
-        IntStream.range(0, commitCount.length).forEach(index -> {if (commitCount[index] > 0 ) dataset.addValue(String.valueOf(index) + ":00", commitCount[index]);});
+        IntStream.range(0, commitCount.length).forEach(index -> {if (commitCount[index] > 0 ) dataset.addValue(index + ":00", commitCount[index]);});
+        return dataset;
+    }
+
+    private DefaultPieDataset createBarDataByDayOfMouth(Map<String, CommitSize> commitSizeMap) {
+        DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
+        int[] commitCount = new int[32];
+        commitSizeMap.values().stream().filter(it -> Objects.equals(it.getAuthorEmail(), email)).map(CommitSize::getDate)
+                .forEach(it -> commitCount[DateUtils.Companion.getDayOfMouth(it)]++);
+        IntStream.range(0, commitCount.length).forEach(index -> {if (commitCount[index] > 0 ) dataset.addValue(String.valueOf(index + 1), commitCount[index]);});
         return dataset;
     }
 

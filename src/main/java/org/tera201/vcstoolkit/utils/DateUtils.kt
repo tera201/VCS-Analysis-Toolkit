@@ -1,6 +1,8 @@
 package org.tera201.vcstoolkit.utils
 
 import java.time.*
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 
 class DateUtils {
@@ -27,6 +29,11 @@ class DateUtils {
             return date.dayOfWeek
         }
 
+        fun getDayOfMouth(timestamp: Int): Int {
+            val date = timestampToLocalDate(timestamp)
+            return date.dayOfMonth
+        }
+
         fun getMonthOfYear(timestamp: Int): Month {
             val date = timestampToLocalDate(timestamp)
             return date.month
@@ -35,6 +42,12 @@ class DateUtils {
         fun getHourOfDay(timestamp: Int): Int {
             val dateTime: LocalDateTime = timestampToLocalDateTime(timestamp)
             return dateTime.hour
+        }
+
+        fun getStringDate(timestamp: Int): String {
+            val date = timestampToLocalDate(timestamp)
+            val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+            return date.format(formatter)
         }
     }
 }
