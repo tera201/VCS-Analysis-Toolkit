@@ -38,6 +38,7 @@
     <![CDATA[
       <html>
         <b>1.5.0</b>
+          <li> Added commit stability PieChart for authors
           <li> Added authors tab page for info
           <li> Added experimental optimization for circle view
         <b>1.4.1</b>

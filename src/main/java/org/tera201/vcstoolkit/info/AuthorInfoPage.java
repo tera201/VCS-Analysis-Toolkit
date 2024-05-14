@@ -18,12 +18,15 @@ import org.tera201.vcstoolkit.utils.DateUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.DecimalFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -43,6 +46,7 @@ public class AuthorInfoPage {
     private JPanel barChartByMonthPanel;
     private JPanel barChartByHoursPanel;
     private JLabel lastActivityLabel;
+    private JPanel stableCommitPanel;
 
     private final TabManager tabManager;
     private JPanel spinnerPanel;
@@ -53,7 +57,7 @@ public class AuthorInfoPage {
     public AuthorInfoPage(TabManager tabManager, String email) {
         this.tabManager = tabManager;
         this.email = email;
-        emailLabel.setText(email);
+        setShortTextForLabel(emailLabel, email, 6);
         initSpinner();
     }
 
@@ -70,6 +74,7 @@ public class AuthorInfoPage {
         updateLabels(developerInfoMap, commitSizeMap);
         intPieChart(createPieDataFile(developerInfoMap.get(email)), filePiePanel, "File actions");
         intPieChart(createPieDataLines(developerInfoMap.get(email)), linesPiePanel, "Line actions");
+        intPieChart(createPieDataStable(commitSizeMap), stableCommitPanel, "Stable commits");
         initCalendarPane(commitSizeMap);
         createBarChart(barChartByHoursPanel, createBarDataByHours(commitSizeMap), "Commit by hours");
         createBarChart(barChartByDayPanel, createBarDataByDay(commitSizeMap), "Commit by day of week");
@@ -93,6 +98,18 @@ public class AuthorInfoPage {
         double daysCount = commitDates.stream().map(DateUtils.Companion::timestampToLocalDate).collect(Collectors.toSet()).size();
         commitFrequencyLabel.setText(String.format("%.2f", differences.size()/daysCount) + " per day");
         avgCommitTimeLabel.setText(String.format("%.2f",  differences.stream().mapToInt(Integer::intValue).sum() / (24 * 3600.0 * differences.size())) + " day");
+    }
+
+    private void setShortTextForLabel(JLabel label, String text, int width) {
+        String shortenedText = text.substring(0, width) + "...";
+        label.setText(shortenedText);
+        label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        label.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                label.setText(label.getText().equals(text) ? shortenedText : text);
+            }
+        });
     }
 
     private void initCalendarPane(Map<String, CommitSize> commitSizeMap) {
@@ -170,6 +187,19 @@ public class AuthorInfoPage {
         dataset.addValue("Lines added", developerInfo.getLinesAdded());
         dataset.addValue("Lines deleted", developerInfo.getLinesDeleted());
         dataset.addValue("Lines modified", developerInfo.getLinesModified());
+        return dataset;
+    }
+
+    private DefaultPieDataset createPieDataStable(Map<String, CommitSize> commitSizeMap) {
+        AtomicReference<Integer> stableCommitCount = new AtomicReference<>(0);
+        AtomicReference<Integer> unStableCommitSize = new AtomicReference<>(0);
+        commitSizeMap.values().stream().filter(it -> Objects.equals(it.getAuthorEmail(), email)).forEach( it ->{
+            if (it.getStability() <= 0.2) unStableCommitSize.getAndSet(unStableCommitSize.get() + 1);
+            else stableCommitCount.getAndSet(stableCommitCount.get() + 1);
+        });
+        DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
+        dataset.addValue("stable commit count", stableCommitCount.get());
+        dataset.addValue("unstable commit count", unStableCommitSize.get());
         return dataset;
     }
 
