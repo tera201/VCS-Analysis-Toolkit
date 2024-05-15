@@ -94,7 +94,8 @@ public class AuthorInfoPage {
         for (int i = 1; i < commitDates.size(); i++) {
             differences.add(commitDates.get(i) - commitDates.get(i - 1));
         }
-        lastActivityLabel.setText(DateUtils.Companion.getStringDate(commitDates.stream().max(Integer::max).get()));
+        int date = commitDates.stream().max(Integer::max).orElse(0);
+        if (date != 0) {lastActivityLabel.setText(DateUtils.Companion.getStringDate(date));} else lastActivityLabel.setText("");
         double daysCount = commitDates.stream().map(DateUtils.Companion::timestampToLocalDate).collect(Collectors.toSet()).size();
         commitFrequencyLabel.setText(String.format("%.2f", differences.size()/daysCount) + " per day");
         avgCommitTimeLabel.setText(String.format("%.2f",  differences.stream().mapToInt(Integer::intValue).sum() / (24 * 3600.0 * differences.size())) + " day");
