@@ -256,7 +256,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
     private fun updatePathPanelAndGitLists(projectName: String, projectPath: String) {
         thread {
             val isRepo = File("$projectPath/.git").exists()
-            if (myRepo?.repoName != projectName && isRepo) myRepo = buildModel.getRepository(projectPath)
+            if (myRepo?.repoName != projectName && isRepo) myRepo = buildModel.getRepository(projectPath, settings.modelPath)
             updatePathPanel()
             if (isRepo && !(cache.projectPathMap[projectName]!!.isExternal && settings.externalProjectMode == 1)) {
                 populateJBList(branchListModel, buildModel.getBranches(myRepo).filter { it != "HEAD" })
@@ -282,7 +282,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
         val lastDirectory = splitPath[splitPath.size - 1]
         var name = lastDirectory
         if (isRepo) {
-            myRepo = buildModel.getRepository(projectPath)
+            myRepo = buildModel.getRepository(projectPath, settings.modelPath)
             name = myRepo!!.scm.currentBranchOrTagName
         }
         return name
@@ -488,14 +488,14 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
         try {
             if (directory.exists() && directory.isDirectory) {
                 logsJTextArea.append("Already exist!\n")
-                myRepo = buildModel.getRepository(url, settings.repoPath)
+                myRepo = buildModel.getRepository(url, settings.repoPath, settings.modelPath)
                 if ((0 until projectComboBox.model.size).none { i -> projectComboBox.model.getElementAt(i) == repoName }) {
                     projectComboBox.addItem(repoName)
                 }
             } else {
                 logsJTextArea.append("Cloning: ${url}\n")
-                myRepo = if (settings.username.equals("")) buildModel.createClone(url, settings.repoPath)
-                else buildModel.createClone(url, settings.repoPath, settings.username, settings.password)
+                myRepo = if (settings.username.equals("")) buildModel.createClone(url, settings.repoPath, settings.modelPath)
+                else buildModel.createClone(url, settings.repoPath, settings.username, settings.password, settings.modelPath)
                 logsJTextArea.append("Cloned to ${myRepo!!.path}\n")
                 projectComboBox.addItem(repoName)
             }

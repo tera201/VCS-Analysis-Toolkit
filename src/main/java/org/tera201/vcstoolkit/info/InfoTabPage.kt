@@ -31,9 +31,15 @@ class InfoTabPage(val tabManager: TabManager): JBTabbedPane() {
         val lastPathNode = if ((path != null)) path.substring(path.lastIndexOf("/") + 1) else null
 
         var startTime = System.currentTimeMillis()
-        val commitSizeMap: Map<String, CommitSize> = gitTab!!.myRepo!!.scm.repositorySize(path)
+        gitTab!!.myRepo!!.scm.dbPrepared()
         var endTime = System.currentTimeMillis()
         var executionTime = endTime - startTime
+        println("dbPrepared выполнился за $executionTime мс")
+
+        startTime = System.currentTimeMillis()
+        val commitSizeMap: Map<String, CommitSize> = gitTab!!.myRepo!!.scm.repositorySize(path)
+        endTime = System.currentTimeMillis()
+        executionTime = endTime - startTime
         println("commitSizeMap выполнился за $executionTime мс")
 
 
