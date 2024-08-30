@@ -124,7 +124,6 @@ public class AuthorInfoPage {
             LocalDate date1 = DateUtils.Companion.timestampToLocalDate(commitSize.getDate());
             return date1.getYear();
         }).collect(Collectors.toSet()).stream().sorted(Comparator.reverseOrder()).forEach(year -> {
-            System.out.println("Year: " + year);
             listModel.addElement(Integer.toString(year));
             commitPanels.put(year, new CommitPanel(year));
         });
