@@ -32,6 +32,7 @@ dependencies {
     implementation("com.formdev:flatlaf:3.4.1")
     implementation("com.formdev:flatlaf-extras:3.4.1")
     implementation("org.xerial:sqlite-jdbc:3.45.3.0")
+    implementation("com.h2database:h2:2.2.220")
 }
 
 javafx {
