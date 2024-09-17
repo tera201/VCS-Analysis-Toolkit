@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.intellij.ui.JBSplitter;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
+import kotlin.Pair;
 import net.miginfocom.swing.MigLayout;
 import org.repodriller.scm.entities.BlameManager;
 import org.repodriller.scm.entities.CommitSize;
@@ -139,7 +140,7 @@ public class InfoPage {
     }
 
     private void initCalendarPane(Map<String, CommitSize> commitSizeMap) {
-        Map<Integer, CommitPanel> commitPanels = new HashMap<>();
+        CommitPanel commitPanel1 = new CommitPanel();
 
         DefaultListModel<String> listModel = new DefaultListModel<>();
         JList<String> yearList = new JBList<>(listModel);
@@ -152,17 +153,7 @@ public class InfoPage {
             return calendar.get(Calendar.YEAR);
         }).collect(Collectors.toSet()).stream().sorted(Comparator.reverseOrder()).forEach(year -> {
             listModel.addElement(Integer.toString(year));
-            commitPanels.put(year, new CommitPanel(year));
         });
-
-        commitSizeMap.values().forEach(commitSize -> {
-            Date date = new Date((long) commitSize.getDate() * 1000);
-            calendar.setTime(date);
-            int year = calendar.get(Calendar.YEAR);
-            int day = calendar.get(Calendar.DAY_OF_YEAR);
-            commitPanels.get(year).addCommitCountForDay(day, 1);
-        });
-        yearList.setSelectedIndex(0);
 
         JBSplitter splitter = new JBSplitter(false, 0.95f);
         splitter.setDividerWidth(1);
@@ -171,14 +162,24 @@ public class InfoPage {
 
         JScrollPane listScrollPane = new JBScrollPane(yearList);
 
-        splitter.setFirstComponent(commitPanels.get(Integer.parseInt(yearList.getSelectedValue())));
+        splitter.setFirstComponent(commitPanel1);
         splitter.setSecondComponent(listScrollPane);
 
         yearList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-                splitter.setFirstComponent(commitPanels.get(Integer.parseInt(yearList.getSelectedValue())));
+                int year = Integer.parseInt(yearList.getSelectedValue());
+                commitPanel1.updatePanel(year);
+
+                commitSizeMap.values().stream().map(it -> {
+                    calendar.setTime(new Date((long) it.getDate() * 1000));
+                    return new Pair<> (calendar.get(Calendar.YEAR), calendar.get(Calendar.DAY_OF_YEAR));
+                }).filter(it -> year == it.component1()).forEach(it ->
+                    commitPanel1.addCommitCountForDay(it.component2(), 1)
+                );
+                splitter.updateUI();
             }
         });
+        yearList.setSelectedIndex(0);
 
         commitScrollPanel.setViewportView(splitter);
     }

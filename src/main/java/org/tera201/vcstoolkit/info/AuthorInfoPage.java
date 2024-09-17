@@ -5,6 +5,7 @@ import com.intellij.ui.JBSplitter;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.uiDesigner.core.GridConstraints;
+import kotlin.Pair;
 import net.miginfocom.swing.MigLayout;
 import org.repodriller.scm.entities.CommitSize;
 import org.repodriller.scm.entities.DeveloperInfo;
@@ -54,10 +55,8 @@ public class AuthorInfoPage {
 
     private String email;
 
-    public AuthorInfoPage(TabManager tabManager, String email) {
+    public AuthorInfoPage(TabManager tabManager) {
         this.tabManager = tabManager;
-        this.email = email;
-        setShortTextForLabel(emailLabel, email, 6);
         initSpinner();
     }
 
@@ -70,7 +69,18 @@ public class AuthorInfoPage {
 //        somePane.setVisible(false);
     }
 
-    public void open(Map<String, CommitSize> commitSizeMap, Map<String, DeveloperInfo> developerInfoMap) throws InterruptedException {
+    private void removeAll() {
+        filePiePanel.removeAll();
+        linesPiePanel.removeAll();
+        stableCommitPanel.removeAll();
+        barChartByDayPanel.removeAll();
+        barChartByMonthPanel.removeAll();
+        barChartByHoursPanel.removeAll();
+    }
+
+    public void open(String email, Map<String, CommitSize> commitSizeMap, Map<String, DeveloperInfo> developerInfoMap) throws InterruptedException {
+        this.email = email;
+        removeAll();
         updateLabels(developerInfoMap, commitSizeMap);
         intPieChart(createPieDataFile(developerInfoMap.get(email)), filePiePanel, "File actions");
         intPieChart(createPieDataLines(developerInfoMap.get(email)), linesPiePanel, "Line actions");
@@ -84,6 +94,7 @@ public class AuthorInfoPage {
     }
 
     private void updateLabels(Map<String, DeveloperInfo> developerInfoMap, Map<String, CommitSize> commitSizeMap) {
+        setShortTextForLabel(emailLabel, email, 6);
         authorNameLabel.setText(developerInfoMap.get(email).getName());
         commitCountLabel.setText(String.valueOf(developerInfoMap.get(email).getCommits().size()));
         createdBranchesLabel.setText("");
@@ -114,7 +125,8 @@ public class AuthorInfoPage {
     }
 
     private void initCalendarPane(Map<String, CommitSize> commitSizeMap) {
-        Map<Integer, CommitPanel> commitPanels = new HashMap<>();
+        CommitPanel commitPanels = new CommitPanel();
+        Calendar calendar = Calendar.getInstance();
 
         DefaultListModel<String> listModel = new DefaultListModel<>();
         JList<String> yearList = new JBList<>(listModel);
@@ -125,33 +137,31 @@ public class AuthorInfoPage {
             return date1.getYear();
         }).collect(Collectors.toSet()).stream().sorted(Comparator.reverseOrder()).forEach(year -> {
             listModel.addElement(Integer.toString(year));
-            commitPanels.put(year, new CommitPanel(year));
         });
-
-
-        commitSizeMap.values().stream().filter(it -> Objects.equals(it.getAuthorEmail(), email)).forEach(commitSize -> {
-            LocalDate date1 = DateUtils.Companion.timestampToLocalDate(commitSize.getDate());
-            int year = date1.getYear();
-            int day = date1.getDayOfYear();
-            commitPanels.get(year).addCommitCountForDay(day, 1);
-        });
-        yearList.setSelectedIndex(0);
 
         JBSplitter splitter = new JBSplitter(false, 0.95f);
         splitter.setDividerWidth(1);
 
-
-
         JScrollPane listScrollPane = new JBScrollPane(yearList);
 
-        splitter.setFirstComponent(commitPanels.get(Integer.parseInt(yearList.getSelectedValue())));
+        splitter.setFirstComponent(commitPanels);
         splitter.setSecondComponent(listScrollPane);
 
         yearList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-                splitter.setFirstComponent(commitPanels.get(Integer.parseInt(yearList.getSelectedValue())));
+                int year = Integer.parseInt(yearList.getSelectedValue());
+                commitPanels.updatePanel(year);
+
+                commitSizeMap.values().stream().map(it -> {
+                    calendar.setTime(new Date((long) it.getDate() * 1000));
+                    return new Pair<>(calendar.get(Calendar.YEAR), calendar.get(Calendar.DAY_OF_YEAR));
+                }).filter(it -> year == it.component1()).forEach(it ->
+                        commitPanels.addCommitCountForDay(it.component2(), 1)
+                );
+                splitter.updateUI();
             }
         });
+        yearList.setSelectedIndex(0);
 
         calendarScrollPane.setViewportView(splitter);
     }
