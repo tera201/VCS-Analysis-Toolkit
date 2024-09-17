@@ -48,16 +48,28 @@ public class AuthorInfoPage {
     private JPanel barChartByHoursPanel;
     private JLabel lastActivityLabel;
     private JPanel stableCommitPanel;
+    private JComboBox comboBox1;
 
     private final TabManager tabManager;
     private JPanel spinnerPanel;
     private SpinnerProgress spinner;
 
+    private final PieChart filePieChart = new PieChart();
+    private final PieChart linesPieChart = new PieChart();
+    private final PieChart stableCommitChart = new PieChart();
+
     private String email;
 
     public AuthorInfoPage(TabManager tabManager) {
         this.tabManager = tabManager;
+        initPieChart(createDefaultPieDataFile(), filePieChart, filePiePanel, "File actions");
+        initPieChart(createDefaultPieDataLines(), linesPieChart, linesPiePanel, "Line actions");
+        initPieChart(createDefaultPieDataStable(), stableCommitChart, stableCommitPanel, "Stable commits");
         initSpinner();
+    }
+
+    public JComboBox getEmailComboBox() {
+        return comboBox1;
     }
 
     private void initSpinner() {
@@ -66,13 +78,9 @@ public class AuthorInfoPage {
         spinnerPanel.add(spinner);
         spinner.setIndeterminate(true);
         calendarScrollPane.setViewportView(spinnerPanel);
-//        somePane.setVisible(false);
     }
 
     private void removeAll() {
-        filePiePanel.removeAll();
-        linesPiePanel.removeAll();
-        stableCommitPanel.removeAll();
         barChartByDayPanel.removeAll();
         barChartByMonthPanel.removeAll();
         barChartByHoursPanel.removeAll();
@@ -82,9 +90,9 @@ public class AuthorInfoPage {
         this.email = email;
         removeAll();
         updateLabels(developerInfoMap, commitSizeMap);
-        intPieChart(createPieDataFile(developerInfoMap.get(email)), filePiePanel, "File actions");
-        intPieChart(createPieDataLines(developerInfoMap.get(email)), linesPiePanel, "Line actions");
-        intPieChart(createPieDataStable(commitSizeMap), stableCommitPanel, "Stable commits");
+        updatePieChart(createPieDataFile(developerInfoMap.get(email)), filePieChart);
+        updatePieChart(createPieDataLines(developerInfoMap.get(email)), linesPieChart);
+        updatePieChart(createPieDataStable(commitSizeMap), stableCommitChart);
         initCalendarPane(commitSizeMap);
         createBarChart(barChartByHoursPanel, createBarDataByHours(commitSizeMap), "Commit by hours");
         createBarChart(barChartByDayPanel, createBarDataByDay(commitSizeMap), "Commit by day of week");
@@ -94,7 +102,7 @@ public class AuthorInfoPage {
     }
 
     private void updateLabels(Map<String, DeveloperInfo> developerInfoMap, Map<String, CommitSize> commitSizeMap) {
-        setShortTextForLabel(emailLabel, email, 6);
+//        setShortTextForLabel(emailLabel, email, 6);
         authorNameLabel.setText(developerInfoMap.get(email).getName());
         commitCountLabel.setText(String.valueOf(developerInfoMap.get(email).getCommits().size()));
         createdBranchesLabel.setText("");
@@ -124,6 +132,7 @@ public class AuthorInfoPage {
         });
     }
 
+
     private void initCalendarPane(Map<String, CommitSize> commitSizeMap) {
         CommitPanel commitPanels = new CommitPanel();
         Calendar calendar = Calendar.getInstance();
@@ -131,11 +140,12 @@ public class AuthorInfoPage {
         DefaultListModel<String> listModel = new DefaultListModel<>();
         JList<String> yearList = new JBList<>(listModel);
         yearList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        List<CommitSize> filteredCommitSize = commitSizeMap.values().stream().filter(it -> Objects.equals(it.getAuthorEmail(), email)).toList();
 
-        commitSizeMap.values().stream().filter(it -> Objects.equals(it.getAuthorEmail(), email)).map(commitSize -> {
+        filteredCommitSize.stream().map(commitSize -> {
             LocalDate date1 = DateUtils.Companion.timestampToLocalDate(commitSize.getDate());
             return date1.getYear();
-        }).collect(Collectors.toSet()).stream().sorted(Comparator.reverseOrder()).forEach(year -> {
+        }).distinct().sorted(Comparator.reverseOrder()).forEach(year -> {
             listModel.addElement(Integer.toString(year));
         });
 
@@ -152,7 +162,7 @@ public class AuthorInfoPage {
                 int year = Integer.parseInt(yearList.getSelectedValue());
                 commitPanels.updatePanel(year);
 
-                commitSizeMap.values().stream().map(it -> {
+                filteredCommitSize.stream().map(it -> {
                     calendar.setTime(new Date((long) it.getDate() * 1000));
                     return new Pair<>(calendar.get(Calendar.YEAR), calendar.get(Calendar.DAY_OF_YEAR));
                 }).filter(it -> year == it.component1()).forEach(it ->
@@ -166,12 +176,11 @@ public class AuthorInfoPage {
         calendarScrollPane.setViewportView(splitter);
     }
 
-    private void intPieChart(DefaultPieDataset defaultPieDataset, JPanel panel, String name) {
+    private void initPieChart(DefaultPieDataset defaultPieDataset, PieChart pieChart1, JPanel panel, String name) {
         panel.putClientProperty(FlatClientProperties.STYLE, ""
                 + "border:5,5,5,5;"
                 + "background:null");
         panel.setLayout(new MigLayout("wrap,fill,gap 10", "fill"));
-        PieChart pieChart1 = new PieChart();
         JLabel header1 = new JLabel(name);
         header1.putClientProperty(FlatClientProperties.STYLE, ""
                 + "font:+1");
@@ -183,6 +192,37 @@ public class AuthorInfoPage {
         panel.add(pieChart1, "split 5,height 360");
         pieChart1.visibleLegend(false);
         pieChart1.startAnimation();
+        pieChart1.setVisible(false);
+    }
+
+    private void updatePieChart(DefaultPieDataset defaultPieDataset, PieChart pieChart) {
+        pieChart.setDataset(defaultPieDataset);
+        pieChart.setVisible(true);
+        pieChart.startAnimation();
+    }
+
+    private DefaultPieDataset createDefaultPieDataFile() {
+        DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
+        dataset.addValue("Files added", 0);
+        dataset.addValue("Files deleted", 0);
+        dataset.addValue("Files modified", 0);
+        return dataset;
+
+    }
+
+    private DefaultPieDataset createDefaultPieDataLines() {
+        DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
+        dataset.addValue("Lines added", 0);
+        dataset.addValue("Lines deleted", 0);
+        dataset.addValue("Lines modified", 0);
+        return dataset;
+    }
+
+    private DefaultPieDataset createDefaultPieDataStable() {
+        DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
+        dataset.addValue("stable commit count", 0);
+        dataset.addValue("unstable commit count", 0);
+        return dataset;
     }
 
     private DefaultPieDataset createPieDataFile(DeveloperInfo developerInfo) {
