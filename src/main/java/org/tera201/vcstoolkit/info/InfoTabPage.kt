@@ -50,7 +50,7 @@ class InfoTabPage(val tabManager: TabManager): JBTabbedPane() {
         executionTime = endTime - startTime
         println("developerInfoMap выполнился за $executionTime мс")
         infoPage.open(commitSizeMap, developerInfoMap)
-        authorTab.open(commitSizeMap, developerInfoMap)
+        authorTab.create(commitSizeMap, developerInfoMap)
     }
 
 
