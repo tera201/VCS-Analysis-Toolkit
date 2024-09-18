@@ -57,6 +57,11 @@ public class AuthorInfoPage {
     private final PieChart filePieChart = new PieChart();
     private final PieChart linesPieChart = new PieChart();
     private final PieChart stableCommitChart = new PieChart();
+    private final CommitPanel commitPanels = new CommitPanel();
+    private final DefaultListModel<String> listModel = new DefaultListModel<>();
+    private final JList<String> yearList = new JBList<>(listModel);
+    private final JBSplitter splitter = new JBSplitter(false, 0.95f);
+    private final JScrollPane listScrollPane = new JBScrollPane(yearList);
 
     private String email;
 
@@ -65,6 +70,7 @@ public class AuthorInfoPage {
         initPieChart(createDefaultPieDataFile(), filePieChart, filePiePanel, "File actions");
         initPieChart(createDefaultPieDataLines(), linesPieChart, linesPiePanel, "Line actions");
         initPieChart(createDefaultPieDataStable(), stableCommitChart, stableCommitPanel, "Stable commits");
+        initCalendarPane();
         initSpinner();
     }
 
@@ -81,6 +87,8 @@ public class AuthorInfoPage {
     }
 
     private void removeAll() {
+        Arrays.stream(yearList.getListSelectionListeners()).forEach(yearList::removeListSelectionListener);
+        listModel.removeAllElements();
         barChartByDayPanel.removeAll();
         barChartByMonthPanel.removeAll();
         barChartByHoursPanel.removeAll();
@@ -93,7 +101,7 @@ public class AuthorInfoPage {
         updatePieChart(createPieDataFile(developerInfoMap.get(email)), filePieChart);
         updatePieChart(createPieDataLines(developerInfoMap.get(email)), linesPieChart);
         updatePieChart(createPieDataStable(commitSizeMap), stableCommitChart);
-        initCalendarPane(commitSizeMap);
+        updateCalendarPane(commitSizeMap);
         createBarChart(barChartByHoursPanel, createBarDataByHours(commitSizeMap), "Commit by hours");
         createBarChart(barChartByDayPanel, createBarDataByDay(commitSizeMap), "Commit by day of week");
         createBarChart(barChartByMonthPanel, createBarDataByDayOfMouth(commitSizeMap), "Commit by day of month");
@@ -131,15 +139,16 @@ public class AuthorInfoPage {
             }
         });
     }
-
-
-    private void initCalendarPane(Map<String, CommitSize> commitSizeMap) {
-        CommitPanel commitPanels = new CommitPanel();
-        Calendar calendar = Calendar.getInstance();
-
-        DefaultListModel<String> listModel = new DefaultListModel<>();
-        JList<String> yearList = new JBList<>(listModel);
+    private void initCalendarPane() {
         yearList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        splitter.setDividerWidth(1);
+        splitter.setFirstComponent(commitPanels);
+        splitter.setSecondComponent(listScrollPane);
+    }
+
+
+    private void updateCalendarPane(Map<String, CommitSize> commitSizeMap) {
+        Calendar calendar = Calendar.getInstance();
         List<CommitSize> filteredCommitSize = commitSizeMap.values().stream().filter(it -> Objects.equals(it.getAuthorEmail(), email)).toList();
 
         filteredCommitSize.stream().map(commitSize -> {
@@ -148,14 +157,6 @@ public class AuthorInfoPage {
         }).distinct().sorted(Comparator.reverseOrder()).forEach(year -> {
             listModel.addElement(Integer.toString(year));
         });
-
-        JBSplitter splitter = new JBSplitter(false, 0.95f);
-        splitter.setDividerWidth(1);
-
-        JScrollPane listScrollPane = new JBScrollPane(yearList);
-
-        splitter.setFirstComponent(commitPanels);
-        splitter.setSecondComponent(listScrollPane);
 
         yearList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
@@ -172,7 +173,6 @@ public class AuthorInfoPage {
             }
         });
         yearList.setSelectedIndex(0);
-
         calendarScrollPane.setViewportView(splitter);
     }
 
