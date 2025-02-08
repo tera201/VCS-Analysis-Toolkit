@@ -1,3 +1,6 @@
 [submodule "code-to-uml"]
 	path = code-to-uml
 	url = git@github.com:tera201/Code2UML.git
+[submodule "swrminer"]
+	path = swrminer
+	url = git@github.com:tera201/SWRMiner.git
