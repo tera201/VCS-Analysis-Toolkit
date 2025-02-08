@@ -7,14 +7,10 @@ import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
-import com.intellij.openapi.fileChooser.FileChooserFactory
-import com.intellij.openapi.fileChooser.FileSaverDescriptor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.ui.ComboBox
-import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.vfs.LocalFileSystem
-import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.ColoredTreeCellRenderer
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBList
@@ -22,16 +18,17 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.treeStructure.Tree
 import com.intellij.util.PlatformIcons
 import model.console.BuildModel
-import org.eclipse.uml2.uml.Model
 import org.repodriller.scm.SCMRepository
 import org.tera201.code2uml.AnalyzerBuilder
 import org.tera201.code2uml.Language
-import org.tera201.code2uml.uml.util.UMLModelHandler
+import org.tera201.code2uml.util.messages.DataBaseUtil
 import org.tera201.vcstoolkit.helpers.ProjectPath
 import org.tera201.vcstoolkit.helpers.SharedModel
 import org.tera201.vcstoolkit.services.VCSToolkitCache
 import org.tera201.vcstoolkit.services.settings.VCSToolkitSettings
-import java.awt.*
+import java.awt.BorderLayout
+import java.awt.Dimension
+import java.awt.FlowLayout
 import java.awt.event.*
 import java.io.File
 import java.io.IOException
@@ -44,11 +41,11 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
     private var settings: VCSToolkitSettings = VCSToolkitSettings.getInstance()
     private var cache: VCSToolkitCache = VCSToolkitCache.getInstance(tabManager.getCurrentProject())
     var myRepo: SCMRepository? = null
+    val dateBaseURL = "${settings.modelPath}/model.db"
+    val dataBaseUtil:DataBaseUtil
     private val getButton = JButton("Get")
     private val urlField = JTextField()
     private val analyzeButton = JButton("Analyze")
-    private val saveUmlFileButton = JButton("Save UML model")
-    private val getUmlFileButton = JButton("Get UML model")
     private val buildModel = BuildModel()
     // TODO: problems with JBTextArea (IDEA freeze) when analyzing one branch
     private val logsJTextArea = JTextArea().apply {
@@ -59,8 +56,9 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
         JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
         JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
     )
-    var models = ArrayList<Model>()
-    private val handler = UMLModelHandler()
+    var models = ArrayList<Int>()
+    var modelsIdMap = HashMap<String, Int>()
+
     private var isClearingSelection = false
     private val branchListModel = DefaultListModel<String>()
     private val tagListModel = DefaultListModel<String>()
@@ -118,6 +116,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
         } catch (e: IOException) {
             e.printStackTrace()
         }
+        dataBaseUtil = DataBaseUtil(dateBaseURL)
 
         this.layout = FlowLayout(FlowLayout.LEFT)
         logsJBScrollPane.isVisible = settings.showGitLogs
@@ -127,6 +126,8 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
                 VCSToolkitSettings.SettingsChangedListener {
                 override fun onSettingsChange(settings: VCSToolkitSettings) {
                     logsJBScrollPane.isVisible = settings.showGitLogs
+                    createDirectoryIfNotExists(settings.repoPath)
+                    createDirectoryIfNotExists(settings.modelPath)
                     if (settings.externalProjectMode == 1 &&  cache.projectPathMap[projectComboBox.selectedItem]!!.isExternal) {
                         branchListModel.clear()
                         tagListModel.clear()
@@ -172,6 +173,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
         this.add(logModelSplitPane)
         addModelControlPanel()
         addProjectPane()
+        createPopupMenu()
     }
 
     private fun addProjectPane() {
@@ -241,7 +243,8 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
     }
 
     private fun createExceptionNotification(e:Exception) {
-        val content = "message: ${e.message}\nstackTrace: ${e.stackTrace.joinToString("\n")}"
+        val content = "${e.message}"
+        System.err.println("message: ${e.message}\nstackTrace: ${e.stackTrace.joinToString("\n")}")
         createNotification(e.javaClass.simpleName, content, NotificationType.ERROR)
     }
 
@@ -253,7 +256,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
     private fun updatePathPanelAndGitLists(projectName: String, projectPath: String) {
         thread {
             val isRepo = File("$projectPath/.git").exists()
-            if (myRepo?.repoName != projectName && isRepo) myRepo = buildModel.getRepository(projectPath)
+            if (myRepo?.repoName != projectName && isRepo) myRepo = buildModel.getRepository(projectPath, settings.modelPath)
             updatePathPanel()
             if (isRepo && !(cache.projectPathMap[projectName]!!.isExternal && settings.externalProjectMode == 1)) {
                 populateJBList(branchListModel, buildModel.getBranches(myRepo).filter { it != "HEAD" })
@@ -279,7 +282,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
         val lastDirectory = splitPath[splitPath.size - 1]
         var name = lastDirectory
         if (isRepo) {
-            myRepo = buildModel.getRepository(projectPath)
+            myRepo = buildModel.getRepository(projectPath, settings.modelPath)
             name = myRepo!!.scm.currentBranchOrTagName
         }
         return name
@@ -304,6 +307,38 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
                 }
             }
         })
+    }
+
+    private fun createPopupMenu() {
+        val popupMenu = JPopupMenu()
+        val menuItemDeleteFromDB = JMenuItem("Delete From DB")
+        popupMenu.add(menuItemDeleteFromDB)
+        modelList.addMouseListener(object : MouseAdapter() {
+            override fun mouseClicked(e: MouseEvent) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    val index: Int = modelList.locationToIndex(e.point)
+                    if (index != -1) {
+                        modelList.setSelectedIndex(index)
+                        popupMenu.show(modelList, e.x, e.y)
+                    }
+                }
+            }
+        })
+
+        menuItemDeleteFromDB.addActionListener { e: ActionEvent? ->
+            val selectedIndex: Int = modelList.getSelectedIndex()
+            val modelId = modelsIdMap[modelListContent.getElementAt(selectedIndex)]
+            if (selectedIndex != -1) {
+                modelList.remove(selectedIndex)
+                modelListContent.removeAt(selectedIndex)
+                if (modelId != null) {
+                    dataBaseUtil.deleteModel(modelId)
+                }
+            }
+        }
+        menuItemDeleteFromDB.addActionListener { e: ActionEvent? ->
+
+        }
     }
 
     fun JBList<String>.addClearSelectorByAnotherList(anotherList: JBList<String>) {
@@ -335,7 +370,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
                     val index = jbList.locationToIndex(e.point)
                     if (index >= 0) {
                         val selectedItem = jbList.model.getElementAt(index)
-                        onListItemDoubleClicked(selectedItem)
+                        checkoutTo(selectedItem)
                     }
                 } else if (analyzing) {
                     createNotification("Checkout freeze",
@@ -345,19 +380,11 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
         }
     }
 
-    private fun onListItemDoubleClicked(item: String) {
-        println("Double clicked on item: $item")
-        checkoutTo(item)
-    }
-
-    private fun checkoutTo(item:String) {
-        val fileSystem = LocalFileSystem.getInstance()
-        val virtualFile: VirtualFile? = fileSystem.findFileByPath(myRepo!!.path)
-        val virtualFileGit: VirtualFile? = fileSystem.findFileByPath("${myRepo!!.path}/.git}")
+    public fun checkoutTo(item:String) {
         try {
             if (settings.externalProjectMode == 2)
                 myRepo?.scm?.createCommit("VCSToolkit: save message")
-            buildModel.checkout(myRepo, item)
+            myRepo!!.scm.checkoutTo(item)
             if (myRepo?.scm?.currentBranchOrTagName != null)
                 currentBranchOrTagLabel.text = myRepo?.scm?.currentBranchOrTagName
             if (settings.externalProjectMode == 2)
@@ -365,8 +392,11 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
         } catch (e:Exception) {
             createExceptionNotification(e)
         }
-        virtualFile?.refresh(false, true)
-        virtualFileGit?.refresh(false, true)
+//        val fileSystem = LocalFileSystem.getInstance()
+//        val virtualFile: VirtualFile? = fileSystem.findFileByPath(myRepo!!.path)
+//        val virtualFileGit: VirtualFile? = fileSystem.findFileByPath("${myRepo!!.path}/.git}")
+//        virtualFile?.refresh(false, true)
+//        virtualFileGit?.refresh(false, true)
         updatePathPanel()
     }
 
@@ -390,11 +420,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
     private fun addModelControlPanel() {
         val modelControlPanel = JPanel()
         listenerForAnalyzeButton()
-        listenerForGetUmlFileButton()
-        listenerForSaveUmlButton()
         modelControlPanel.add(analyzeButton)
-        modelControlPanel.add(saveUmlFileButton)
-        modelControlPanel.add(getUmlFileButton)
         this.add(modelControlPanel)
     }
 
@@ -407,78 +433,24 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
                     val startTime = System.currentTimeMillis()
                     val allList = branchList.selectedValuesList + tagList.selectedValuesList
                     models.clear()
+                    modelsIdMap.clear()
                     modelListContent.clear()
                     logsJTextArea.append("Start analyzing.\n")
                     allList.forEach { analyze(true, it, myRepo!!.path) }
-                    if (allList.size == 1 || allList.isEmpty()) saveUmlFileButton.text = "Save UML model"
-                    else saveUmlFileButton.text = "Save UML model pack"
                     if (allList.isEmpty() && projectPath != null) analyze(false, currentBranchOrTagLabel.text, projectPath)
                     val executionTime = (System.currentTimeMillis() - startTime) / 1000.0
                     logsJTextArea.append("End analyzing. Execution time: $executionTime sec.\n")
                     analyzing = false
-                    modelListContent.addAll(models.stream().map { it.name }.toList())
+                    modelListContent.addAll(modelsIdMap.keys)
                     buildCircle()
                 }else logsJTextArea.append("Get some repo or project for analyzing.\n")
             }
         }
     }
 
-    private fun listenerForGetUmlFileButton() {
-        getUmlFileButton.addActionListener {
-            val descriptor = FileChooserDescriptor(
-                true, false,
-                false, false, false, false
-            );
-            descriptor.setTitle("Get UML-Model");
-            val toSelect = if (settings.modelPath.isEmpty()) null else LocalFileSystem.getInstance()
-                .findFileByPath(settings.modelPath)
-            val virtualFile = FileChooser.chooseFile(descriptor, null, toSelect)
-
-            if (virtualFile != null) {
-                logsJTextArea.append("Get model from file: ${virtualFile.path}\n")
-                try {
-                    val modelList = handler.loadListModelFromFile(virtualFile.path)
-                    if (modelList != null)
-                        models = modelList as ArrayList<Model>
-                    modelListContent.clear()
-                    modelListContent.addAll(models.stream().map { it.name }.toList())
-                    (tabManager.getTabMap()[TabEnum.CIRCLE] as FXCircleTab).renderByModel(models)
-                } catch (e: Exception) {
-                    createExceptionNotification(e)
-                }
-            }
-        }
-    }
-
-    private fun listenerForSaveUmlButton() {
-        saveUmlFileButton.addActionListener {
-            val title =  if (models.size == 1) "SAVE UML-MODEL" else "SAVE UML-MODEL PACK"
-            val fileNameExt = if (models.size == 1) "" else "Pack"
-            val descriptor = FileSaverDescriptor(
-                title, "Choose the destination file",
-                "json"
-            );
-            val toSelect = if (settings.modelPath.isEmpty()) null else LocalFileSystem.getInstance()
-                .findFileByPath(settings.modelPath)
-            val fileSaverDialog = FileChooserFactory.getInstance().createSaveFileDialog(descriptor, null)
-            val fileName = if(SystemInfo.isMac) "${cache.lastProject}Model$fileNameExt.json"
-            else "${cache.lastProject}Model$fileNameExt"
-            val virtualFileWrapper = fileSaverDialog.save(toSelect, fileName)
-            if (virtualFileWrapper != null) {
-                val fileToSave = virtualFileWrapper.file
-                logsJTextArea.append("Save as file: ${fileToSave.absolutePath}\n")
-                try {
-                    handler.saveModelToFile(models, fileToSave.absolutePath)
-                } catch (e: Exception) {
-                    createExceptionNotification(e)
-                }
-            }
-        }
-    }
-
     private fun buildCircle() {
         try {
-            (tabManager.getTabMap()[TabEnum.CIRCLE] as FXCircleTab).renderByModel(models)
+            (tabManager.getTabMap()[TabEnum.CIRCLE] as FXCircleTab).renderByModel(models, dataBaseUtil)
         } catch (e:Exception) {
             createExceptionNotification(e)
         }
@@ -487,32 +459,43 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
     private fun analyze(isGit: Boolean, name: String, projectPath: String) {
         logsJTextArea.append("\t*modeling: ${currentBranchOrTagLabel.text}\n")
         logsJTextArea.caret.dot = logsJTextArea.text.length
+        val selectedProject = if (projectComboBox.selectedItem == "Current project")  tabManager.project.name else projectComboBox.selectedItem as String
         try {
             if (isGit) checkoutTo(name)
             val analyzerBuilder =
-                AnalyzerBuilder(Language.Java, name, projectPath)
+                AnalyzerBuilder(Language.Java, selectedProject, name, projectPath, dateBaseURL)
                     .textArea(logsJTextArea).threads(4)
-            models.add(analyzerBuilder.build())
+            val modelId = analyzerBuilder.buildDB()
+            models.add(modelId)
+            modelsIdMap.put(name, modelId)
         } catch (e:Exception) {
             createExceptionNotification(e)
         }
     }
 
+    private fun createDirectoryIfNotExists(path: String) {
+        val directory = File(path)
+        if (!directory.exists()) {
+            directory.mkdirs()
+        }
+    }
+
     private fun getRepoByUrl(url: String) {
         val repoName = buildModel.getRepoNameByUrl(url)
+        createDirectoryIfNotExists(settings.repoPath)
         val directoryPath = "${settings.repoPath}/$repoName"
         val directory = File(directoryPath)
         try {
             if (directory.exists() && directory.isDirectory) {
                 logsJTextArea.append("Already exist!\n")
-                myRepo = buildModel.getRepository(url, settings.repoPath)
+                myRepo = buildModel.getRepository(url, settings.repoPath, settings.modelPath)
                 if ((0 until projectComboBox.model.size).none { i -> projectComboBox.model.getElementAt(i) == repoName }) {
                     projectComboBox.addItem(repoName)
                 }
             } else {
                 logsJTextArea.append("Cloning: ${url}\n")
-                myRepo = if (settings.username.equals("")) buildModel.createClone(url, settings.repoPath)
-                else buildModel.createClone(url, settings.repoPath, settings.username, settings.password)
+                myRepo = if (settings.username.equals("")) buildModel.createClone(url, settings.repoPath, settings.modelPath)
+                else buildModel.createClone(url, settings.repoPath, settings.username, settings.password, settings.modelPath)
                 logsJTextArea.append("Cloned to ${myRepo!!.path}\n")
                 projectComboBox.addItem(repoName)
             }
@@ -524,11 +507,14 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
     }
 
     private fun updatePathPanel() {
+//        println(cache.projectPathMap[cache.lastProject]?.path)
         val root = DefaultMutableTreeNode(cache.projectPathMap[cache.lastProject]?.path)
         buildTree(File(cache.projectPathMap[cache.lastProject]?.path), root)
         pathJTree.model = DefaultTreeModel(root)
-        filesTreeJBScrollPane.setViewportView(pathJTree)
-        filesTreeJBScrollPane.updateUI()
+        SwingUtilities.invokeLater {
+            filesTreeJBScrollPane.setViewportView(pathJTree)
+            filesTreeJBScrollPane.updateUI()
+        }
     }
 
     private fun buildTree(file: File, rootTree: DefaultMutableTreeNode) {

@@ -34,19 +34,16 @@ class VCSToolWindowFactoryKt : ToolWindowFactory {
             val jtp = tabManager.getJBTabbedPane()
             val actionManager = ActionManager(jtp, toolWindow, tabManager)
 
-            jtp.addChangeListener(object : ChangeListener {
-                override fun stateChanged(e: ChangeEvent?) {
-                    val selectedTab = jtp.getTitleAt(jtp.selectedIndex)
-                    if ((selectedTab == TabEnum.CITY.value || selectedTab == TabEnum.CIRCLE.value) &&
-                        actionManager.openedFxTabs[selectedTab] == null)
-                        actionManager.setToolBarWithExpand()
-                    else if (actionManager.openedFxTabs[selectedTab] != null)
-                        actionManager.setToolBarWithCollapse()
-                    else
-                        actionManager.setDefaultToolBar()
+            jtp.addChangeListener {
+                when (val selectedTab = jtp.getTitleAt(jtp.selectedIndex)) {
+                    TabEnum.GRAPH.value -> actionManager.setToolBarForInfoPage()
+                    in arrayOf(TabEnum.CITY.value, TabEnum.CIRCLE.value) -> {
+                        if (actionManager.openedFxTabs[selectedTab] == null) actionManager.setToolBarWithExpand()
+                        else actionManager.setToolBarWithCollapse()
+                    }
+                    else -> actionManager.setDefaultToolBar()
                 }
-
-            })
+            }
 
             ApplicationManager.getApplication().messageBus.connect()
                 .subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, object : FileEditorManagerListener {

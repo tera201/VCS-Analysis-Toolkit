@@ -37,7 +37,28 @@
   <change-notes>
     <![CDATA[
       <html>
+        <b>1.5.0</b>
+          <li> Added commit stability PieChart for authors
+          <li> Added authors tab page for info
+          <li> Added experimental optimization for circle view
+        <b>1.4.1</b>
+          <li> Fixed calculations for circle view
+          <li> Analyzing time have significant reduced for almost similar branches
+          <li> Model safes in DB
+          <li> Removed buttons for safe/load model
+          <li> Removed background for graph
+          <li> Fixed dragging on graph view
+          <li> Updated info page
+          <li> Added info page for circle selected object
+          <li> Added info page for city selected object
+          <li> Added info page for git selected file
+        </ul>
         <b>1.4.0</b>
+          <li> Added loading spinner for info page
+          <li> Added support for 2024.1
+          <li> Added bar chart
+          <li> Added commit calendar
+          <li> Added line chart
           <li> Added info button for stat
           <li> Added template for stat
           <li> Fixed text of tip

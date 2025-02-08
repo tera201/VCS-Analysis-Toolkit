@@ -14,8 +14,9 @@ import kotlin.jvm.optionals.getOrNull
 
 
 class FXCityTab(private val tabManager: TabManager, modelListContent:SharedModel) : JPanel(), FXTab {
-    private val modelComboBox = ComboBox(modelListContent)
-    private var model: Model? = null
+    val modelComboBox = ComboBox(modelListContent)
+    private var model: Int? = null
+    val fxCity:FXCityPanel
     private val topPanel = JPanel()
 
     init {
@@ -23,7 +24,7 @@ class FXCityTab(private val tabManager: TabManager, modelListContent:SharedModel
         topPanel.layout = FlowLayout(FlowLayout.LEFT)
         topPanel.add(modelComboBox)
         this.add(topPanel, BorderLayout.NORTH)
-        val fxCity = FXCityPanel()
+        fxCity = FXCityPanel()
         this.add(fxCity, BorderLayout.CENTER)
         // TODO: help with render javafx after plugin hide state - have no idea how
         FXCityPanel()
@@ -31,11 +32,12 @@ class FXCityTab(private val tabManager: TabManager, modelListContent:SharedModel
         modelComboBox.addActionListener {
             if (modelComboBox.selectedItem != null) {
                 val selectedModelName = modelComboBox.selectedItem as String
-                model = (tabManager.getTabMap()[TabEnum.GIT] as GitTab).models.stream().filter { it.name == selectedModelName }.findAny().getOrNull()
+                val gitTab = tabManager.getTabMap()[TabEnum.GIT] as GitTab
+                model = gitTab.modelsIdMap.getOrDefault(selectedModelName, null)
                 Platform.runLater {
                 if (model != null) {
                         fxCity.citySpace.clean()
-                        model!!.toCity(fxCity.citySpace)
+                        toCity(fxCity.citySpace, model!!, gitTab.dataBaseUtil)
                         fxCity.citySpace.updateView()
                     }
                 }

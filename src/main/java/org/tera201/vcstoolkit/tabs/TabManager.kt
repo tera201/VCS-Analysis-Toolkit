@@ -25,8 +25,12 @@ class TabManager (val project:Project) {
         return jtp
     }
 
+    fun getSelectedTabTitle(): String {
+        return jtp.getTitleAt(jtp.selectedIndex)
+    }
+
     fun getTabMap() : HashMap<TabEnum, JPanel> {
-        return tabMap;
+        return tabMap
     }
 
     fun getCurrentProject(): Project {

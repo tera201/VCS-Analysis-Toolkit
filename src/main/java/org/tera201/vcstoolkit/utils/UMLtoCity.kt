@@ -24,6 +24,7 @@ private fun Package.generatePackage(citySpace: FXSpace<Quarter>, parentName: Str
     val newName = if (parentName.orEmpty().isNotEmpty())  "$parentName.$name" else name
     val quarter = Quarter(newName, size, 10.0, size, 50.0)
     citySpace.mainObject.addObject(quarter)
+    quarter.filePath = this.getEAnnotation("ResourcePath")?.details?.get("path")
     packagedElements
         .filter { !it.hasKeyword("unknown") }
         .forEach {
@@ -41,6 +42,7 @@ private fun Class.generateClass(quarter: Quarter?) {
     val methods = ownedComments[1].body.toDouble() + 1
     val side = size / 20
     val building = Building(name, side, 10 * methods, side)
+    building.filePath = this.getEAnnotation("ResourcePath")?.details?.get("path")
     building.info = """
         $parentsAsJava
     """.trimIndent()
@@ -52,11 +54,13 @@ private fun Interface.generateInterface(quarter: Quarter?) {
     val methods = ownedComments[1].body.toDouble() + 1
     val side = size / 20
     val building = Building(name, side, 10 * methods, side)
+    building.filePath = this.getEAnnotation("ResourcePath")?.details?.get("path")
     quarter?.addObject(building)
 }
 
 private fun Enumeration.generateEnumeration(quarter: Quarter?) {
     val building = Building(name, 100.0, 900.0, 100.0)
+    building.filePath = this.getEAnnotation("ResourcePath")?.details?.get("path")
     quarter?.addObject(building)
 }
 

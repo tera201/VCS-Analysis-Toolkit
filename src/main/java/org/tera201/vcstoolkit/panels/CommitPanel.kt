@@ -13,19 +13,43 @@ import javax.swing.BorderFactory
 import javax.swing.JLabel
 import javax.swing.JPanel
 
-class CommitPanel internal constructor(private var year: Int) : JPanel() {
+class CommitPanel internal constructor() : JPanel() {
+    private var year: Int = LocalDate.now().year
     private var daysInYear: Int = Year.of(year).length()
-    private var panels: Array<JPanel?> = arrayOfNulls(daysInYear)
-    private val dayCommit = IntArray(daysInYear)
+    private var offset:Int = LocalDate.ofYearDay(year, 1).getDayOfWeek().value - 1
+    private var panels: Array<JPanel?> = arrayOfNulls(366)
+    private val dayCommit = IntArray(366)
+    private val gbc: GridBagConstraints = GridBagConstraints()
+    private var date: LocalDate = LocalDate.ofYearDay(year, 1)
 
     init {
         setLayout(GridBagLayout())
-        val gbc = GridBagConstraints()
         gbc.fill = GridBagConstraints.BOTH
-        var date = LocalDate.ofYearDay(year, 1)
-        val offset = date.getDayOfWeek().value - 1 // offset for 1st week of year
         gbc.weightx = 10.0
         gbc.weighty = 10.0
+
+    }
+
+    constructor(year: Int) : this() {
+        updatePanel(year)
+    }
+
+    private fun clearPanels() = panels.forEachIndexed() { i, _ -> panels[i] = null }
+
+    fun updatePanel(year: Int) {
+        this.removeAll()
+        clearPanels()
+        date = LocalDate.ofYearDay(year, 1)
+        dayCommit.forEachIndexed() { i,_ -> dayCommit[i] = 0 }
+        daysInYear = Year.of(year).length()
+        offset = date.getDayOfWeek().value - 1
+
+        gbc.gridx = 0
+        gbc.gridy = 0
+        drawPanel()
+    }
+
+    private fun drawPanel() {
 
         // add labels for month
         addMonthLabels(date, gbc.clone() as GridBagConstraints)
@@ -43,12 +67,12 @@ class CommitPanel internal constructor(private var year: Int) : JPanel() {
         }
 
         // Fill the calendar with day panels
-        for (i in 0 until daysInYear) {
+        for (i in offset until daysInYear + offset) {
             val dayPanel =
                 createDayPanel(date.month.getDisplayName(TextStyle.FULL, Locale.getDefault()), date.dayOfMonth)
             gbc.gridx = i / 7 + 1
             gbc.gridy = i % 7 + 1
-            panels[i] = dayPanel
+            panels[i - offset] = dayPanel
             this.add(dayPanel, gbc.clone())
             date = date.plusDays(1)
         }
@@ -94,8 +118,6 @@ class CommitPanel internal constructor(private var year: Int) : JPanel() {
             weeksPerMonths[currentMonth]++
             date = date.plusWeeks(1)
         }
-
-        weeksPerMonths.forEach { println(it) }
 
         gbc.gridx = 1
         gbc.gridwidth = weeksPerMonths[0]

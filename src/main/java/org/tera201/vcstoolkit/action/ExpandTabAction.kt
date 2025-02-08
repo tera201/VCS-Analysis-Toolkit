@@ -2,7 +2,7 @@ package org.tera201.vcstoolkit.action
 
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.fileEditor.impl.JComponentEditorProvider
+import com.intellij.openapi.fileEditor.impl.JComponentEditorProviderUtils
 import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.util.containers.stream
 import javafx.embed.swing.JFXPanel
@@ -18,10 +18,7 @@ class ExpandTabAction(private val actionManager: ActionManager) : DumbAwareActio
 
         event.project?.let {
             val jfxPanel = (content as JComponent).components.stream().filter { it is JFXPanel }.findAny().get() as JFXPanel
-            val editor = JComponentEditorProvider.openEditor(
-                it, selectedTabTitle,
-                jfxPanel as JComponent
-            )
+            val editor = JComponentEditorProviderUtils.openEditor(it, selectedTabTitle, jfxPanel)
             actionManager.openedFxTabs.set(selectedTabTitle, FullScreenTabInfo(selectedIndex, jfxPanel, editor[0].file))
             actionManager.setToolBarWithCollapse()
         }
