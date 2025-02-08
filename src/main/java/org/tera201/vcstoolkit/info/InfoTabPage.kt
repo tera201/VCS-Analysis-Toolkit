@@ -7,6 +7,7 @@ import org.repodriller.scm.entities.DeveloperInfo
 import org.tera201.vcstoolkit.tabs.GitTab
 import org.tera201.vcstoolkit.tabs.TabEnum
 import org.tera201.vcstoolkit.tabs.TabManager
+import kotlin.concurrent.thread
 
 class InfoTabPage(val tabManager: TabManager): JBTabbedPane() {
     val infoPage = InfoPage(tabManager)
@@ -49,8 +50,8 @@ class InfoTabPage(val tabManager: TabManager): JBTabbedPane() {
         endTime = System.currentTimeMillis()
         executionTime = endTime - startTime
         println("developerInfoMap выполнился за $executionTime мс")
-        infoPage.open(commitSizeMap, developerInfoMap)
-        authorTab.create(commitSizeMap, developerInfoMap)
+        thread {infoPage.open(commitSizeMap, developerInfoMap)}
+        thread {authorTab.create(commitSizeMap, developerInfoMap)}
     }
 
 

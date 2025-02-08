@@ -68,7 +68,6 @@ public class InfoPage {
         String path = InfoPageUtilsKt.getPathByTab(tabManager);
         lastPathNode = (path != null) ? path.substring(path.lastIndexOf("/") + 1) : null;
 
-
         spinner.setIndeterminate(false);
         Thread.sleep(100);
         mainInfoPane.setVisible(true);
