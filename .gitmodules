@@ -10,3 +10,6 @@
 [submodule "swing-components"]
 	path = swing-components
 	url = git@github.com:tera201/SwingComponents.git
+[submodule "javafx-uml-graph"]
+	path = javafx-uml-graph
+	url = git@github.com:tera201/JavaFXUMLGraph.git
