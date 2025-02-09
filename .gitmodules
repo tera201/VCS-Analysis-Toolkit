@@ -7,3 +7,6 @@
 [submodule "javafx-code-modeling-tool"]
 	path = javafx-code-modeling-tool
 	url = git@github.com:tera201/JavaFXCodeModelingTool.git
+[submodule "swing-components"]
+	path = swing-components
+	url = git@github.com:tera201/SwingComponents.git
