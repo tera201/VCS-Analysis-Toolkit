@@ -1,15 +1,15 @@
-[submodule "code-to-uml"]
+[submodule "modules/code-to-uml"]
 	path = modules/code-to-uml
 	url = git@github.com:tera201/Code2UML.git
-[submodule "swrminer"]
+[submodule "modules/swrminer"]
 	path = modules/swrminer
 	url = git@github.com:tera201/SWRMiner.git
-[submodule "javafx-code-modeling-tool"]
+[submodule "modules/javafx-code-modeling-tool"]
 	path = modules/javafx-code-modeling-tool
 	url = git@github.com:tera201/JavaFXCodeModelingTool.git
-[submodule "swing-components"]
+[submodule "modules/swing-components"]
 	path = modules/swing-components
 	url = git@github.com:tera201/SwingComponents.git
-[submodule "javafx-uml-graph"]
+[submodule "modules/javafx-uml-graph"]
 	path = modules/javafx-uml-graph
 	url = git@github.com:tera201/JavaFXUMLGraph.git
