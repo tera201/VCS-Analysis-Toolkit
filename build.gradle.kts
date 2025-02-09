@@ -5,21 +5,16 @@ plugins {
     id("org.openjfx.javafxplugin") version "0.0.14"
 }
 
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+}
+
 group = "org.tera201"
 version = "1.5.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
-    mavenLocal()
-//    maven {
-//        url = uri("https://maven.pkg.github.com/tera201/JavaFXUMLCityBuilder")
-//        credentials {
-//            username = project.properties["username"].toString()
-//            password = project.properties["password"].toString()
-//        }
-//    }
 }
-
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.10")
@@ -51,32 +46,7 @@ tasks {
     runIde {
         jvmArgs("-Xms256m", "-Xmx3048m")
     }
-    // Set the JVM compatibility versions
-    withType<JavaCompile> {
-        sourceCompatibility = "17"
-        targetCompatibility = "17"
-    }
 
-    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        kotlinOptions {
-            jvmTarget = "17"
-            apiVersion = "1.8"
-            languageVersion = "1.8"
-        }
-    }
-}
-
-tasks {
-    compileKotlin {
-        kotlinOptions.jvmTarget = "17"
-        kotlinOptions.languageVersion = "1.8"
-        kotlinOptions.apiVersion = "1.8"
-    }
-    compileTestKotlin {
-        kotlinOptions.jvmTarget = "17"
-        kotlinOptions.languageVersion = "1.8"
-        kotlinOptions.apiVersion = "1.8"
-    }
     patchPluginXml {
         sinceBuild.set("221.*")
     }
