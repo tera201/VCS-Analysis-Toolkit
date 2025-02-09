@@ -1,7 +1,7 @@
 rootProject.name = "IdeaPlugin"
 
-includeBuild("code-to-uml")
-includeBuild("swrminer")
-includeBuild("javafx-code-modeling-tool")
-includeBuild("swing-components")
-includeBuild("javafx-uml-graph")
+includeBuild("modules/code-to-uml")
+includeBuild("modules/swrminer")
+includeBuild("modules/javafx-code-modeling-tool")
+includeBuild("modules/swing-components")
+includeBuild("modules/javafx-uml-graph")
