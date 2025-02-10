@@ -465,7 +465,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
             val analyzerBuilder =
                 AnalyzerBuilder(Language.Java, selectedProject, name, projectPath, dateBaseURL)
                     .textArea(logsJTextArea).threads(4)
-            val modelId = analyzerBuilder.buildDB()
+            val modelId = analyzerBuilder.buildDB(dataBaseUtil)
             models.add(modelId)
             modelsIdMap.put(name, modelId)
         } catch (e:Exception) {
