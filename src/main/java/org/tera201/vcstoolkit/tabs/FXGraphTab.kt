@@ -29,7 +29,7 @@ import javax.swing.JPanel
 
 class FXGraphTab(private val tabManager: TabManager, modelListContent:SharedModel): JPanel() {
 
-    var graphView: GraphPanel<String, String>? = null
+    var graphView: GraphPanel<Int, String>? = null
     private val fxPanel: JFXPanel = object : JFXPanel() {}
     private val topPanel = JPanel()
     private val modelComboBox = ComboBox(modelListContent)
@@ -119,8 +119,8 @@ class FXGraphTab(private val tabManager: TabManager, modelListContent:SharedMode
             return g
         }
 
-        public fun build_package_graph(model: Int, dataBaseUtil: DataBaseUtil): Graph<String, String> {
-            val g: DigraphTreeEdgeList<String, String> = DigraphTreeEdgeList()
+        public fun build_package_graph(model: Int, dataBaseUtil: DataBaseUtil): Graph<Int, String> {
+            val g: DigraphTreeEdgeList<Int, String> = DigraphTreeEdgeList()
             toPackage(g, model, dataBaseUtil)
             return g
         }
@@ -131,8 +131,8 @@ class FXGraphTab(private val tabManager: TabManager, modelListContent:SharedMode
             return g
         }
 
-        public fun build_class_graph(model: Int, dataBaseUtil: DataBaseUtil): Graph<String, String> {
-            val g: DigraphTreeEdgeList<String, String> = DigraphTreeEdgeList();
+        public fun build_class_graph(model: Int, dataBaseUtil: DataBaseUtil): Graph<Int, String> {
+            val g: DigraphTreeEdgeList<Int, String> = DigraphTreeEdgeList();
             toClass(g, model, dataBaseUtil)
             return g
         }
@@ -145,15 +145,15 @@ class FXGraphTab(private val tabManager: TabManager, modelListContent:SharedMode
     }
 
 
-    private fun build_sample_digraph(): Graph<String, String> {
-        val g: Digraph<String, String> = DigraphTreeEdgeList()
-        val a = g.insertVertex("A", ElementTypes.PACKAGE, "<<package>> A\n included: B, C, D")
-        val b = g.insertVertex("B", ElementTypes.INTERFACE)
-        val c = g.insertVertex("C", ElementTypes.COMPONENT)
-        val d = g.insertVertex("D", ElementTypes.ENUM)
-        val e = g.insertVertex("E", ElementTypes.CLASS)
-        val f = g.insertVertex("F")
-        val mn = g.insertVertex("main")
+    private fun build_sample_digraph(): Graph<Int, String> {
+        val g: Digraph<Int, String> = DigraphTreeEdgeList()
+        val a = g.insertVertex(1, ElementTypes.PACKAGE, "A", "<<package>> A\n included: B, C, D")
+        val b = g.insertVertex(2, ElementTypes.INTERFACE,"B")
+        val c = g.insertVertex(3, ElementTypes.COMPONENT,"C")
+        val d = g.insertVertex(4, ElementTypes.ENUM,"D")
+        val e = g.insertVertex(5, ElementTypes.CLASS,"E")
+        val f = g.insertVertex(6, ElementTypes.CLASS,"F")
+        val mn = g.insertVertex(7, ElementTypes.CLASS,"Main")
         g.insertEdge(a, b, "AB", ArrowTypes.AGGREGATION)
         g.insertEdge(b, a, "AB2", ArrowTypes.DEPENDENCY)
         g.insertEdge(a, c, "AC", ArrowTypes.COMPOSITION)
