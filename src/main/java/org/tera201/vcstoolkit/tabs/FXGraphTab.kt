@@ -12,14 +12,12 @@ import org.eclipse.uml2.uml.Model
 import org.tera201.code2uml.util.messages.DataBaseUtil
 import org.tera201.umlgraph.containers.GraphDemoContainer
 import org.tera201.umlgraph.graph.Digraph
-import org.tera201.umlgraph.graph.DigraphTreeEdgeList
+import org.tera201.umlgraph.graph.DigraphEdgeList
 import org.tera201.umlgraph.graph.Graph
 import org.tera201.umlgraph.graphview.GraphPanel
 import org.tera201.umlgraph.graphview.arrows.ArrowTypes
-import org.tera201.umlgraph.graphview.edges.Edge
 import org.tera201.umlgraph.graphview.strategy.DigraphTreePlacementStrategy
 import org.tera201.umlgraph.graphview.strategy.PlacementStrategy
-import org.tera201.umlgraph.graphview.vertices.GraphVertex
 import org.tera201.umlgraph.graphview.vertices.elements.ElementTypes
 import org.tera201.vcstoolkit.helpers.SharedModel
 import java.awt.BorderLayout
@@ -114,31 +112,34 @@ class FXGraphTab(private val tabManager: TabManager, modelListContent:SharedMode
 
     companion object {
         public fun build_graph(model: Model): Graph<String, String> {
-            val g: Digraph<String, String> = DigraphTreeEdgeList();
+            val g: Digraph<String, String> = DigraphEdgeList();
             model.toGraph(g)
             return g
         }
 
         public fun build_package_graph(model: Int, dataBaseUtil: DataBaseUtil): Graph<Int, String> {
-            val g: DigraphTreeEdgeList<Int, String> = DigraphTreeEdgeList()
+            val g: DigraphEdgeList<Int, String> =
+                DigraphEdgeList()
             toPackage(g, model, dataBaseUtil)
             return g
         }
 
         public fun build_package_graph(model: Model): Graph<String, String> {
-            val g: Digraph<String, String> = DigraphTreeEdgeList();
+            val g: Digraph<String, String> = DigraphEdgeList();
             model.toPackage(g)
             return g
         }
 
         public fun build_class_graph(model: Int, dataBaseUtil: DataBaseUtil): Graph<Int, String> {
-            val g: DigraphTreeEdgeList<Int, String> = DigraphTreeEdgeList();
+            val g: DigraphEdgeList<Int, String> =
+                DigraphEdgeList();
             toClass(g, model, dataBaseUtil)
             return g
         }
 
         public fun build_class_graph(model: Model): Graph<String, String> {
-            val g: DigraphTreeEdgeList<String, String> = DigraphTreeEdgeList();
+            val g: DigraphEdgeList<String, String> =
+                DigraphEdgeList();
             model.toClass(g)
             return g
         }
@@ -146,7 +147,7 @@ class FXGraphTab(private val tabManager: TabManager, modelListContent:SharedMode
 
 
     private fun build_sample_digraph(): Graph<Int, String> {
-        val g: Digraph<Int, String> = DigraphTreeEdgeList()
+        val g: Digraph<Int, String> = DigraphEdgeList()
         val a = g.insertVertex(1, ElementTypes.PACKAGE, "A", "<<package>> A\n included: B, C, D")
         val b = g.insertVertex(2, ElementTypes.INTERFACE,"B")
         val c = g.insertVertex(3, ElementTypes.COMPONENT,"C")

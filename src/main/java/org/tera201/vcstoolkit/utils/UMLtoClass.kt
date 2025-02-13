@@ -1,13 +1,13 @@
 package org.tera201.vcstoolkit.utils
 
 import org.eclipse.uml2.uml.*
-import org.tera201.umlgraph.graph.DigraphTreeEdgeList
+import org.tera201.umlgraph.graph.DigraphEdgeList
 import org.tera201.umlgraph.graph.InvalidVertexException
 import org.tera201.umlgraph.graph.Vertex
 import org.tera201.umlgraph.graphview.arrows.ArrowTypes
 import org.tera201.umlgraph.graphview.vertices.elements.ElementTypes
 
-fun Package.toClass(graph: DigraphTreeEdgeList<String, String>) {
+fun Package.toClass(graph: DigraphEdgeList<String, String>) {
     packagedElements
         .filter { !it.hasKeyword("unknown") }
         .forEach {
@@ -21,7 +21,7 @@ fun Package.toClass(graph: DigraphTreeEdgeList<String, String>) {
 }
 
 
-private fun Package.generatePackage(graph: DigraphTreeEdgeList<String, String>, parent: Vertex<String>?) {
+private fun Package.generatePackage(graph: DigraphEdgeList<String, String>, parent: Vertex<String>?) {
     packagedElements
         .filter { !it.hasKeyword("unknown") }
         .forEach {
@@ -34,7 +34,7 @@ private fun Package.generatePackage(graph: DigraphTreeEdgeList<String, String>, 
         }
 }
 
-private fun Class.generateClass(graph: DigraphTreeEdgeList<String, String>, parent: Vertex<String>?) {
+private fun Class.generateClass(graph: DigraphEdgeList<String, String>, parent: Vertex<String>?) {
     this.parentsAsJava(graph, name)
     this.interfacesAsJava(graph, name)
     val root = getVertexOrCreate(graph, name, ElementTypes.CLASS)
@@ -42,14 +42,14 @@ private fun Class.generateClass(graph: DigraphTreeEdgeList<String, String>, pare
     if (parent != null) graph.insertEdge(parent, root, "$name-${parent}", ArrowTypes.DEPENDENCY)
 }
 
-private fun Classifier.nestedClasses(graph: DigraphTreeEdgeList<String, String>, parent: Vertex<String>?) {
+private fun Classifier.nestedClasses(graph: DigraphEdgeList<String, String>, parent: Vertex<String>?) {
     val root = graph.insertVertex(name, ElementTypes.CLASS)
 //    if (parent != null) graph.insertEdge(parent, root, "$name-$parent", ArrowTypes.DEPENDENCY)
 }
 
 
 
-private fun Class.interfacesAsJava(graph: DigraphTreeEdgeList<String, String>, mainClass:String) {
+private fun Class.interfacesAsJava(graph: DigraphEdgeList<String, String>, mainClass:String) {
         val implemented = interfaceRealizations.joinToString { it.contract.name }
         if (implemented.isNotEmpty()) {
             val root = getVertexOrCreate(graph, implemented, ElementTypes.INTERFACE)
@@ -67,7 +67,7 @@ private val NamedElement.javaName: String
     }
 
 
-private fun Classifier.parentsAsJava(graph: DigraphTreeEdgeList<String, String>, mainClass:String) {
+private fun Classifier.parentsAsJava(graph: DigraphEdgeList<String, String>, mainClass:String) {
     val parents = generalizations
         .map { it.general }
         .filter { !it.javaName.endsWith("java.lang.Object") }
@@ -79,18 +79,18 @@ private fun Classifier.parentsAsJava(graph: DigraphTreeEdgeList<String, String>,
     }
 }
 
-private fun Enumeration.generateEnumeration(graph: DigraphTreeEdgeList<String, String>, parent: Vertex<String>?) {
+private fun Enumeration.generateEnumeration(graph: DigraphEdgeList<String, String>, parent: Vertex<String>?) {
     var root:Vertex<String>;
     root = getVertexOrCreate(graph, name, ElementTypes.ENUM)
     if (parent != null) graph.insertEdge(parent, root, "$name-$parent", ArrowTypes.DEPENDENCY)
 }
 
-private fun Interface.generateInterface(graph: DigraphTreeEdgeList<String, String>, parent: Vertex<String>?) {
+private fun Interface.generateInterface(graph: DigraphEdgeList<String, String>, parent: Vertex<String>?) {
     var root:Vertex<String>;
     root = getVertexOrCreate(graph, name, ElementTypes.INTERFACE)
     if (parent != null) graph.insertEdge(parent, root, "$name-$parent", ArrowTypes.DEPENDENCY)
 }
-private fun getVertexOrCreate(graph: DigraphTreeEdgeList<String, String>, nodeName: String, types: ElementTypes): Vertex<String> {
+private fun getVertexOrCreate(graph: DigraphEdgeList<String, String>, nodeName: String, types: ElementTypes): Vertex<String> {
     return try {
         graph.getVertex(nodeName)
     } catch (e: InvalidVertexException) {
