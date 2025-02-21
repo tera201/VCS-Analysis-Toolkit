@@ -7,7 +7,7 @@
   <id>org.tera201.VCSToolkit</id>
 
   <!-- Text to display as name on Preferences/Settings | Plugin page -->
-  <name>SDK: VCS Toolkit</name>
+  <name>VCS Analysis Toolkit</name>
 
   <!-- Indicate this plugin can be loaded in all IntelliJ Platform-based products. -->
   <depends>com.intellij.modules.platform</depends>
@@ -113,7 +113,7 @@
   </change-notes>
 
   <!-- Text to display as company information on Preferences/Settings | Plugin page -->
-  <vendor url="https://plugins.jetbrains.com">IntelliJ Platform SDK</vendor>
+  <vendor email="201tera201@gmail.com">tera201</vendor>
 
   <extensions defaultExtensionNs="com.intellij">
     <toolWindow id="VCS Toolkit" secondary="true" icon="AllIcons.General.Modified" anchor="left"

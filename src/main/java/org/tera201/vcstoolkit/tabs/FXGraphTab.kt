@@ -1,37 +1,41 @@
 package org.tera201.vcstoolkit.tabs
 
-import org.tera201.vcstoolkit.utils.toClass
-import org.tera201.vcstoolkit.utils.toGraph
-import org.tera201.vcstoolkit.utils.toPackage
 import com.intellij.icons.AllIcons
+import com.intellij.ide.ui.LafManagerListener
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.editor.colors.ColorKey
+import com.intellij.openapi.editor.colors.EditorColorsManager
+import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.ui.ComboBox
 import javafx.application.Platform
 import javafx.embed.swing.JFXPanel
 import javafx.scene.Scene
 import org.eclipse.uml2.uml.Model
 import org.tera201.code2uml.util.messages.DataBaseUtil
-import org.tera201.umlgraph.containers.GraphDemoContainer
-import org.tera201.umlgraph.graph.Digraph
-import org.tera201.umlgraph.graph.DigraphTreeEdgeList
 import org.tera201.umlgraph.graph.Graph
-import org.tera201.umlgraph.graphview.GraphPanel
+import org.tera201.umlgraph.graphview.UMLGraphControlPanel
+import org.tera201.umlgraph.graphview.UMLGraphPanel
 import org.tera201.umlgraph.graphview.arrows.ArrowTypes
-import org.tera201.umlgraph.graphview.edges.Edge
-import org.tera201.umlgraph.graphview.strategy.DigraphTreePlacementStrategy
 import org.tera201.umlgraph.graphview.strategy.PlacementStrategy
-import org.tera201.umlgraph.graphview.vertices.GraphVertex
 import org.tera201.umlgraph.graphview.vertices.elements.ElementTypes
 import org.tera201.vcstoolkit.helpers.SharedModel
+import org.tera201.vcstoolkit.utils.toClass
+import org.tera201.vcstoolkit.utils.toGraph
+import org.tera201.vcstoolkit.utils.toPackage
 import java.awt.BorderLayout
+import java.awt.Color
 import java.awt.FlowLayout
 import javax.swing.JButton
 import javax.swing.JPanel
+import javax.swing.UIManager
+
 
 class FXGraphTab(private val tabManager: TabManager, modelListContent:SharedModel): JPanel() {
 
-    var graphView: GraphPanel<String, String>? = null
+    var umlGraphPanel: UMLGraphPanel<Int, String>? = null
     private val fxPanel: JFXPanel = object : JFXPanel() {}
     private val topPanel = JPanel()
+    private var umlGraphControlPanel: UMLGraphControlPanel<Int, String>? = null
     private val modelComboBox = ComboBox(modelListContent)
     private var model:Int? = null
     private val packageButton = JButton("Package")
@@ -50,37 +54,37 @@ class FXGraphTab(private val tabManager: TabManager, modelListContent:SharedMode
         topPanel.add(packageButton)
         topPanel.add(classButton)
         topPanel.add(modelComboBox)
+        ApplicationManager.getApplication().messageBus.connect()
+            .subscribe(LafManagerListener.TOPIC, LafManagerListener {
+                updateGraphControlPanelColors()
+            })
+
+
 
         modelComboBox.addActionListener {
             if (modelComboBox.selectedItem != null) {
                 val selectedModelName = modelComboBox.selectedItem as String
                 gitTab = tabManager.getTabMap()[TabEnum.GIT] as GitTab
-//                model = gitTab!!.models.stream().filter { it.name == selectedModelName }.findAny().getOrNull()
                 model = gitTab!!.modelsIdMap.getOrDefault(selectedModelName, null)
             }
         }
 
         packageButton.addActionListener {
             if (model != null) {
-                val strategy: PlacementStrategy = DigraphTreePlacementStrategy()
-                graphView = GraphPanel(build_package_graph(model!!, gitTab!!.dataBaseUtil), strategy)
-                val sceneWidth = 800.0
-                val sceneHeight = 600.0
-                val scene = Scene(GraphDemoContainer(graphView), sceneWidth, sceneHeight)
-                fxPanel.scene = scene
-//                graphView?.setTheGraph(build_package_graph(model!!, gitTab!!.dataBaseUtil))
+                Platform.runLater {
+                    umlGraphPanel?.setGraph(build_package_graph(model!!, gitTab!!.dataBaseUtil))
+                }
+                umlGraphPanel?.update()
+                umlGraphControlPanel?.update()
             }
         }
-//
+
         classButton.addActionListener {
             if (model != null) {
-                val strategy: PlacementStrategy = DigraphTreePlacementStrategy()
-                graphView = GraphPanel(build_class_graph(model!!, gitTab!!.dataBaseUtil), strategy)
-                val sceneWidth = 800.0
-                val sceneHeight = 600.0
-                val scene = Scene(GraphDemoContainer(graphView), sceneWidth, sceneHeight)
-                fxPanel.scene = scene
-//                graphView?.setTheGraph(build_class_graph(model!!, gitTab!!.dataBaseUtil))
+                Platform.runLater {
+                    umlGraphPanel?.setGraph(build_class_graph(model!!, gitTab!!.dataBaseUtil))
+                }
+                umlGraphPanel?.update()
             }
         }
 
@@ -92,79 +96,76 @@ class FXGraphTab(private val tabManager: TabManager, modelListContent:SharedMode
     fun make_fxPanel(mainPanel: JFXPanel) {
         val sceneWidth = 800.0
         val sceneHeight = 600.0
-        val g = build_sample_digraph()
-        val strategy: PlacementStrategy = DigraphTreePlacementStrategy()
-        graphView = GraphPanel(g, strategy)
-//        if (g.numVertices() > 0) {
-//            graphView!!.getStylableVertex("A").setStyle("-fx-fill: gold; -fx-stroke: brown;")
-//        }
-        val scene = Scene(GraphDemoContainer(graphView), sceneWidth, sceneHeight)
-        Platform.runLater { graphView!!.init() }
-//        graphView!!.setVertexDoubleClickAction { graphVertex: GraphVertex<String> ->
-//            if (!graphVertex.removeStyleClass("myVertex")) {
-//                graphVertex.addStyleClass("myVertex")
-//            }
-//        }
-//        graphView!!.setEdgeDoubleClickAction { graphEdge: Edge<String, String> ->
-//            graphEdge.setStyle("-fx-stroke: black; -fx-stroke-width: 3;")
-//            graphEdge.stylableArrow.setStyle("-fx-stroke: black; -fx-stroke-width: 3;")
-//        }
+        val g = build_sample()
+        val strategy = PlacementStrategy()
+        umlGraphPanel = UMLGraphPanel(g, strategy)
+        umlGraphControlPanel = UMLGraphControlPanel(umlGraphPanel)
+        val scene = Scene(umlGraphControlPanel, sceneWidth, sceneHeight)
+        updateGraphControlPanelColors()
+        Platform.runLater { umlGraphPanel!!.init() }
         mainPanel.scene = scene
+    }
+
+    private fun updateGraphControlPanelColors() {
+        umlGraphControlPanel?.setBackgroundColor(EditorColorsManager.getInstance().schemeForCurrentUITheme.defaultBackground.brighter())
+        umlGraphControlPanel?.setButtonColor(UIManager.getColor("Button.background").brighter())
     }
 
     companion object {
         public fun build_graph(model: Model): Graph<String, String> {
-            val g: Digraph<String, String> = DigraphTreeEdgeList();
+            val g: Graph<String, String> = Graph();
             model.toGraph(g)
             return g
         }
 
-        public fun build_package_graph(model: Int, dataBaseUtil: DataBaseUtil): Graph<String, String> {
-            val g: DigraphTreeEdgeList<String, String> = DigraphTreeEdgeList()
+        public fun build_package_graph(model: Int, dataBaseUtil: DataBaseUtil): Graph<Int, String> {
+            val g: Graph<Int, String> =
+                Graph()
             toPackage(g, model, dataBaseUtil)
             return g
         }
 
         public fun build_package_graph(model: Model): Graph<String, String> {
-            val g: Digraph<String, String> = DigraphTreeEdgeList();
+            val g: Graph<String, String> = Graph();
             model.toPackage(g)
             return g
         }
 
-        public fun build_class_graph(model: Int, dataBaseUtil: DataBaseUtil): Graph<String, String> {
-            val g: DigraphTreeEdgeList<String, String> = DigraphTreeEdgeList();
+        public fun build_class_graph(model: Int, dataBaseUtil: DataBaseUtil): Graph<Int, String> {
+            val g: Graph<Int, String> =
+                Graph();
             toClass(g, model, dataBaseUtil)
             return g
         }
 
         public fun build_class_graph(model: Model): Graph<String, String> {
-            val g: DigraphTreeEdgeList<String, String> = DigraphTreeEdgeList();
+            val g: Graph<String, String> =
+                Graph();
             model.toClass(g)
             return g
         }
     }
 
 
-    private fun build_sample_digraph(): Graph<String, String> {
-        val g: Digraph<String, String> = DigraphTreeEdgeList()
-        val a = g.insertVertex("A", ElementTypes.PACKAGE, "<<package>> A\n included: B, C, D")
-        val b = g.insertVertex("B", ElementTypes.INTERFACE)
-        val c = g.insertVertex("C", ElementTypes.COMPONENT)
-        val d = g.insertVertex("D", ElementTypes.ENUM)
-        val e = g.insertVertex("E", ElementTypes.CLASS)
-        val f = g.insertVertex("F")
-        val mn = g.insertVertex("main")
-        g.insertEdge(a, b, "AB", ArrowTypes.AGGREGATION)
-        g.insertEdge(b, a, "AB2", ArrowTypes.DEPENDENCY)
-        g.insertEdge(a, c, "AC", ArrowTypes.COMPOSITION)
-        g.insertEdge(a, d, "AD")
-        g.insertEdge(b, c, "BC")
-        g.insertEdge(c, d, "CD", ArrowTypes.REALIZATION)
-        g.insertEdge(b, e, "BE")
-        g.insertEdge(d, f, "DF2")
+    private fun build_sample(): Graph<Int, String> {
+        val graph = Graph<Int, String>()
+        val packageV = graph.getOrCreateVertex(1, ElementTypes.PACKAGE, "<<package>> A\n included: interface, component, enum")
+        val interfaceV = graph.getOrCreateVertex(2, ElementTypes.INTERFACE, "interface")
+        val componentV = graph.getOrCreateVertex(3, ElementTypes.COMPONENT, "component")
+        val enumV = graph.getOrCreateVertex(4, ElementTypes.ENUM, "enum")
+        val classV = graph.getOrCreateVertex(5, ElementTypes.CLASS, "class")
+        val fClassV = graph.getOrCreateVertex(6, ElementTypes.CLASS, "f class")
 
-        //yep, it's a loop!
-        g.insertEdge(a, a, "Loop")
-        return g
+        graph.getOrCreateEdge(packageV, interfaceV, "package - interface", ArrowTypes.AGGREGATION)
+        graph.getOrCreateEdge(interfaceV, packageV, "interface - package", ArrowTypes.DEPENDENCY)
+        graph.getOrCreateEdge(packageV, componentV, "package - component", ArrowTypes.COMPOSITION)
+        graph.getOrCreateEdge(packageV, enumV, "package - enum")
+        graph.getOrCreateEdge(interfaceV, componentV, "interface - component")
+        graph.getOrCreateEdge(componentV, enumV, "component - enum", ArrowTypes.REALIZATION)
+        graph.getOrCreateEdge(interfaceV, classV, "interface - class")
+        graph.getOrCreateEdge(enumV, fClassV, "enum - f class")
+        graph.getOrCreateEdge(fClassV, enumV, "f class - enum")
+
+        return graph
     }
 }
