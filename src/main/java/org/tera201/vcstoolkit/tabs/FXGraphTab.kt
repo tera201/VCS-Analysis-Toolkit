@@ -1,6 +1,11 @@
 package org.tera201.vcstoolkit.tabs
 
 import com.intellij.icons.AllIcons
+import com.intellij.ide.ui.LafManagerListener
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.editor.colors.ColorKey
+import com.intellij.openapi.editor.colors.EditorColorsManager
+import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.ui.ComboBox
 import javafx.application.Platform
 import javafx.embed.swing.JFXPanel
@@ -18,9 +23,12 @@ import org.tera201.vcstoolkit.utils.toClass
 import org.tera201.vcstoolkit.utils.toGraph
 import org.tera201.vcstoolkit.utils.toPackage
 import java.awt.BorderLayout
+import java.awt.Color
 import java.awt.FlowLayout
 import javax.swing.JButton
 import javax.swing.JPanel
+import javax.swing.UIManager
+
 
 class FXGraphTab(private val tabManager: TabManager, modelListContent:SharedModel): JPanel() {
 
@@ -46,6 +54,12 @@ class FXGraphTab(private val tabManager: TabManager, modelListContent:SharedMode
         topPanel.add(packageButton)
         topPanel.add(classButton)
         topPanel.add(modelComboBox)
+        ApplicationManager.getApplication().messageBus.connect()
+            .subscribe(LafManagerListener.TOPIC, LafManagerListener {
+                updateGraphControlPanelColors()
+            })
+
+
 
         modelComboBox.addActionListener {
             if (modelComboBox.selectedItem != null) {
@@ -87,8 +101,14 @@ class FXGraphTab(private val tabManager: TabManager, modelListContent:SharedMode
         umlGraphPanel = UMLGraphPanel(g, strategy)
         umlGraphControlPanel = UMLGraphControlPanel(umlGraphPanel)
         val scene = Scene(umlGraphControlPanel, sceneWidth, sceneHeight)
+        updateGraphControlPanelColors()
         Platform.runLater { umlGraphPanel!!.init() }
         mainPanel.scene = scene
+    }
+
+    private fun updateGraphControlPanelColors() {
+        umlGraphControlPanel?.setBackgroundColor(EditorColorsManager.getInstance().schemeForCurrentUITheme.defaultBackground.brighter())
+        umlGraphControlPanel?.setButtonColor(UIManager.getColor("Button.background").brighter())
     }
 
     companion object {
