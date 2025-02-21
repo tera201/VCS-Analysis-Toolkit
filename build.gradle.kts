@@ -1,6 +1,6 @@
 plugins {
     id("java")
-    id("org.jetbrains.intellij") version "1.15.0"
+    id("org.jetbrains.intellij.platform") version "2.0.0"
     id("org.jetbrains.kotlin.jvm") version "1.8.10"
     id("org.openjfx.javafxplugin") version "0.0.14"
 }
@@ -14,6 +14,9 @@ version = "1.5.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    intellijPlatform {
+        defaultRepositories()
+    }
 }
 
 dependencies {
@@ -28,18 +31,24 @@ dependencies {
     implementation("com.formdev:flatlaf:3.4.1")
     implementation("com.formdev:flatlaf-extras:3.4.1")
     implementation("org.xerial:sqlite-jdbc:3.45.3.0")
+    intellijPlatform {
+        intellijIdeaCommunity("2024.1")
+        instrumentationTools()
+        plugin("com.intellij.javafx:1.0.4")
+    }
+}
+
+intellijPlatform {
+    pluginConfiguration {
+        ideaVersion {
+            untilBuild = provider { null }
+        }
+    }
 }
 
 javafx {
     version = "20"
     modules = listOf("javafx.controls", "javafx.fxml", "javafx.graphics", "javafx.swing", "javafx.web", "javafx.media", "javafx.base")
-}
-
-// Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
-intellij {
-    version.set("2024.1")
-    type.set("IC") // Target IDE Platform
-    plugins.set(listOf("com.intellij.javafx:1.0.4"))
 }
 
 tasks {
