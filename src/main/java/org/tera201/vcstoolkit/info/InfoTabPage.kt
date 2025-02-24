@@ -38,7 +38,7 @@ class InfoTabPage(val tabManager: TabManager): JBTabbedPane() {
         println("dbPrepared выполнился за $executionTime мс")
 
         startTime = System.currentTimeMillis()
-        val commitSizeMap: Map<String, CommitSize> = gitTab!!.myRepo!!.scm.repositorySize(path)
+        val commitSizeMap: Map<String, CommitSize> = gitTab.myRepo!!.scm.repositorySize(path)
         endTime = System.currentTimeMillis()
         executionTime = endTime - startTime
         println("commitSizeMap выполнился за $executionTime мс")
