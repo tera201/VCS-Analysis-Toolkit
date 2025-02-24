@@ -41,7 +41,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
     private var settings: VCSToolkitSettings = VCSToolkitSettings.getInstance()
     private var cache: VCSToolkitCache = VCSToolkitCache.getInstance(tabManager.getCurrentProject())
     var myRepo: SCMRepository? = null
-    val dateBaseURL = "${settings.modelPath}/model.db"
+    private val dateBaseURL: String = "${settings.modelPath}/model.db"
     val dataBaseUtil:DataBaseUtil
     private val getButton = JButton("Get")
     private val urlField = JTextField()

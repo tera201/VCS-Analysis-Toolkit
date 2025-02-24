@@ -2,6 +2,7 @@ package org.tera201.vcstoolkit.services
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.PersistentStateComponent
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.project.Project
@@ -10,6 +11,7 @@ import com.intellij.util.xmlb.XmlSerializerUtil
 import org.tera201.vcstoolkit.helpers.ProjectPath
 
 
+@Service(Service.Level.PROJECT)
 @State(name = "VCSToolkitCachesNew", storages = [Storage("vcs_toolkit_cache.xml")])
 class VCSToolkitCache : PersistentStateComponent<VCSToolkitCache> {
     var urlField: String = "https://github.com/arnohaase/a-foundation.git"

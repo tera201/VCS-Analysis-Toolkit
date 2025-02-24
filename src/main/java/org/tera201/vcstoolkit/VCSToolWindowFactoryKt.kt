@@ -8,18 +8,12 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.content.ContentFactory
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 import org.tera201.vcstoolkit.action.ActionManager
 import org.tera201.vcstoolkit.tabs.*
 import javax.swing.SwingUtilities
-import javax.swing.event.ChangeEvent
-import javax.swing.event.ChangeListener
 
 
 class VCSToolWindowFactoryKt : ToolWindowFactory {
-
-    private val log: Logger = LogManager.getLogger(VCSToolWindowFactoryKt::class.java)
 
     /**
      * Create the tool window content.
@@ -50,7 +44,7 @@ class VCSToolWindowFactoryKt : ToolWindowFactory {
                     override fun fileClosed(source: FileEditorManager, file: VirtualFile) {
                         if (file.extension == null && (file.name == TabEnum.CITY.value || file.name == TabEnum.CIRCLE.value)) {
                             val fullScreenTabInfo = actionManager.openedFxTabs[file.name]
-                        if (fullScreenTabInfo != null) {
+                            if (fullScreenTabInfo != null) {
                                 val fxTab = jtp.getComponentAt(fullScreenTabInfo.index) as FXTab
                                 fxTab.setJFXPanel(fullScreenTabInfo.jfxPanel)
                                 actionManager.openedFxTabs.remove(file.name)

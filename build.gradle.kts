@@ -1,7 +1,7 @@
 plugins {
     id("java")
-    id("org.jetbrains.intellij.platform") version "2.0.0"
-    id("org.jetbrains.kotlin.jvm") version "1.8.10"
+    id("org.jetbrains.intellij.platform") version "2.2.0"
+    id("org.jetbrains.kotlin.jvm") version "2.0.0"
     id("org.openjfx.javafxplugin") version "0.0.14"
 }
 
@@ -10,7 +10,7 @@ java {
 }
 
 group = "org.tera201"
-version = "1.5.0-SNAPSHOT"
+version = "1.5.1-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -32,8 +32,7 @@ dependencies {
     implementation("com.formdev:flatlaf-extras:3.4.1")
     implementation("org.xerial:sqlite-jdbc:3.45.3.0")
     intellijPlatform {
-        intellijIdeaCommunity("2024.1")
-        instrumentationTools()
+        intellijIdeaCommunity("2024.3.2.1")
         plugin("com.intellij.javafx:1.0.4")
     }
 }
@@ -54,9 +53,5 @@ javafx {
 tasks {
     runIde {
         jvmArgs("-Xms256m", "-Xmx3048m")
-    }
-
-    patchPluginXml {
-        sinceBuild.set("221.*")
     }
 }
