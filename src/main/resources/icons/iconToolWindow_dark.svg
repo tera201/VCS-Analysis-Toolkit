@@ -1,0 +1,12 @@
+<svg width="16" height="16" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Base "T" Shape (Front Face) -->
+  <polygon points="26.19,10 173.8,10 173.8,22 145,40 115,40 115,200 85,200 85,40 55,40 26.19, 22"  fill="#CED0D6" opacity="0.7"/>
+
+  <!-- Base "A" Parts Shape (Front Face)-->
+  <polygon points="26.19,200 26.19,190 75,67.04 75,143.72 47.44,210" fill="#CED0D6"/>
+  <polygon points="173.8,200 173.8,190 125,67.04 125,143.72 152.3,210" fill="#CED0D6"/>
+  <polygon points="85,40 100,0 115,40" fill="#CED0D6" />
+  <rect x="80" y="80" width="40" height="40"  fill="#CED0D6" />
+
+</svg>

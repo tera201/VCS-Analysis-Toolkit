@@ -1,52 +1,44 @@
-<svg width="81" height="80" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background Gradient -->
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background (optional, for visibility) -->
+  <!--  <rect width="200" height="200" fill="white"/>-->
   <defs>
-    <linearGradient id="bgGradient" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#1E1E2E"/>
-      <stop offset="100%" stop-color="#000000"/>
+    <linearGradient id="letterGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="00%" stop-color="#800080" /> <!-- Violet -->
+      <!--      <stop offset="70%" stop-color="#ADD8E6"/> &lt;!&ndash; Violet &ndash;&gt;-->
+      <stop offset="100%" stop-color="#000000"/> <!-- Black -->
     </linearGradient>
+    <linearGradient id="letterGradient2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#BABAB"/> <!-- Violet -->
+      <stop offset="40%" stop-color="#ADD8E6"/> <!-- Violet -->
+      <stop offset="60%" stop-color="#800080"/> <!-- Violet -->
+      <!--      <stop offset="70%" stop-color="#ADD8E6"/> &lt;!&ndash; Violet &ndash;&gt;-->
+      <stop offset="100%" stop-color="#000000"/> <!-- Black -->
+    </linearGradient>
+
+    <!-- Radial Gradient for Portal Glow -->
+    <radialGradient id="portalGradient" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="rgba(128, 0, 128, 0.8)"/> <!-- Violet Center -->
+      <stop offset="100%" stop-color="rgba(0, 0, 0, 0)"/> <!-- Fades to Transparent -->
+    </radialGradient>
   </defs>
-  <rect width="500" height="500" fill="url(#bgGradient)"/>
 
-  <!-- UML Class Diagram (Top Left) -->
-  <rect x="30" y="30" width="150" height="30" stroke="white" stroke-width="2" fill="none"/>
-  <line x1="30" y1="60" x2="180" y2="60" stroke="white" stroke-width="2"/>
-  <rect x="30" y="60" width="150" height="40" stroke="white" stroke-width="2" fill="none"/>
-  <line x1="30" y1="100" x2="180" y2="100" stroke="white" stroke-width="2"/>
-  <rect x="30" y="100" width="150" height="40" stroke="white" stroke-width="2" fill="none"/>
+  <ellipse cx="100" cy="138" rx="90" ry="14" fill="url(#portalGradient)" opacity="0.8"/>
 
-  <!-- Nested Circles (Top Right) -->
-  <circle cx="400" cy="80" r="50" stroke="#A9A9A9" stroke-width="2" fill="none"/>
-  <circle cx="400" cy="64" r="30" stroke="#ADD8E6" stroke-width="4" fill="none"/>
-  <circle cx="400" cy="54" r="15" stroke="#A9A9A9" stroke-width="5" fill="none"/>
+  <!-- Base "A" 3D Shape (Front Face) -->
+  <polygon points="60,140 100,7.5 140,140 120,135 100,50 80,135" fill="url(#letterGradient2)" opacity="0.6"/>
+  <polygon points="60,140 100,7.5 60 130" fill="grey" opacity="0.2"/>
+  <polygon points="140,140 100,7.5 140 130" fill="grey" opacity="0.1"/>
 
-  <!-- Git-Like Angled Branches (Orange) -->
-  <!--   UML connects to Circles -->
-  <polyline points="180,80 280,80 370,80" stroke="#FFA500" stroke-width="3" fill="none"/>
-  <!---->
-  <!-- UML connects to Buildings -->
-  <polyline points="100,140 100,280" stroke="#FFA500" stroke-width="3" fill="none"/>
-  <polyline points="100,280 260,280" stroke="#FFA500" stroke-width="3" fill="none"/>
-  <polyline points="260,280 260, 410" stroke="#FFA500" stroke-width="3" fill="none"/>
+  <!-- Base "T" 3D Shape (Back Face) -->
+  <polygon points="65,2.5 145,22.5 145,42.5 115,35 115,135 95,130 95,30 65,22.5" fill="black" opacity="0.5"/>
 
-  <!-- Circles connect to Buildings -->
-  <polyline points="400,70  400,240" stroke="#FFA500" stroke-width="3" fill="none"/>
-  <polyline points="400,240  340,240" stroke="#FFA500" stroke-width="3" fill="none"/>
-  <polyline points="340,240  340, 400" stroke="#FFA500" stroke-width="3" fill="none"/>
+  <!-- "T" 3D Depth Effect (Side Faces) -->
+  <polygon points="60,7.5 65,2.5 145,22.5 140,27.5"  fill="grey" opacity="0.2"/>
+  <polygon points=" 145,22.5 145,42.5 140,47.5 140,27.5"  fill="grey" opacity="0.1"/>
+  <polygon points="145,42.5 140,47.5 110,40 115,35"  fill="black" opacity="0.5"/>
+  <polygon points="110,40 110,140  115,135 115,35"  fill="grey" opacity="0.1"/>
 
-  <!-- Circles connect to Buildings differently -->
-  <polyline points="415,54  470,54" stroke="#FFA500" stroke-width="3" fill="none"/>
-  <polyline points="470,54 470,340" stroke="#FFA500" stroke-width="3" fill="none"/>
-  <polyline points="470,340 100,340" stroke="#FFA500" stroke-width="3" fill="none"/>
-  <polyline points="100,340 100,390" stroke="#FFA500" stroke-width="3" fill="none"/>
+  <!-- Base "T" 3D Shape (Front Face) -->
+  <polygon points="60,7.5 140,27.5 140,47.5 110,40 110,140 90,135 90,35 60,27.5" fill="url(#letterGradient2)" opacity="0.9"/> <!-- __ -->
 
-  <!-- Thin Floor under Buildings -->
-  <rect x="50" y="470" width="400" height="10" fill="#ADD8E6"/>
-
-  <!-- Buildings (Parallelepipeds) -->
-  <rect x="80" y="390" width="50" height="80" fill="#800080"/>
-  <rect x="170" y="370" width="30" height="100" fill="#800080"/>
-  <rect x="230" y="410" width="55" height="60" fill="#800080"/>
-  <rect x="310" y="380" width="60" height="90" fill="#800080"/>
-  <rect x="390" y="400" width="40" height="70" fill="#800080"/>
 </svg>
