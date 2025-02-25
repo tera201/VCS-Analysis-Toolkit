@@ -138,6 +138,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
             })
 
         urlField.text = cache.urlField
+        urlField.toolTipText = "<html>Enter your repository path.<br>Example: https://github.com/dummy/project.git</html>"
         this.minimumSize = Dimension(0, 200)
         this.addComponentListener(object : ComponentAdapter() {
             override fun componentResized(e: ComponentEvent?) {

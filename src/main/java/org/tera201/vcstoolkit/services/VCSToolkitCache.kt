@@ -14,7 +14,7 @@ import org.tera201.vcstoolkit.helpers.ProjectPath
 @Service(Service.Level.PROJECT)
 @State(name = "VCSToolkitCachesNew", storages = [Storage("vcs_toolkit_cache.xml")])
 class VCSToolkitCache : PersistentStateComponent<VCSToolkitCache> {
-    var urlField: String = "https://github.com/arnohaase/a-foundation.git"
+    var urlField: String = ""
     var lastProject: String = ""
     var projectPathMap: MutableMap<String, ProjectPath> = hashMapOf()
 
