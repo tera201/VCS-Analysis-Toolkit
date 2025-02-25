@@ -10,10 +10,10 @@ import org.tera201.vcstoolkit.tabs.TabManager
 import kotlin.concurrent.thread
 
 class InfoTabPage(val tabManager: TabManager): JBTabbedPane() {
-    val infoPage = InfoPage(tabManager)
-    val authorTab = AuthorTabPage(tabManager)
-    val jBScrollPane1: JBScrollPane = JBScrollPane(infoPage.component)
-    val jBScrollPane2: JBScrollPane = JBScrollPane(authorTab)
+    private val infoPage = InfoPage(tabManager)
+    private val authorTab = AuthorTabPage(tabManager)
+    private val jBScrollPane1: JBScrollPane = JBScrollPane(infoPage.component)
+    private val jBScrollPane2: JBScrollPane = JBScrollPane(authorTab)
 
     init {
         jBScrollPane1.setBorder(null);
@@ -31,25 +31,12 @@ class InfoTabPage(val tabManager: TabManager): JBTabbedPane() {
         val path = getPathByTab(tabManager)
         val lastPathNode = if ((path != null)) path.substring(path.lastIndexOf("/") + 1) else null
 
-        var startTime = System.currentTimeMillis()
         gitTab!!.myRepo!!.scm.dbPrepared()
-        var endTime = System.currentTimeMillis()
-        var executionTime = endTime - startTime
-        println("dbPrepared выполнился за $executionTime мс")
 
-        startTime = System.currentTimeMillis()
         val commitSizeMap: Map<String, CommitSize> = gitTab.myRepo!!.scm.repositorySize(path)
-        endTime = System.currentTimeMillis()
-        executionTime = endTime - startTime
-        println("commitSizeMap выполнился за $executionTime мс")
-
 
         //        BlameManager blameManager  = gitTab.getMyRepo().getScm().blameManager();
-        startTime = System.currentTimeMillis()
         val developerInfoMap: Map<String, DeveloperInfo> = gitTab.myRepo!!.scm.getDeveloperInfo(path)
-        endTime = System.currentTimeMillis()
-        executionTime = endTime - startTime
-        println("developerInfoMap выполнился за $executionTime мс")
         thread {infoPage.open(commitSizeMap, developerInfoMap)}
         thread {authorTab.create(commitSizeMap, developerInfoMap)}
     }
