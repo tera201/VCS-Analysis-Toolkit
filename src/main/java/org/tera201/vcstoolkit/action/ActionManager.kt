@@ -12,17 +12,22 @@ class ActionManager(val jtp: JBTabbedPane, private val toolWindow: ToolWindow, p
     private val showSettingsAction = ShowSettingsAction()
     private val infoTabAction = InfoTabAction(this, tabManager)
 
-    private val buttonsForSelectedUmlTab =  listOf(showSettingsAction)
+    private val buttonsUmlWithExpand =  listOf(expandTabAction, showSettingsAction)
+    private val buttonsUmlWithCollapse = listOf(collapseTabAction, showSettingsAction)
     private val buttonsFxWithExpand = listOf(infoTabAction, expandTabAction, showSettingsAction)
     private val buttonsFxWithCollapse = listOf(infoTabAction, collapseTabAction, showSettingsAction)
     private val settingButton = listOf(infoTabAction, showSettingsAction)
 
     init {
-        setToolBarForInfoPage()
+        setToolBarForUMLPageExpand()
     }
 
-    fun setToolBarForInfoPage() {
-        toolWindow.setTitleActions(buttonsForSelectedUmlTab)
+    fun setToolBarForUMLPageExpand() {
+        toolWindow.setTitleActions(buttonsUmlWithExpand)
+    }
+
+    fun setToolBarForUMLPageCollapse() {
+        toolWindow.setTitleActions(buttonsUmlWithCollapse)
     }
 
     fun setDefaultToolBar() {

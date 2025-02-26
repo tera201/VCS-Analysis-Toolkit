@@ -30,7 +30,10 @@ class VCSToolWindowFactoryKt : ToolWindowFactory {
 
             jtp.addChangeListener {
                 when (val selectedTab = jtp.getTitleAt(jtp.selectedIndex)) {
-                    TabEnum.GRAPH.value -> actionManager.setToolBarForInfoPage()
+                    TabEnum.GRAPH.value -> {
+                        if (actionManager.openedFxTabs[selectedTab] == null) actionManager.setToolBarForUMLPageExpand()
+                        else actionManager.setToolBarForUMLPageCollapse()
+                    }
                     in arrayOf(TabEnum.CITY.value, TabEnum.CIRCLE.value) -> {
                         if (actionManager.openedFxTabs[selectedTab] == null) actionManager.setToolBarWithExpand()
                         else actionManager.setToolBarWithCollapse()
