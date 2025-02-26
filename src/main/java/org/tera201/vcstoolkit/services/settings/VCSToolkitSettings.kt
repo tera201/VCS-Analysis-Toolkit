@@ -18,7 +18,7 @@ class VCSToolkitSettings : PersistentStateComponent<VCSToolkitSettings> {
     var modelPath:String = "${PluginManagerCore.getPlugin(PluginId.getId("org.tera201.VCSToolkit"))?.pluginPath}/VCSToolkitCache/Models"
     var username: String = ""
     var password: String = ""
-    var showGitLogs:Boolean = true
+    var showGitLogs:Boolean = false
     var externalProjectMode:Int = 0
     var circleScrollSpeed:Int = 5
     var circleDynamicScrollSpeed:Boolean = false;
