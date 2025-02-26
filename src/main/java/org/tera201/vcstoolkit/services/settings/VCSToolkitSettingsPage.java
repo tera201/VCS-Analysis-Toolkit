@@ -10,10 +10,10 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.tera201.code2uml.util.messages.DataBaseUtil;
 
 import javax.swing.*;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.util.Hashtable;
 
 public class VCSToolkitSettingsPage implements Configurable {
@@ -38,6 +38,8 @@ public class VCSToolkitSettingsPage implements Configurable {
     private JSlider cityScrollSpeedSlider;
     private JCheckBox circleDynamicSpeedCheckBox;
     private JCheckBox cityDynamicSpeedCheckBox;
+    private JButton createButton;
+    private JButton removeButton;
 
     public VCSToolkitSettingsPage() {
 
@@ -66,6 +68,14 @@ public class VCSToolkitSettingsPage implements Configurable {
         cityScrollSpeedSlider.setLabelTable(scrollSpeedSliderLabels);
         cityDynamicSpeedCheckBox.addItemListener(e -> cityScrollSpeedSlider.setEnabled(e.getStateChange() != ItemEvent.SELECTED));
         cityScrollSpeedSlider.setEnabled(!cityDynamicSpeedCheckBox.isSelected());
+        removeButton.addActionListener(e -> {
+            DataBaseUtil dataBaseUtil = DataBaseUtil.Companion.getInstance(modelPathTextField.getText() + "/model.db");
+            dataBaseUtil.clearTables();
+        } );
+        createButton.addActionListener(e -> {
+            DataBaseUtil dataBaseUtil = DataBaseUtil.Companion.getInstance(modelPathTextField.getText() + "/model.db");
+            dataBaseUtil.recreateTables();
+        });
     }
 
     private void browseFolder(@NotNull final JTextField target) {
