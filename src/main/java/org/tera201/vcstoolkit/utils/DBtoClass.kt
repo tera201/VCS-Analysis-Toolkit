@@ -72,7 +72,7 @@ private fun generateInterface(graph: Graph<Int, String>, parent: Vertex<Int>?, d
     if (parent != null) graph.getOrCreateEdge(parent, root, "${root.label}-${parent.label}", ArrowTypes.DEPENDENCY)
 }
 private fun getVertexOrCreate(graph: Graph<Int, String>, nodeId: Int, nodeName: String, types: ElementTypes): Vertex<Int> {
-    return graph.getVertex(nodeId)
+    return graph.getOrCreateVertex(nodeId, types, nodeName)
 }
 
 private fun tryInsertEdge(graph: Graph<Int, String>, node1: Vertex<Int>, node2: Vertex<Int>, arrowTypes: ArrowTypes) {
