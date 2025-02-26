@@ -85,6 +85,7 @@ class FXGraphTab(private val tabManager: TabManager, modelListContent:SharedMode
                     umlGraphPanel?.setGraph(build_class_graph(model!!, gitTab!!.dataBaseUtil))
                 }
                 umlGraphPanel?.update()
+                umlGraphControlPanel?.update()
             }
         }
 
