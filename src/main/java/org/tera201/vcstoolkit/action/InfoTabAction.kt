@@ -31,16 +31,16 @@ class InfoTabAction(private val actionManager: ActionManager, private val tabMan
         if (selectedTabTitle == TabEnum.CIRCLE.value && circleSelected == null ||
             selectedTabTitle == TabEnum.CITY.value && citySelected == null) {
             val notification: Notification =
-                notificationGroup.createNotification("VCSToolkit - $selectedTabTitle", "Please select object", NotificationType.WARNING)
+                notificationGroup.createNotification("VCS Analysis Toolkit - $selectedTabTitle", "Please select object", NotificationType.WARNING)
             Notifications.Bus.notify(notification, null)
         } else if (selectedTabTitle == TabEnum.CIRCLE.value && gitTab?.models?.isEmpty() == true ||
             selectedTabTitle == TabEnum.CITY.value && gitTab?.models?.isEmpty() == true) {
             val notification: Notification =
-                notificationGroup.createNotification("VCSToolkit - $selectedTabTitle", "Please analyze repo", NotificationType.WARNING)
+                notificationGroup.createNotification("VCS Analysis Toolkit - $selectedTabTitle", "Please analyze repo", NotificationType.WARNING)
             Notifications.Bus.notify(notification, null)
         } else if (selectedTabTitle == TabEnum.CITY.value && fxCityTab.modelComboBox.selectedIndex == -1) {
             val notification: Notification =
-                notificationGroup.createNotification("VCSToolkit - $selectedTabTitle", "Please select model", NotificationType.WARNING)
+                notificationGroup.createNotification("VCS Analysis Toolkit - $selectedTabTitle", "Please select model", NotificationType.WARNING)
             Notifications.Bus.notify(notification, null)
         }
         else {
