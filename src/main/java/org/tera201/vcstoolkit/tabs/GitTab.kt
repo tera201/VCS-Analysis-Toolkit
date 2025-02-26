@@ -51,6 +51,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
     private val logsJTextArea = JTextArea().apply {
         this.isEditable = false
     }
+    private val clearLogButton = JButton("Clear log")
     val logsJBScrollPane = JBScrollPane(
         logsJTextArea,
         JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -120,12 +121,14 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
 
         this.layout = FlowLayout(FlowLayout.LEFT)
         logsJBScrollPane.isVisible = settings.showGitLogs
+        clearLogButton.isVisible = settings.showGitLogs
 
         ApplicationManager.getApplication().messageBus.connect()
             .subscribe(VCSToolkitSettings.SettingsChangedListener.TOPIC, object :
                 VCSToolkitSettings.SettingsChangedListener {
                 override fun onSettingsChange(settings: VCSToolkitSettings) {
                     logsJBScrollPane.isVisible = settings.showGitLogs
+                    clearLogButton.isVisible = settings.showGitLogs
                     createDirectoryIfNotExists(settings.repoPath)
                     createDirectoryIfNotExists(settings.modelPath)
                     if (settings.externalProjectMode == 1 &&  cache.projectPathMap[projectComboBox.selectedItem]!!.isExternal) {
@@ -239,7 +242,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
 
     private fun createNotification(title:String, message:String, notificationType: NotificationType) {
         val notification: Notification =
-            notificationGroup.createNotification("VCSToolkit - $title", message, notificationType)
+            notificationGroup.createNotification("VCS Analysis Toolkit - $title", message, notificationType)
         Notifications.Bus.notify(notification, null)
     }
 
@@ -409,7 +412,6 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
     private fun addLogPanelButtons(mainJPanel: JPanel) {
         val logButtonsPanel = JPanel()
         logButtonsPanel.layout = BoxLayout(logButtonsPanel, BoxLayout.Y_AXIS)
-        val clearLogButton = JButton("Clear log")
 
         clearLogButton.addActionListener {
             logsJTextArea.text = null
