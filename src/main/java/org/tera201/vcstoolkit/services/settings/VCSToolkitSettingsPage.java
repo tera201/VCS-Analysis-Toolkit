@@ -95,7 +95,7 @@ public class VCSToolkitSettingsPage implements Configurable {
 
     @Override
     public @NlsContexts.ConfigurableName String getDisplayName() {
-        return "VCS Toolkit";
+        return "VCS Analysis Toolkit";
     }
 
     @Override

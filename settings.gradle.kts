@@ -1,4 +1,4 @@
-rootProject.name = "VCS-Analysis-Toolkit"
+rootProject.name = "vcs-analysis-toolkit"
 
 includeBuild("modules/code-to-uml")
 includeBuild("modules/swrminer")

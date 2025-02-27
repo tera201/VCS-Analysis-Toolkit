@@ -13,9 +13,9 @@ import com.intellij.util.xmlb.XmlSerializerUtil
 @State(name = "VCSToolkitSettings", storages = [Storage("vcs_toolkit_settings.xml")])
 class VCSToolkitSettings : PersistentStateComponent<VCSToolkitSettings> {
 
-    var repoPath:String =  "${PluginManagerCore.getPlugin(PluginId.getId("org.tera201.VCSToolkit"))?.pluginPath}/VCSToolkitCache"
+    var repoPath:String =  "${PluginManagerCore.getPlugin(PluginId.getId("org.tera201.vcs-analysis-toolkit"))?.pluginPath}/VCSToolkitCache"
 
-    var modelPath:String = "${PluginManagerCore.getPlugin(PluginId.getId("org.tera201.VCSToolkit"))?.pluginPath}/VCSToolkitCache/Models"
+    var modelPath:String = "${PluginManagerCore.getPlugin(PluginId.getId("org.tera201.vcs-analysis-toolkit"))?.pluginPath}/VCSToolkitCache/Models"
     var username: String = ""
     var password: String = ""
     var showGitLogs:Boolean = false

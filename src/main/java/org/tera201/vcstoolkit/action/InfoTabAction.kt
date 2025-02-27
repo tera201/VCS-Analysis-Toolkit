@@ -16,7 +16,7 @@ import org.tera201.vcstoolkit.tabs.*
 import java.util.function.Supplier
 import kotlin.concurrent.thread
 
-class InfoTabAction(private val actionManager: ActionManager, private val tabManager: TabManager) : DumbAwareAction(Supplier {"Open stat"}, AllIcons.General.Information) {
+class InfoTabAction(private val actionManager: ActionManager, private val tabManager: TabManager) : DumbAwareAction(Supplier {"Open stat"}, AllIcons.General.Vcs) {
     private val notificationGroup = NotificationGroupManager.getInstance().getNotificationGroup("VCSToolkitNotify")
     override fun actionPerformed(event: AnActionEvent) {
         val selectedTabTitle = tabManager.getSelectedTabTitle()

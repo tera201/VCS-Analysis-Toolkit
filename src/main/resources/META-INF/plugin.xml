@@ -4,7 +4,7 @@
 <idea-plugin>
 
   <!-- Unique id for this plugin. Must stay constant for the life of the plugin. -->
-  <id>org.tera201.VCSToolkit</id>
+  <id>org.tera201.vcs-analysis-toolkit</id>
 
   <!-- Text to display as name on Preferences/Settings | Plugin page -->
   <name>VCS Analysis Toolkit</name>
@@ -16,115 +16,125 @@
   <!-- Text to display as description on Preferences/Settings | Plugin page -->
   <description>
     <![CDATA[
-      <style>
-        .indented-paragraph {
-            text-indent: 20px;
-        }
-      </style>
-      <p class="indented-paragraph">To increase the maximum Java heap size in IntelliJ IDEA, follow these steps:</p>
-        <ul>
-          <li>Open IntelliJ IDEA.</li>
-          <li>Navigate to "Help" > "Edit Custom VM Options."</li>
-          <li>In the custom VM options file, you can add or modify the -Xmx parameter to adjust the maximum heap size based on your requirements.
-          <p>For example, if you want to set the maximum heap size to 2 gigabytes, add the following line:</p>
-               <p style="margin-left: 40px;">-Xmx2g</p>
-           This will configure the maximum heap size to be 2 gigabytes.</li>
-          <li>Save the custom VM options file.</li>
-          <li>Restart IntelliJ IDEA to apply the changes.</li>
-        </ul>
+      <p><strong>Analyze and visualize VCS data to gain insights into repository structure, code evolution and developer activity</strong></p>
+
+    <p>VCS Analysis Toolkit is a plugin designed for analyzing and visualizing version control system (VCS) data. It helps developers, researchers, and project managers explore repository history, track changes, and assess team contributions.</p>
+
+    <h3>Features</h3>
+    <ul>
+        <li><strong>Repository Structure Analysis</strong> – Generate UML-like models to visualize project.</li>
+        <li><strong>Commit Tracking</strong> – Examine commit stability, author contributions, and file modifications.</li>
+        <li><strong>3D Visualization</strong> – Use JavaFX-powered 3D models for interactive data exploration.</li>
+        <li><strong>Evolution Visualization</strong> – Use Circle Visualization to display different branches and tags of the project.</li>
+    </ul>
+
+    <h3>Additional Resources</h3>
+    <ul>
+        <li><a href="https://github.com/tera201/VCS-Analysis-Toolkit">Source Code &amp; Issue Tracker</a></li>
+        <li><a href="mailto:201tera201@gmail.com">Support &amp; Feedback</a></li>
+    </ul>
+
+    <p>Install the plugin to analyze your repositories and gain valuable insights into project development.</p>
   ]]>
   </description>
   <change-notes>
     <![CDATA[
       <html>
-        <b>1.6.0</b>
-          <li> Updated logo and icon for toolwindow
-          <li> Refactoring
-          <li> Migrated to IntelliJ Platform Gradle Plugin (2.x)
-          <li> Updated UML Graph library
-          <li> Fixed asynchronous analysis of code
-          <li> Updated DB schemas
-          <li> Updated default path in settings
+        <b>1.6.0</b> (2025-02-27)
+        <ul>
+            <li>Added create & remove buttons for DB in settings</li>
+            <li>Added expand/collapse button for graph page</li>
+            <li>Updated logo and icon for tool window</li>
+            <li>Refactored code</li>
+            <li>Migrated to IntelliJ Platform Gradle Plugin (2.x)</li>
+            <li>Updated UML Graph library</li>
+            <li>Fixed asynchronous analysis of code</li>
+            <li>Updated DB schemas</li>
+            <li>Updated default path in settings</li>
         </ul>
 
         <b>1.5.0</b>
-          <li> Added commit stability PieChart for authors
-          <li> Added authors tab page for info
-          <li> Added experimental optimization for circle view
-          <li> DB optimizations
+        <ul>
+            <li>Added commit stability PieChart for authors</li>
+            <li>Added authors tab page for info</li>
+            <li>Added experimental optimization for circle view</li>
+            <li>DB optimizations</li>
         </ul>
 
         <b>1.4.1</b>
-          <li> Fixed calculations for circle view
-          <li> Analyzing time have significant reduced for almost similar branches
-          <li> Model safes in DB
-          <li> Removed buttons for safe/load model
-          <li> Removed background for graph
-          <li> Fixed dragging on graph view
-          <li> Updated info page
-          <li> Added info page for circle selected object
-          <li> Added info page for city selected object
-          <li> Added info page for git selected file
+        <ul>
+            <li>Fixed calculations for circle view</li>
+            <li>Analysis time has been significantly reduced for nearly identical branches</li>
+            <li>Model is saved in DB</li>
+            <li>Removed buttons for save/load model</li>
+            <li>Removed background for graph</li>
+            <li>Fixed dragging in graph view</li>
+            <li>Updated info page</li>
+            <li>Added info page for selected circle object</li>
+            <li>Added info page for selected city object</li>
+            <li>Added info page for selected Git file</li>
         </ul>
 
         <b>1.4.0</b>
-          <li> Added loading spinner for info page
-          <li> Added support for 2024.1
-          <li> Added bar chart
-          <li> Added commit calendar
-          <li> Added line chart
-          <li> Added info button for stat
-          <li> Added template for stat
-          <li> Fixed text of tip
+        <ul>
+            <li>Added loading spinner for info page</li>
+            <li>Added support for IntelliJ IDEA 2024.1</li>
+            <li>Added bar chart</li>
+            <li>Added commit calendar</li>
+            <li>Added line chart</li>
+            <li>Added info button for statistics</li>
+            <li>Added template for statistics</li>
+            <li>Fixed text of tip</li>
         </ul>
 
         <b>1.3.0</b>
-          <li>Added threading for analyzing
-          <li>Added git auth
-          <li>Update VFS after branch switching
-          <li>Fixed commit/unsafe mode
-          <li>Fixed checkout for the analyzer
-          <li>block checkout while the analyzer is running
-          <li>Added labels for git panel
-          <li>Analyzing without choosing tag or branch
-          <li>Fixed problems with changing mode between safe
-          <li>Added slider for scroll speed
-          <li>Circle and City view could be opened on full screen
-          <li>The plugin can work in different projects independently
-          <li>Analyzing not git project
+        <ul>
+            <li>Added threading for analysis</li>
+            <li>Added Git authentication</li>
+            <li>Updated VFS after branch switching</li>
+            <li>Fixed commit/unsafe mode</li>
+            <li>Fixed checkout for the analyzer</li>
+            <li>Blocked checkout while the analyzer is running</li>
+            <li>Added labels for Git panel</li>
+            <li>Enabled analysis without selecting a tag or branch</li>
+            <li>Fixed issues when switching between safe mode</li>
+            <li>Added slider for scroll speed</li>
+            <li>Circle and City views can now open in full-screen mode</li>
+            <li>The plugin can work independently in different projects</li>
+            <li>Enabled analysis for non-Git projects</li>
         </ul>
 
         <b>1.2.0</b>
         <ul>
-          <li>Added current project into project combobox
-          <li>After cloning the project it will be added to combobox and selected
-          <li>If project choosing not successful then notification will be sent
-          <li>Support for projects without git
-          <li>Set min size
-          <li>Add safe mode for external projects
-          <li>Add Commit mode for all project
-          <li>Update split panes
-          <li>Implement "Get uml model" button
-          <li>Add cache for git url field
-          <li>Upgrade selecting for Circle view
+            <li>Added current project into project combobox</li>
+            <li>After cloning a project, it will be added to the combobox and selected</li>
+            <li>If project selection fails, a notification will be sent</li>
+            <li>Support for projects without Git</li>
+            <li>Set minimum size</li>
+            <li>Added safe mode for external projects</li>
+            <li>Added commit mode for the entire project</li>
+            <li>Updated split panes</li>
+            <li>Implemented "Get UML model" button</li>
+            <li>Added cache for Git URL field</li>
+            <li>Improved selection for Circle view</li>
         </ul>
 
-        <b>1.1.1</b> (11/01/2023)
+        <b>1.1.1</b> (2023-11-01)
         <ul>
-          <li>Support for older IntelliJ Idea Products
-          <li>Updated plugin page
+            <li>Support for older IntelliJ IDEA products</li>
+            <li>Updated plugin page</li>
         </ul>
 
-        <b>1.1.0</b> (11/01/2023)
+        <b>1.1.0</b> (2023-11-01)
         <ul>
-          <li>Added a kludge to fix the bug with rendering after hiding
+            <li>Added a workaround to fix the rendering bug after hiding</li>
         </ul>
 
-        <b>1.0.0</b> (10/31/2023)
+        <b>1.0.0</b> (2023-10-31)
         <ul>
-          <li>Initial release
+            <li>Initial release</li>
         </ul>
-      </html>
+    </html>
     ]]>
   </change-notes>
 
