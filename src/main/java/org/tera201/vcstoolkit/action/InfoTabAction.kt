@@ -1,6 +1,5 @@
 package org.tera201.vcstoolkit.action
 
-import com.intellij.icons.AllIcons
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
@@ -8,15 +7,15 @@ import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.fileEditor.impl.JComponentEditorProviderUtils
 import com.intellij.openapi.project.DumbAwareAction
+import icons.MyIcons
 import javafx.embed.swing.JFXPanel
 import org.tera201.vcstoolkit.helpers.FullScreenTabInfo
-import org.tera201.vcstoolkit.info.InfoPage
 import org.tera201.vcstoolkit.info.InfoTabPage
 import org.tera201.vcstoolkit.tabs.*
 import java.util.function.Supplier
 import kotlin.concurrent.thread
 
-class InfoTabAction(private val actionManager: ActionManager, private val tabManager: TabManager) : DumbAwareAction(Supplier {"Open stat"}, AllIcons.General.Vcs) {
+class InfoTabAction(private val actionManager: ActionManager, private val tabManager: TabManager) : DumbAwareAction(Supplier {"Open stat"}, MyIcons.VCS) {
     private val notificationGroup = NotificationGroupManager.getInstance().getNotificationGroup("VCSToolkitNotify")
     override fun actionPerformed(event: AnActionEvent) {
         val selectedTabTitle = tabManager.getSelectedTabTitle()
