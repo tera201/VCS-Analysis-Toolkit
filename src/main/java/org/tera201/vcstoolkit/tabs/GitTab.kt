@@ -137,6 +137,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
                     } else {
                         projectComboBox.selectedItem = cache.lastProject
                     }
+                    buildCircle()
                 }
             })
 
