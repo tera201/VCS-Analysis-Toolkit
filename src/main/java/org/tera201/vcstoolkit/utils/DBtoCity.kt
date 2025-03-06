@@ -6,9 +6,11 @@ import org.tera201.elements.city.Building
 import org.tera201.elements.city.City
 import org.tera201.elements.city.Quarter
 
+private const val methodFactor = 10.0
+
 fun toCity(citySpace: FXSpace<Quarter>, modelId:Int, dataBaseUtil: DataBaseUtil) {
     val model = dataBaseUtil.getModel(modelId)
-    var city = City(8000.0, 20.0, 8000.0, model.name)
+    val city = City(8000.0, 20.0, 8000.0, model.name)
     citySpace.add(city)
     dataBaseUtil.getRootPackageIds(modelId).forEach { generatePackage(city, null, dataBaseUtil, it, modelId) }
 }
@@ -29,7 +31,7 @@ private fun generateClass(quarter: Quarter?, dataBaseUtil: DataBaseUtil, id:Int,
     val classDB = dataBaseUtil.getClass(id, modelId)
     val methods = classDB.methodCount.toDouble() + 1
     val side = classDB.size.toDouble() / 20
-    val building = Building(classDB.name, side, 10 * methods, side)
+    val building = Building(classDB.name, side, methodFactor * methods, side)
     building.filePath = classDB.filePath
     building.info = """
     """.trimIndent()
@@ -40,14 +42,15 @@ private fun generateInterface(quarter: Quarter?, dataBaseUtil: DataBaseUtil, id:
     val interfaceDB = dataBaseUtil.getInterface(id, modelId)
     val methods = interfaceDB.methodCount.toDouble() + 1
     val side = interfaceDB.size.toDouble() / 20
-    val building = Building(interfaceDB.name, side, 10 * methods, side)
+    val building = Building(interfaceDB.name, side, methodFactor * methods, side)
     building.filePath = interfaceDB.filePath
     quarter?.addObject(building)
 }
 
 private fun generateEnumeration(quarter: Quarter?, dataBaseUtil: DataBaseUtil, id:Int, modelId: Int) {
     val enumerationDB = dataBaseUtil.getEnumerations(id, modelId)
-    val building = Building(enumerationDB.name, 100.0, 900.0, 100.0)
+    val side = enumerationDB.size.toDouble() / 20
+    val building = Building(enumerationDB.name, side, methodFactor, side)
     building.filePath = enumerationDB.filePath
     quarter?.addObject(building)
 }
