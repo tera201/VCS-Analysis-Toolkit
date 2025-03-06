@@ -40,6 +40,14 @@
   <change-notes>
     <![CDATA[
       <html>
+        <b>1.6.1</b> (2025-03-06)
+        <ul>
+            <li>Fixed JavaFX compatibility across Windows, macOS, and Linux</li>
+            <li>Removed unused JavaFX libraries</li>
+            <li>Updated JavaFX to version 21</li>
+            <li>Fixed dependency issue with IDEA 2024.1 (241.14494.240)</li>
+        </ul>
+
         <b>1.6.0</b> (2025-02-27)
         <ul>
             <li>Added create & remove buttons for DB in settings</li>
