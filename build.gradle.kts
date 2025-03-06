@@ -1,6 +1,6 @@
 plugins {
     id("java")
-    id("org.jetbrains.intellij.platform") version "2.2.0"
+    id("org.jetbrains.intellij.platform") version "2.0.0"
     id("org.jetbrains.kotlin.jvm") version "2.1.0"
     id("org.openjfx.javafxplugin") version "0.0.14"
 }
@@ -10,7 +10,7 @@ java {
 }
 
 group = "org.tera201"
-version = "1.6.1"
+version = "1.6.1-223"
 
 val javafxModules = listOf("javafx-controls", "javafx-graphics", "javafx-swing", "javafx-base")
 val javaFXVersion = "21";
@@ -38,16 +38,17 @@ dependencies {
     }
 
     intellijPlatform {
-        intellijIdeaCommunity("2024.3.2.1")
+        intellijIdeaCommunity("2022.3")
         plugin("com.intellij.javafx:1.0.4")
+        instrumentationTools()
     }
 }
 
 intellijPlatform {
     pluginConfiguration {
         ideaVersion {
-            untilBuild = provider { null }
-            sinceBuild = provider { "241" }
+            untilBuild = provider { "233.*" }
+            sinceBuild = provider { "223" }
         }
     }
 }

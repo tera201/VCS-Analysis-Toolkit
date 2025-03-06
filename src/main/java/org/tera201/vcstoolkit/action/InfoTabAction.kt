@@ -5,7 +5,7 @@ import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.fileEditor.impl.JComponentEditorProviderUtils
+import com.intellij.openapi.fileEditor.impl.JComponentEditorProvider
 import com.intellij.openapi.project.DumbAwareAction
 import icons.MyIcons
 import javafx.embed.swing.JFXPanel
@@ -47,7 +47,7 @@ class InfoTabAction(private val actionManager: ActionManager, private val tabMan
             event.project?.let {
                 val infoTabPanel = InfoTabPage(tabManager)
                 val editor =
-                    JComponentEditorProviderUtils.openEditor(it, selectedTabTitle + "Info", infoTabPanel)
+                    JComponentEditorProvider.openEditor(it, selectedTabTitle + "Info", infoTabPanel)
                 thread { infoTabPanel.start() }
                 actionManager.openedFxTabs.set(
                     selectedTabTitle + "Info",
