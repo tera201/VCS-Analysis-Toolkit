@@ -40,6 +40,15 @@
   <change-notes>
     <![CDATA[
       <html>
+
+        <b>1.7.0</b> (2025-03-07)
+        <ul>
+            <li>Fixed the issue of hardcoded values in enum visualization</li>
+            <li>Introduced a new settings parameter for the factor (height/width) to allow dynamic scaling for visualizations</li>
+            <li>Added an option to change the color scheme for visualizations in the settings</li>
+            <li>Added progress bar for analyzing</li>
+        </ul>
+
         <b>1.6.1</b> (2025-03-06)
         <ul>
             <li>Fixed JavaFX compatibility across Windows, macOS, and Linux</li>

@@ -11,6 +11,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.tera201.code2uml.util.messages.DataBaseUtil;
+import org.tera201.vcstoolkit.services.colors.ColorScheme;
 
 import javax.swing.*;
 import java.awt.event.ItemEvent;
@@ -40,6 +41,12 @@ public class VCSToolkitSettingsPage implements Configurable {
     private JCheckBox cityDynamicSpeedCheckBox;
     private JButton createButton;
     private JButton removeButton;
+    private JSpinner circleMethodFactor;
+    private JSpinner cityMethodFactor;
+    private JComboBox circleColorScheme;
+    private JComboBox cityColorScheme;
+    private JSpinner circlePackageFactor;
+    private JSpinner circleHeightFactor;
 
     public VCSToolkitSettingsPage() {
 
@@ -76,6 +83,22 @@ public class VCSToolkitSettingsPage implements Configurable {
             DataBaseUtil dataBaseUtil = DataBaseUtil.Companion.getInstance(modelPathTextField.getText() + "/model.db");
             dataBaseUtil.recreateTables();
         });
+
+        SpinnerNumberModel circleSpinnerModel = new SpinnerNumberModel(100, 1, 1000, 10);
+        circleMethodFactor.setModel(circleSpinnerModel);
+
+        SpinnerNumberModel circlePackageModel = new SpinnerNumberModel(5, 1, 500, 1);
+        circlePackageFactor.setModel(circlePackageModel);
+        circleMethodFactor.setModel(circleSpinnerModel);
+
+        SpinnerNumberModel circleHeightModel = new SpinnerNumberModel(1, 1, 100, 1);
+        circleHeightFactor.setModel(circleHeightModel);
+
+        SpinnerNumberModel citySpinnerModel = new SpinnerNumberModel(10, 1, 400, 5);
+        cityMethodFactor.setModel(citySpinnerModel);
+
+        circleColorScheme.setModel(new DefaultComboBoxModel<>(ColorScheme.values()));
+        cityColorScheme.setModel(new DefaultComboBoxModel<>(ColorScheme.values()));
     }
 
     private void browseFolder(@NotNull final JTextField target) {
@@ -116,10 +139,19 @@ public class VCSToolkitSettingsPage implements Configurable {
                 slider1.getValue() != settings.getExternalProjectMode() ||
                 !usernameField.getText().equals(settings.getUsername()) ||
                 !String.valueOf(passwordField.getPassword()).equals(settings.getPassword()) ||
+
                 circleScrollSpeedSlider.getValue() != settings.getCircleScrollSpeed() ||
+                circleDynamicSpeedCheckBox.isSelected() != settings.getCircleDynamicScrollSpeed() ||
+                ((int) circleMethodFactor.getValue()) != settings.getCircleMethodFactor() ||
+                circleColorScheme.getSelectedItem() != settings.getCircleColorScheme() ||
+                ((int) circlePackageFactor.getValue()) != settings.getCirclePackageFactor() ||
+                ((int) circleHeightFactor.getValue()) != settings.getCircleHeightFactor() ||
+
+
                 cityScrollSpeedSlider.getValue() != settings.getCityScrollSpeed() ||
                 cityDynamicSpeedCheckBox.isSelected() != settings.getCityDynamicScrollSpeed() ||
-                circleDynamicSpeedCheckBox.isSelected() != settings.getCircleDynamicScrollSpeed();
+                ((int) cityMethodFactor.getValue()) != settings.getCityMethodFactor() ||
+                cityColorScheme.getSelectedItem() != settings.getCityColorScheme();
     }
 
     @Override
@@ -144,10 +176,20 @@ public class VCSToolkitSettingsPage implements Configurable {
         settings.setExternalProjectMode(slider1.getValue());
         settings.setUsername(usernameField.getText());
         settings.setPassword(String.valueOf(passwordField.getPassword()));
+
         settings.setCircleScrollSpeed(circleScrollSpeedSlider.getValue());
-        settings.setCityScrollSpeed(cityScrollSpeedSlider.getValue());
         settings.setCircleDynamicScrollSpeed(circleDynamicSpeedCheckBox.isSelected());
+        settings.setCircleMethodFactor((int)circleMethodFactor.getValue());
+        if (circleColorScheme.getSelectedItem() != null)
+            settings.setCircleColorScheme((ColorScheme) circleColorScheme.getSelectedItem());
+        settings.setCirclePackageFactor((int)circlePackageFactor.getValue());
+        settings.setCircleHeightFactor((int)circleHeightFactor.getValue());
+
+        settings.setCityScrollSpeed(cityScrollSpeedSlider.getValue());
         settings.setCityDynamicScrollSpeed(cityDynamicSpeedCheckBox.isSelected());
+        settings.setCityMethodFactor((int)cityMethodFactor.getValue());
+        if (cityColorScheme.getSelectedItem() != null)
+            settings.setCityColorScheme((ColorScheme) cityColorScheme.getSelectedItem());
     }
 
     private void getSettings(VCSToolkitSettings settings) {
@@ -157,10 +199,18 @@ public class VCSToolkitSettingsPage implements Configurable {
         slider1.setValue(settings.getExternalProjectMode());
         usernameField.setText(settings.getUsername());
         passwordField.setText(settings.getPassword());
+
         circleScrollSpeedSlider.setValue(settings.getCircleScrollSpeed());
-        cityScrollSpeedSlider.setValue(settings.getCityScrollSpeed());
         circleDynamicSpeedCheckBox.setSelected(settings.getCircleDynamicScrollSpeed());
+        circleMethodFactor.setValue(settings.getCircleMethodFactor());
+        circleColorScheme.setSelectedIndex(settings.getCircleColorScheme().getIndex());
+        circlePackageFactor.setValue(settings.getCirclePackageFactor());
+        circleHeightFactor.setValue(settings.getCircleHeightFactor());
+
+        cityScrollSpeedSlider.setValue(settings.getCityScrollSpeed());
         cityDynamicSpeedCheckBox.setSelected(settings.getCityDynamicScrollSpeed());
+        cityMethodFactor.setValue(settings.getCityMethodFactor());
+        cityColorScheme.setSelectedIndex(settings.getCityColorScheme().getIndex());
     }
 
 }

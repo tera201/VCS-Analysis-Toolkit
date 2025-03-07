@@ -8,6 +8,7 @@ import com.intellij.openapi.components.Storage
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.util.messages.Topic
 import com.intellij.util.xmlb.XmlSerializerUtil
+import org.tera201.vcstoolkit.services.colors.ColorScheme
 
 
 @State(name = "VCSToolkitSettings", storages = [Storage("vcs_toolkit_settings.xml")])
@@ -20,10 +21,18 @@ class VCSToolkitSettings : PersistentStateComponent<VCSToolkitSettings> {
     var password: String = ""
     var showGitLogs:Boolean = false
     var externalProjectMode:Int = 0
+
     var circleScrollSpeed:Int = 5
-    var circleDynamicScrollSpeed:Boolean = false;
+    var circleDynamicScrollSpeed:Boolean = false
+    var circleMethodFactor:Int = 100
+    var circleColorScheme: ColorScheme = ColorScheme.DEFAULT
+    var circlePackageFactor:Int = 5
+    var circleHeightFactor:Int = 1
+
     var cityScrollSpeed:Int = 5
-    var cityDynamicScrollSpeed:Boolean = false;
+    var cityDynamicScrollSpeed:Boolean = false
+    var cityMethodFactor:Int = 10
+    var cityColorScheme: ColorScheme = ColorScheme.DEFAULT
 
 
     companion object {
