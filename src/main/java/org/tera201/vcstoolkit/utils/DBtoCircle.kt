@@ -5,6 +5,8 @@ import org.tera201.elements.FXSpace
 import org.tera201.elements.circle.ClassCircle
 import org.tera201.elements.circle.HollowCylinder
 import org.tera201.elements.circle.PackageCircle
+import org.tera201.vcstoolkit.services.colors.UMLColorScheme
+import org.tera201.vcstoolkit.services.colors.ColorScheme
 import org.tera201.vcstoolkit.services.settings.VCSToolkitSettings
 
 private const val height = 500.0
@@ -29,6 +31,10 @@ private fun generatePackage(circleParent: PackageCircle, dataBaseUtil: DataBaseU
         packageDB.childrenId.forEach { generatePackage(circleParent, dataBaseUtil, it, modelId) }
     } else {
         val packageCircle = PackageCircle(packageDB.packageName, circleParent.innerRadius/2 + 500, circleParent.innerRadius/2, height)
+
+        if (settings.circleColorScheme == ColorScheme.UML) {
+            packageCircle.setColor(UMLColorScheme.PACKAGE.color)
+        }
 //        packageCircle.filePath = packageDB.filePath
         circleParent.addObject(packageCircle)
         classes.forEach { generateClass(packageCircle, dataBaseUtil, it, modelId) }
@@ -45,6 +51,9 @@ private fun generateClass(circleParent: PackageCircle, dataBaseUtil: DataBaseUti
     val classCircle = ClassCircle(classDB.name, side + methods * settings.circleMethodFactor, side, height)
     classCircle.filePath = classDB.filePath
     circleParent.addObject(classCircle)
+    if (settings.circleColorScheme == ColorScheme.UML) {
+        classCircle.setColor(UMLColorScheme.CLASS.color)
+    }
 }
 
 private fun generateInterface(circleParent: PackageCircle, dataBaseUtil: DataBaseUtil, interfaceId: Int, modelId: Int) {
@@ -55,6 +64,9 @@ private fun generateInterface(circleParent: PackageCircle, dataBaseUtil: DataBas
     val classCircle = ClassCircle(interfaceDB.name, side + methods * settings.circleMethodFactor, side, height)
     classCircle.filePath = interfaceDB.filePath
     circleParent.addObject(classCircle)
+    if (settings.circleColorScheme == ColorScheme.UML) {
+        classCircle.setColor(UMLColorScheme.INTERFACE.color)
+    }
 }
 
 private fun generateEnumeration(circleParent: PackageCircle, dataBaseUtil: DataBaseUtil, enumerationId: Int, modelId: Int) {
@@ -63,4 +75,7 @@ private fun generateEnumeration(circleParent: PackageCircle, dataBaseUtil: DataB
     val classCircle = ClassCircle(enumerationDB.name, side + settings.circleMethodFactor, side, height)
     classCircle.filePath = enumerationDB.filePath
     circleParent.addObject(classCircle)
+    if (settings.circleColorScheme == ColorScheme.UML) {
+        classCircle.setColor(UMLColorScheme.ENUM.color)
+    }
 }

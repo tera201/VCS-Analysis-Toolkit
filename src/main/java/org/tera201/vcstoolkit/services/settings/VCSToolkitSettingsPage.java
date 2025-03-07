@@ -11,6 +11,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.tera201.code2uml.util.messages.DataBaseUtil;
+import org.tera201.vcstoolkit.services.colors.ColorScheme;
 
 import javax.swing.*;
 import java.awt.event.ItemEvent;
@@ -42,6 +43,8 @@ public class VCSToolkitSettingsPage implements Configurable {
     private JButton removeButton;
     private JSpinner circleMethodFactor;
     private JSpinner cityMethodFactor;
+    private JComboBox circleColorScheme;
+    private JComboBox cityColorScheme;
 
     public VCSToolkitSettingsPage() {
 
@@ -84,6 +87,9 @@ public class VCSToolkitSettingsPage implements Configurable {
 
         SpinnerNumberModel citySpinnerModel = new SpinnerNumberModel(10, 1, 400, 5);
         cityMethodFactor.setModel(citySpinnerModel);
+
+        circleColorScheme.setModel(new DefaultComboBoxModel<>(ColorScheme.values()));
+        cityColorScheme.setModel(new DefaultComboBoxModel<>(ColorScheme.values()));
     }
 
     private void browseFolder(@NotNull final JTextField target) {
@@ -124,12 +130,17 @@ public class VCSToolkitSettingsPage implements Configurable {
                 slider1.getValue() != settings.getExternalProjectMode() ||
                 !usernameField.getText().equals(settings.getUsername()) ||
                 !String.valueOf(passwordField.getPassword()).equals(settings.getPassword()) ||
+
                 circleScrollSpeedSlider.getValue() != settings.getCircleScrollSpeed() ||
                 circleDynamicSpeedCheckBox.isSelected() != settings.getCircleDynamicScrollSpeed() ||
                 ((int) circleMethodFactor.getValue()) != settings.getCircleMethodFactor() ||
+                circleColorScheme.getSelectedItem() != settings.getCircleColorScheme() ||
+
+
                 cityScrollSpeedSlider.getValue() != settings.getCityScrollSpeed() ||
                 cityDynamicSpeedCheckBox.isSelected() != settings.getCityDynamicScrollSpeed() ||
-                ((int) cityMethodFactor.getValue()) != settings.getCityMethodFactor();
+                ((int) cityMethodFactor.getValue()) != settings.getCityMethodFactor() ||
+                cityColorScheme.getSelectedItem() != settings.getCityColorScheme();
     }
 
     @Override
@@ -158,10 +169,14 @@ public class VCSToolkitSettingsPage implements Configurable {
         settings.setCircleScrollSpeed(circleScrollSpeedSlider.getValue());
         settings.setCircleDynamicScrollSpeed(circleDynamicSpeedCheckBox.isSelected());
         settings.setCircleMethodFactor((int)circleMethodFactor.getValue());
+        if (circleColorScheme.getSelectedItem() != null)
+            settings.setCircleColorScheme((ColorScheme) circleColorScheme.getSelectedItem());
 
         settings.setCityScrollSpeed(cityScrollSpeedSlider.getValue());
         settings.setCityDynamicScrollSpeed(cityDynamicSpeedCheckBox.isSelected());
         settings.setCityMethodFactor((int)cityMethodFactor.getValue());
+        if (cityColorScheme.getSelectedItem() != null)
+            settings.setCityColorScheme((ColorScheme) cityColorScheme.getSelectedItem());
     }
 
     private void getSettings(VCSToolkitSettings settings) {
@@ -175,10 +190,12 @@ public class VCSToolkitSettingsPage implements Configurable {
         circleScrollSpeedSlider.setValue(settings.getCircleScrollSpeed());
         circleDynamicSpeedCheckBox.setSelected(settings.getCircleDynamicScrollSpeed());
         circleMethodFactor.setValue(settings.getCircleMethodFactor());
+        circleColorScheme.setSelectedIndex(settings.getCircleColorScheme().getIndex());
 
         cityScrollSpeedSlider.setValue(settings.getCityScrollSpeed());
         cityDynamicSpeedCheckBox.setSelected(settings.getCityDynamicScrollSpeed());
         cityMethodFactor.setValue(settings.getCityMethodFactor());
+        cityColorScheme.setSelectedIndex(settings.getCityColorScheme().getIndex());
     }
 
 }

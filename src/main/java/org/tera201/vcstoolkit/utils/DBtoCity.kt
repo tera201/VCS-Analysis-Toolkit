@@ -5,6 +5,8 @@ import org.tera201.elements.FXSpace
 import org.tera201.elements.city.Building
 import org.tera201.elements.city.City
 import org.tera201.elements.city.Quarter
+import org.tera201.vcstoolkit.services.colors.UMLColorScheme
+import org.tera201.vcstoolkit.services.colors.ColorScheme
 import org.tera201.vcstoolkit.services.settings.VCSToolkitSettings
 
 private var settings: VCSToolkitSettings = VCSToolkitSettings.getInstance()
@@ -21,6 +23,9 @@ private fun generatePackage(city: City, parentName: String?, dataBaseUtil: DataB
     val size = packageDB.size.toDouble()
     val newName = if (parentName.orEmpty().isNotEmpty())  "$parentName.${packageDB.name}" else packageDB.name
     val quarter = Quarter(newName, size, 10.0, size, 50.0)
+    if (settings.circleColorScheme == ColorScheme.UML) {
+        quarter.setColor(UMLColorScheme.PACKAGE.color)
+    }
     city.addObject(quarter)
     dataBaseUtil.getClassIdsByPackageId(modelId, id).forEach { generateClass(quarter, dataBaseUtil, it, modelId) }
     dataBaseUtil.getInterfacesIdsByPackageId(modelId, id).forEach { generateInterface(quarter, dataBaseUtil, it, modelId) }
@@ -37,6 +42,9 @@ private fun generateClass(quarter: Quarter?, dataBaseUtil: DataBaseUtil, id:Int,
     building.info = """
     """.trimIndent()
     quarter?.addObject(building)
+    if (settings.circleColorScheme == ColorScheme.UML) {
+        building.setColor(UMLColorScheme.CLASS.color)
+    }
 }
 
 private fun generateInterface(quarter: Quarter?, dataBaseUtil: DataBaseUtil, id:Int, modelId: Int) {
@@ -46,6 +54,9 @@ private fun generateInterface(quarter: Quarter?, dataBaseUtil: DataBaseUtil, id:
     val building = Building(interfaceDB.name, side, settings.cityMethodFactor * methods, side)
     building.filePath = interfaceDB.filePath
     quarter?.addObject(building)
+    if (settings.circleColorScheme == ColorScheme.UML) {
+        building.setColor(UMLColorScheme.INTERFACE.color)
+    }
 }
 
 private fun generateEnumeration(quarter: Quarter?, dataBaseUtil: DataBaseUtil, id:Int, modelId: Int) {
@@ -54,4 +65,7 @@ private fun generateEnumeration(quarter: Quarter?, dataBaseUtil: DataBaseUtil, i
     val building = Building(enumerationDB.name, side, settings.cityMethodFactor.toDouble(), side)
     building.filePath = enumerationDB.filePath
     quarter?.addObject(building)
+    if (settings.circleColorScheme == ColorScheme.UML) {
+        building.setColor(UMLColorScheme.ENUM.color)
+    }
 }
