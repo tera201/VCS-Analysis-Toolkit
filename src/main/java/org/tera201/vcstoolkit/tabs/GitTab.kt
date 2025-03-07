@@ -107,6 +107,12 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
         this.secondComponent = modelListScrollPane
     this.dividerWidth = 1
     }
+    private val analyzerProgressBar = JProgressBar().apply { isVisible = false };
+    private val logModelPane = JPanel().apply {
+        layout = BorderLayout()
+        add(logModelSplitPane, BorderLayout.CENTER);
+        add(analyzerProgressBar, BorderLayout.SOUTH);
+    }
     private var analyzing = false
     private val notificationGroup = NotificationGroupManager.getInstance().getNotificationGroup("VCSToolkitNotify")
     
@@ -175,7 +181,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
         this.add(getButton)
         this.add(showSplitPane)
         addLogPanelButtons(this)
-        this.add(logModelSplitPane)
+        this.add(logModelPane)
         addModelControlPanel()
         addProjectPane()
         createPopupMenu()
@@ -434,6 +440,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
                 if (cache.projectPathMap[cache.lastProject] != null) {
                     val projectPath = cache.projectPathMap[cache.lastProject]?.path
                     analyzing = true
+                    analyzerProgressBar.isVisible = true
                     val startTime = System.currentTimeMillis()
                     val allList = branchList.selectedValuesList + tagList.selectedValuesList
                     models.clear()
@@ -445,9 +452,10 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
                     val executionTime = (System.currentTimeMillis() - startTime) / 1000.0
                     logsJTextArea.append("End analyzing. Execution time: $executionTime sec.\n")
                     analyzing = false
+                    analyzerProgressBar.isVisible = false
                     modelListContent.addAll(modelsIdMap.keys)
                     buildCircle()
-                }else logsJTextArea.append("Get some repo or project for analyzing.\n")
+                } else logsJTextArea.append("Get some repo or project for analyzing.\n")
             }
         }
     }
@@ -468,7 +476,7 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
             if (isGit) checkoutTo(name)
             val analyzerBuilder =
                 AnalyzerBuilder(Language.Java, selectedProject, name, projectPath, dateBaseURL)
-                    .textArea(logsJTextArea).threads(4)
+                    .textArea(logsJTextArea).progressBar(analyzerProgressBar).threads(4)
             val modelId = analyzerBuilder.buildDB(dataBaseUtil)
             models.add(modelId)
             modelsIdMap.put(name, modelId)
