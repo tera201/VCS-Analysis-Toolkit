@@ -8,7 +8,6 @@ import com.intellij.openapi.ui.ComboBox
 import javafx.application.Platform
 import javafx.embed.swing.JFXPanel
 import javafx.scene.Scene
-import org.eclipse.uml2.uml.Model
 import org.tera201.code2uml.util.messages.DataBaseUtil
 import org.tera201.umlgraph.graph.Graph
 import org.tera201.umlgraph.graphview.UMLGraphControlPanel
@@ -18,24 +17,22 @@ import org.tera201.umlgraph.graphview.strategy.PlacementStrategy
 import org.tera201.umlgraph.graphview.vertices.elements.ElementTypes
 import org.tera201.vcstoolkit.helpers.SharedModel
 import org.tera201.vcstoolkit.utils.toClass
-import org.tera201.vcstoolkit.utils.toGraph
 import org.tera201.vcstoolkit.utils.toPackage
 import java.awt.BorderLayout
-import java.awt.Color
 import java.awt.FlowLayout
 import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.UIManager
 
 
-class FXGraphTab(private val tabManager: TabManager, modelListContent:SharedModel): JPanel() {
+class FXGraphTab(private val tabManager: TabManager, modelListContent: SharedModel) : JPanel() {
 
     var umlGraphPanel: UMLGraphPanel<Int, String>? = null
     private val fxPanel: JFXPanel = object : JFXPanel() {}
     private val topPanel = JPanel()
     private var umlGraphControlPanel: UMLGraphControlPanel<Int, String>? = null
     private val modelComboBox = ComboBox(modelListContent)
-    private var model:Int? = null
+    private var model: Int? = null
     private val packageButton = JButton("Package")
     private val classButton = JButton("Class")
     private var gitTab: GitTab? = null
@@ -70,7 +67,7 @@ class FXGraphTab(private val tabManager: TabManager, modelListContent:SharedMode
         packageButton.addActionListener {
             if (model != null) {
                 Platform.runLater {
-                    umlGraphPanel?.setGraph(build_package_graph(model!!, gitTab!!.controller.dataBaseUtil))
+                    umlGraphPanel?.setGraph(buildPackageGraph(model!!, gitTab!!.controller.dataBaseUtil))
                 }
                 umlGraphPanel?.update()
                 umlGraphControlPanel?.update()
@@ -80,22 +77,22 @@ class FXGraphTab(private val tabManager: TabManager, modelListContent:SharedMode
         classButton.addActionListener {
             if (model != null) {
                 Platform.runLater {
-                    umlGraphPanel?.setGraph(build_class_graph(model!!, gitTab!!.controller.dataBaseUtil))
+                    umlGraphPanel?.setGraph(buildClassGraph(model!!, gitTab!!.controller.dataBaseUtil))
                 }
                 umlGraphPanel?.update()
                 umlGraphControlPanel?.update()
             }
         }
 
-        Platform.runLater { make_fxPanel(fxPanel) }
+        Platform.runLater { makeFxpanel(fxPanel) }
         this.add(topPanel, BorderLayout.NORTH)
         this.add(fxPanel, BorderLayout.CENTER)
     }
 
-    fun make_fxPanel(mainPanel: JFXPanel) {
+    private fun makeFxpanel(mainPanel: JFXPanel) {
         val sceneWidth = 800.0
         val sceneHeight = 600.0
-        val g = build_sample()
+        val g = buildSample()
         val strategy = PlacementStrategy()
         umlGraphPanel = UMLGraphPanel(g, strategy)
         umlGraphControlPanel = UMLGraphControlPanel(umlGraphPanel)
@@ -111,44 +108,26 @@ class FXGraphTab(private val tabManager: TabManager, modelListContent:SharedMode
     }
 
     companion object {
-        public fun build_graph(model: Model): Graph<String, String> {
-            val g: Graph<String, String> = Graph();
-            model.toGraph(g)
-            return g
-        }
-
-        public fun build_package_graph(model: Int, dataBaseUtil: DataBaseUtil): Graph<Int, String> {
+        fun buildPackageGraph(model: Int, dataBaseUtil: DataBaseUtil): Graph<Int, String> {
             val g: Graph<Int, String> =
                 Graph()
             toPackage(g, model, dataBaseUtil)
             return g
         }
 
-        public fun build_package_graph(model: Model): Graph<String, String> {
-            val g: Graph<String, String> = Graph();
-            model.toPackage(g)
-            return g
-        }
-
-        public fun build_class_graph(model: Int, dataBaseUtil: DataBaseUtil): Graph<Int, String> {
+        fun buildClassGraph(model: Int, dataBaseUtil: DataBaseUtil): Graph<Int, String> {
             val g: Graph<Int, String> =
                 Graph();
             toClass(g, model, dataBaseUtil)
             return g
         }
-
-        public fun build_class_graph(model: Model): Graph<String, String> {
-            val g: Graph<String, String> =
-                Graph();
-            model.toClass(g)
-            return g
-        }
     }
 
 
-    private fun build_sample(): Graph<Int, String> {
+    private fun buildSample(): Graph<Int, String> {
         val graph = Graph<Int, String>()
-        val packageV = graph.getOrCreateVertex(1, ElementTypes.PACKAGE, "<<package>> A\n included: interface, component, enum")
+        val packageV =
+            graph.getOrCreateVertex(1, ElementTypes.PACKAGE, "<<package>> A\n included: interface, component, enum")
         val interfaceV = graph.getOrCreateVertex(2, ElementTypes.INTERFACE, "interface")
         val componentV = graph.getOrCreateVertex(3, ElementTypes.COMPONENT, "component")
         val enumV = graph.getOrCreateVertex(4, ElementTypes.ENUM, "enum")

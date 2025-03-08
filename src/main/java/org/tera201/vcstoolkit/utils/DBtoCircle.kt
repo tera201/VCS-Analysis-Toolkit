@@ -14,17 +14,22 @@ private const val gap = 1000.0
 private const val defaultPackageWidth = 100
 private var settings: VCSToolkitSettings = VCSToolkitSettings.getInstance()
 
-fun toCircle(circleSpace: FXSpace<HollowCylinder>, number: Int=0, modelId:Int, dataBaseUtil: DataBaseUtil) {
+fun toCircle(circleSpace: FXSpace<HollowCylinder>, number: Int = 0, modelId: Int, dataBaseUtil: DataBaseUtil) {
     val model = dataBaseUtil.getModel(modelId)
     val radius = 6000.0
-    val packageCircle = PackageCircle(model.name, radius + defaultPackageWidth * settings.circlePackageFactor, radius, height * settings.circleHeightFactor)
+    val packageCircle = PackageCircle(
+        model.name,
+        radius + defaultPackageWidth * settings.circlePackageFactor,
+        radius,
+        height * settings.circleHeightFactor
+    )
     packageCircle.translateY = number * gap * settings.circleGapFactor
     packageCircle.filePath = model.filePath
     circleSpace.add(packageCircle)
     dataBaseUtil.getRootPackageIds(modelId).forEach { generatePackage(packageCircle, dataBaseUtil, it, modelId) }
 }
 
-private fun generatePackage(circleParent: PackageCircle, dataBaseUtil: DataBaseUtil, id:Int, modelId: Int) {
+private fun generatePackage(circleParent: PackageCircle, dataBaseUtil: DataBaseUtil, id: Int, modelId: Int) {
     val packageDB = dataBaseUtil.getPackage(id, modelId)
     val classes = dataBaseUtil.getClassIdsByPackageId(modelId, id)
     val interfaces = dataBaseUtil.getInterfacesIdsByPackageId(modelId, id)
@@ -32,12 +37,16 @@ private fun generatePackage(circleParent: PackageCircle, dataBaseUtil: DataBaseU
     if (classes.isEmpty() and interfaces.isEmpty() and enumerations.isEmpty()) {
         packageDB.childrenId.forEach { generatePackage(circleParent, dataBaseUtil, it, modelId) }
     } else {
-        val packageCircle = PackageCircle(packageDB.packageName, circleParent.innerRadius/2 + defaultPackageWidth * settings.circlePackageFactor, circleParent.innerRadius/2, height * settings.circleHeightFactor)
+        val packageCircle = PackageCircle(
+            packageDB.packageName,
+            circleParent.innerRadius / 2 + defaultPackageWidth * settings.circlePackageFactor,
+            circleParent.innerRadius / 2,
+            height * settings.circleHeightFactor
+        )
 
         if (settings.circleColorScheme == ColorScheme.UML) {
             packageCircle.setColor(UMLColorScheme.PACKAGE.color)
         }
-//        packageCircle.filePath = packageDB.filePath
         circleParent.addObject(packageCircle)
         classes.forEach { generateClass(packageCircle, dataBaseUtil, it, modelId) }
         interfaces.forEach { generateInterface(packageCircle, dataBaseUtil, it, modelId) }
@@ -49,8 +58,13 @@ private fun generatePackage(circleParent: PackageCircle, dataBaseUtil: DataBaseU
 private fun generateClass(circleParent: PackageCircle, dataBaseUtil: DataBaseUtil, classId: Int, modelId: Int) {
     val classDB = dataBaseUtil.getClass(classId, modelId)
     val methods = classDB.methodCount.toDouble() + 1
-    val side =  classDB.size.toDouble() / 2
-    val classCircle = ClassCircle(classDB.name, side + methods * settings.circleMethodFactor, side, height * settings.circleHeightFactor)
+    val side = classDB.size.toDouble() / 2
+    val classCircle = ClassCircle(
+        classDB.name,
+        side + methods * settings.circleMethodFactor,
+        side,
+        height * settings.circleHeightFactor
+    )
     classCircle.filePath = classDB.filePath
     circleParent.addObject(classCircle)
     if (settings.circleColorScheme == ColorScheme.UML) {
@@ -63,7 +77,12 @@ private fun generateInterface(circleParent: PackageCircle, dataBaseUtil: DataBas
     val size = if (interfaceDB.size == 0L) 700.0 else interfaceDB.size.toDouble()
     val methods = interfaceDB.methodCount.toDouble() + 1
     val side = size / 2
-    val classCircle = ClassCircle(interfaceDB.name, side + methods * settings.circleMethodFactor, side, height * settings.circleHeightFactor)
+    val classCircle = ClassCircle(
+        interfaceDB.name,
+        side + methods * settings.circleMethodFactor,
+        side,
+        height * settings.circleHeightFactor
+    )
     classCircle.filePath = interfaceDB.filePath
     circleParent.addObject(classCircle)
     if (settings.circleColorScheme == ColorScheme.UML) {
@@ -71,10 +90,16 @@ private fun generateInterface(circleParent: PackageCircle, dataBaseUtil: DataBas
     }
 }
 
-private fun generateEnumeration(circleParent: PackageCircle, dataBaseUtil: DataBaseUtil, enumerationId: Int, modelId: Int) {
+private fun generateEnumeration(
+    circleParent: PackageCircle,
+    dataBaseUtil: DataBaseUtil,
+    enumerationId: Int,
+    modelId: Int
+) {
     val enumerationDB = dataBaseUtil.getEnumerations(enumerationId, modelId)
     val side = enumerationDB.size.toDouble() / 20
-    val classCircle = ClassCircle(enumerationDB.name, side + settings.circleMethodFactor, side, height * settings.circleHeightFactor)
+    val classCircle =
+        ClassCircle(enumerationDB.name, side + settings.circleMethodFactor, side, height * settings.circleHeightFactor)
     classCircle.filePath = enumerationDB.filePath
     circleParent.addObject(classCircle)
     if (settings.circleColorScheme == ColorScheme.UML) {

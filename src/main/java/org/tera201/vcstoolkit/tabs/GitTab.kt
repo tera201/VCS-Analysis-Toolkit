@@ -11,11 +11,11 @@ import java.io.File
 import java.io.IOException
 import javax.swing.*
 
-class GitTab(private val tabManager: TabManager, val modelListContent:SharedModel) : JPanel() {
+class GitTab(tabManager: TabManager, modelListContent: SharedModel) : JPanel() {
     private var settings: VCSToolkitSettings = VCSToolkitSettings.getInstance()
     private var cache: VCSToolkitCache = VCSToolkitCache.getInstance(tabManager.getCurrentProject())
     val controller: GitTabController
-    
+
     init {
         try {
             File(settings.repoPath).mkdirs()

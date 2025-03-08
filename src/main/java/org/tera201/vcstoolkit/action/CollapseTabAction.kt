@@ -6,7 +6,8 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.DumbAwareAction
 import java.util.function.Supplier
 
-class CollapseTabAction(private val actionManager: ActionManager) : DumbAwareAction(Supplier {"Collapse tab"}, AllIcons.General.CollapseComponent) {
+class CollapseTabAction(private val actionManager: ActionManager) :
+    DumbAwareAction(Supplier { "Collapse tab" }, AllIcons.General.CollapseComponent) {
 
     override fun actionPerformed(event: AnActionEvent) {
         val selectedIndex = actionManager.jtp.selectedIndex

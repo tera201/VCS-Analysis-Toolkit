@@ -79,7 +79,7 @@ public class VCSToolkitSettingsPage implements Configurable {
         removeButton.addActionListener(e -> {
             DataBaseUtil dataBaseUtil = DataBaseUtil.Companion.getInstance(modelPathTextField.getText() + "/model.db");
             dataBaseUtil.clearTables();
-        } );
+        });
         createButton.addActionListener(e -> {
             DataBaseUtil dataBaseUtil = DataBaseUtil.Companion.getInstance(modelPathTextField.getText() + "/model.db");
             dataBaseUtil.recreateTables();
@@ -135,7 +135,7 @@ public class VCSToolkitSettingsPage implements Configurable {
         return isModified(settings);
     }
 
-    private  boolean isModified(VCSToolkitSettings settings) {
+    private boolean isModified(VCSToolkitSettings settings) {
         return !repoPathTextField.getText().equals(settings.getRepoPath()) ||
                 !modelPathTextField.getText().equals(settings.getModelPath()) ||
                 showLogsCheckBox.isSelected() != settings.getShowGitLogs() ||
@@ -183,16 +183,16 @@ public class VCSToolkitSettingsPage implements Configurable {
 
         settings.setCircleScrollSpeed(circleScrollSpeedSlider.getValue());
         settings.setCircleDynamicScrollSpeed(circleDynamicSpeedCheckBox.isSelected());
-        settings.setCircleMethodFactor((int)circleMethodFactor.getValue());
+        settings.setCircleMethodFactor((int) circleMethodFactor.getValue());
         if (circleColorScheme.getSelectedItem() != null)
             settings.setCircleColorScheme((ColorScheme) circleColorScheme.getSelectedItem());
-        settings.setCirclePackageFactor((int)circlePackageFactor.getValue());
-        settings.setCircleHeightFactor((int)circleHeightFactor.getValue());
-        settings.setCircleGapFactor((int)circleGapFactor.getValue());
+        settings.setCirclePackageFactor((int) circlePackageFactor.getValue());
+        settings.setCircleHeightFactor((int) circleHeightFactor.getValue());
+        settings.setCircleGapFactor((int) circleGapFactor.getValue());
 
         settings.setCityScrollSpeed(cityScrollSpeedSlider.getValue());
         settings.setCityDynamicScrollSpeed(cityDynamicSpeedCheckBox.isSelected());
-        settings.setCityMethodFactor((int)cityMethodFactor.getValue());
+        settings.setCityMethodFactor((int) cityMethodFactor.getValue());
         if (cityColorScheme.getSelectedItem() != null)
             settings.setCityColorScheme((ColorScheme) cityColorScheme.getSelectedItem());
     }

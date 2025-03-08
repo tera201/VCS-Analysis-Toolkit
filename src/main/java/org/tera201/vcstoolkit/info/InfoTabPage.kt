@@ -9,7 +9,7 @@ import org.tera201.vcstoolkit.tabs.TabEnum
 import org.tera201.vcstoolkit.tabs.TabManager
 import kotlin.concurrent.thread
 
-class InfoTabPage(val tabManager: TabManager): JBTabbedPane() {
+class InfoTabPage(val tabManager: TabManager) : JBTabbedPane() {
     private val infoPage = InfoPage(tabManager)
     private val authorTab = AuthorTabPage(tabManager)
     private val jBScrollPane1: JBScrollPane = JBScrollPane(infoPage.component)
@@ -37,8 +37,8 @@ class InfoTabPage(val tabManager: TabManager): JBTabbedPane() {
 
         //        BlameManager blameManager  = gitTab.getMyRepo().getScm().blameManager();
         val developerInfoMap: Map<String, DeveloperInfo> = gitTab.controller.myRepo!!.scm.getDeveloperInfo(path)
-        thread {infoPage.open(commitSizeMap, developerInfoMap)}
-        thread {authorTab.create(commitSizeMap, developerInfoMap)}
+        thread { infoPage.open(commitSizeMap, developerInfoMap) }
+        thread { authorTab.create(commitSizeMap, developerInfoMap) }
     }
 
 

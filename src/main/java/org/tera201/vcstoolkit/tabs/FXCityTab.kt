@@ -14,10 +14,10 @@ import java.awt.FlowLayout
 import javax.swing.JPanel
 
 
-class FXCityTab(private val tabManager: TabManager, modelListContent:SharedModel) : JPanel(), FXTab {
+class FXCityTab(private val tabManager: TabManager, modelListContent: SharedModel) : JPanel(), FXTab {
     val modelComboBox = ComboBox(modelListContent)
     private var model: Int? = null
-    val fxCity:FXCityPanel
+    val fxCity: FXCityPanel
     private val topPanel = JPanel()
 
     init {
@@ -51,13 +51,13 @@ class FXCityTab(private val tabManager: TabManager, modelListContent:SharedModel
 
     fun renderByModel(model: Int, dataBase: DataBaseUtil) {
         Platform.runLater {
-                fxCity.citySpace.clean()
-                toCity(fxCity.citySpace, model, dataBase)
-                fxCity.citySpace.updateView()
+            fxCity.citySpace.clean()
+            toCity(fxCity.citySpace, model, dataBase)
+            fxCity.citySpace.updateView()
         }
     }
 
-    override fun setJFXPanel(panel:JFXPanel) {
+    override fun setJFXPanel(panel: JFXPanel) {
         this.add(panel, BorderLayout.CENTER)
     }
 

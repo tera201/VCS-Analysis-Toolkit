@@ -12,7 +12,7 @@ class ActionManager(val jtp: JBTabbedPane, private val toolWindow: ToolWindow, p
     private val showSettingsAction = ShowSettingsAction()
     private val infoTabAction = InfoTabAction(this, tabManager)
 
-    private val buttonsUmlWithExpand =  listOf(expandTabAction, showSettingsAction)
+    private val buttonsUmlWithExpand = listOf(expandTabAction, showSettingsAction)
     private val buttonsUmlWithCollapse = listOf(collapseTabAction, showSettingsAction)
     private val buttonsFxWithExpand = listOf(infoTabAction, expandTabAction, showSettingsAction)
     private val buttonsFxWithCollapse = listOf(infoTabAction, collapseTabAction, showSettingsAction)
