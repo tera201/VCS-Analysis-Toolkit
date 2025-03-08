@@ -10,7 +10,7 @@ import org.tera201.vcstoolkit.services.colors.ColorScheme
 import org.tera201.vcstoolkit.services.settings.VCSToolkitSettings
 
 private const val height = 500.0
-private const val gap = 8000.0
+private const val gap = 1000.0
 private const val defaultPackageWidth = 100
 private var settings: VCSToolkitSettings = VCSToolkitSettings.getInstance()
 
@@ -18,7 +18,7 @@ fun toCircle(circleSpace: FXSpace<HollowCylinder>, number: Int=0, modelId:Int, d
     val model = dataBaseUtil.getModel(modelId)
     val radius = 6000.0
     val packageCircle = PackageCircle(model.name, radius + defaultPackageWidth * settings.circlePackageFactor, radius, height * settings.circleHeightFactor)
-    packageCircle.translateY = number * gap
+    packageCircle.translateY = number * gap * settings.circleGapFactor
     packageCircle.filePath = model.filePath
     circleSpace.add(packageCircle)
     dataBaseUtil.getRootPackageIds(modelId).forEach { generatePackage(packageCircle, dataBaseUtil, it, modelId) }
