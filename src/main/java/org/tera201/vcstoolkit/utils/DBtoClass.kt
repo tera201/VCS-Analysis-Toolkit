@@ -1,6 +1,5 @@
 package org.tera201.vcstoolkit.utils
 
-import org.eclipse.uml2.uml.*
 import org.tera201.code2uml.util.messages.*
 import org.tera201.umlgraph.graph.Graph
 import org.tera201.umlgraph.graph.GraphException
@@ -57,13 +56,6 @@ private fun interfacesAsJava(
     val root = getVertexOrCreate(graph, id, implemented.name, ElementTypes.INTERFACE)
     tryInsertEdge(graph, root, mainClass, ArrowTypes.REALIZATION)
 }
-
-private val NamedElement.javaName: String
-    get() {
-        val longName = qualifiedName.replace("::", ".")
-        val k = longName.indexOf('.')
-        return longName.substring(k + 1)
-    }
 
 private fun parentsAsJava(
     graph: Graph<Int, String>,

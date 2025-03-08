@@ -45,6 +45,7 @@
         <ul>
           <li>Fixed the issue with nested classes in city visualization</li>
           <li>Fixed the issue with class sizes when nested classes are present</li>
+          <li>Refactored code</li>
         </ul>
 
         <b>1.7.1</b> (2025-03-08)
