@@ -34,8 +34,8 @@ class FXCityTab(private val tabManager: TabManager, modelListContent:SharedModel
             if (modelComboBox.selectedItem != null) {
                 val selectedModelName = modelComboBox.selectedItem as String
                 val gitTab = tabManager.getTabMap()[TabEnum.GIT] as GitTab
-                model = gitTab.modelsIdMap.getOrDefault(selectedModelName, null)
-                model?.let { renderByModel(it, gitTab.dataBaseUtil) }
+                model = gitTab.controller.modelsIdMap.getOrDefault(selectedModelName, null)
+                model?.let { renderByModel(it, gitTab.controller.dataBaseUtil) }
             }
         }
 
@@ -44,7 +44,7 @@ class FXCityTab(private val tabManager: TabManager, modelListContent:SharedModel
                 VCSToolkitSettings.SettingsChangedListener {
                 override fun onSettingsChange(settings: VCSToolkitSettings) {
                     val gitTab = tabManager.getTabMap()[TabEnum.GIT] as GitTab
-                    model?.let { renderByModel(it, gitTab.dataBaseUtil) }
+                    model?.let { renderByModel(it, gitTab.controller.dataBaseUtil) }
                 }
             })
     }

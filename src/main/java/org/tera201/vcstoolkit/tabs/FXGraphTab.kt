@@ -3,9 +3,7 @@ package org.tera201.vcstoolkit.tabs
 import com.intellij.icons.AllIcons
 import com.intellij.ide.ui.LafManagerListener
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.editor.colors.ColorKey
 import com.intellij.openapi.editor.colors.EditorColorsManager
-import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.ui.ComboBox
 import javafx.application.Platform
 import javafx.embed.swing.JFXPanel
@@ -65,14 +63,14 @@ class FXGraphTab(private val tabManager: TabManager, modelListContent:SharedMode
             if (modelComboBox.selectedItem != null) {
                 val selectedModelName = modelComboBox.selectedItem as String
                 gitTab = tabManager.getTabMap()[TabEnum.GIT] as GitTab
-                model = gitTab!!.modelsIdMap.getOrDefault(selectedModelName, null)
+                model = gitTab!!.controller.modelsIdMap.getOrDefault(selectedModelName, null)
             }
         }
 
         packageButton.addActionListener {
             if (model != null) {
                 Platform.runLater {
-                    umlGraphPanel?.setGraph(build_package_graph(model!!, gitTab!!.dataBaseUtil))
+                    umlGraphPanel?.setGraph(build_package_graph(model!!, gitTab!!.controller.dataBaseUtil))
                 }
                 umlGraphPanel?.update()
                 umlGraphControlPanel?.update()
@@ -82,7 +80,7 @@ class FXGraphTab(private val tabManager: TabManager, modelListContent:SharedMode
         classButton.addActionListener {
             if (model != null) {
                 Platform.runLater {
-                    umlGraphPanel?.setGraph(build_class_graph(model!!, gitTab!!.dataBaseUtil))
+                    umlGraphPanel?.setGraph(build_class_graph(model!!, gitTab!!.controller.dataBaseUtil))
                 }
                 umlGraphPanel?.update()
                 umlGraphControlPanel?.update()

@@ -32,8 +32,8 @@ class InfoTabAction(private val actionManager: ActionManager, private val tabMan
             val notification: Notification =
                 notificationGroup.createNotification("VCS Analysis Toolkit - $selectedTabTitle", "Please select object", NotificationType.WARNING)
             Notifications.Bus.notify(notification, null)
-        } else if (selectedTabTitle == TabEnum.CIRCLE.value && gitTab?.models?.isEmpty() == true ||
-            selectedTabTitle == TabEnum.CITY.value && gitTab?.models?.isEmpty() == true) {
+        } else if (selectedTabTitle == TabEnum.CIRCLE.value && gitTab?.controller?.models?.isEmpty() == true ||
+            selectedTabTitle == TabEnum.CITY.value && gitTab?.controller?.models?.isEmpty() == true) {
             val notification: Notification =
                 notificationGroup.createNotification("VCS Analysis Toolkit - $selectedTabTitle", "Please analyze repo", NotificationType.WARNING)
             Notifications.Bus.notify(notification, null)

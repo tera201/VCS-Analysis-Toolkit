@@ -29,7 +29,7 @@ fun getCityBranch(tabManager: TabManager):String? {
 
 fun getGitPath(tabManager: TabManager):String? {
     val gitTab = tabManager.getTabMap()[TabEnum.GIT] as GitTab?
-    val  pathComponent = gitTab!!.pathJTree.selectionPath?.lastPathComponent
+    val  pathComponent = gitTab!!.controller.pathJTree.selectionPath?.lastPathComponent
     return (pathComponent as? DefaultMutableTreeNode)?.userObject?.toString()
 }
 
@@ -45,7 +45,7 @@ fun getPathByTab(tabManager: TabManager):String? {
 fun checkoutByTab(tabManager: TabManager){
     val gitTab = tabManager.getTabMap()[TabEnum.GIT] as GitTab?
     when (tabManager.getSelectedTabTitle()) {
-        TabEnum.CITY.value -> getCityBranch(tabManager)?.let { gitTab!!.checkoutTo(it) }
-        TabEnum.CIRCLE.value -> getCircleBranch(tabManager)?.let { gitTab!!.checkoutTo(it) }
+        TabEnum.CITY.value -> getCityBranch(tabManager)?.let { gitTab!!.controller.checkoutTo(it) }
+        TabEnum.CIRCLE.value -> getCircleBranch(tabManager)?.let { gitTab!!.controller.checkoutTo(it) }
     }
 }
