@@ -1,4 +1,4 @@
-package org.tera201.vcstoolkit.tabs
+package org.tera201.vcstoolkit.tabs.git
 
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.JBSplitter
@@ -16,9 +16,7 @@ class GitTabUI (val modelListContent: SharedModel) {
     val getButton = JButton("Get")
     val analyzeButton = JButton("Analyze")
     // TODO: problems with JBTextArea (IDEA freeze) when analyzing one branch
-    val logsJTextArea = JTextArea().apply {
-        this.isEditable = false
-    }
+    val logsJTextArea = JTextArea().apply { this.isEditable = false }
     val clearLogButton = JButton("Clear log")
     val logsJBScrollPane = JBScrollPane(
         logsJTextArea,
@@ -29,22 +27,17 @@ class GitTabUI (val modelListContent: SharedModel) {
     val tagListModel = DefaultListModel<String>()
     val branchList = JBList(branchListModel)
     val tagList = JBList(tagListModel)
-    val branchListScrollPane = JBScrollPane(branchList)
     val branchPane = JPanel().apply {
-        val label = JLabel("Branches")
         this.layout = BorderLayout()
-        this.add(label, BorderLayout.NORTH)
-        this.add(branchListScrollPane, BorderLayout.CENTER)
+        this.add(JLabel("Branches"), BorderLayout.NORTH)
+        this.add(JBScrollPane(branchList), BorderLayout.CENTER)
     }
-    val tagListScrollPane = JBScrollPane(tagList)
     val tagPane = JPanel().apply {
-        val label = JLabel("Tags")
         this.layout = BorderLayout()
-        this.add(label, BorderLayout.NORTH)
-        this.add(tagListScrollPane, BorderLayout.CENTER)
+        this.add(JLabel("Tags"), BorderLayout.NORTH)
+        this.add(JBScrollPane(tagList), BorderLayout.CENTER)
     }
     val modelList = JBList(modelListContent)
-    val modelListScrollPane = JBScrollPane(modelList)
     val projectComboBox = ComboBox<String>()
     val openProjectButton = JButton("Open project")
     val vcSplitPane = JBSplitter(true, 0.5f).apply {
@@ -67,7 +60,7 @@ class GitTabUI (val modelListContent: SharedModel) {
     }
     val logModelSplitPane = JBSplitter(false, 0.5f).apply {
         this.firstComponent = logsJBScrollPane
-        this.secondComponent = modelListScrollPane
+        this.secondComponent = JBScrollPane(modelList)
         this.dividerWidth = 1
     }
     val analyzerProgressBar = JProgressBar().apply { isVisible = false }
@@ -76,6 +69,11 @@ class GitTabUI (val modelListContent: SharedModel) {
         add(logModelSplitPane, BorderLayout.CENTER)
         add(analyzerProgressBar, BorderLayout.SOUTH)
     }
+    val logButtonsPanel = JPanel().apply {
+        layout = BoxLayout(this, BoxLayout.Y_AXIS)
+        add(clearLogButton)
+    }
+    val modelControlPanel = JPanel().apply { add(analyzeButton) }
     val popupMenu = JPopupMenu()
 
     fun createUI(panel: JPanel) {
@@ -93,26 +91,10 @@ class GitTabUI (val modelListContent: SharedModel) {
         panel.add(urlField)
         panel.add(getButton)
         panel.add(showSplitPane)
-        addLogPanelButtons(panel)
+        panel.add(logButtonsPanel)
         panel.add(logModelPane)
-        addModelControlPanel(panel)
+        panel.add(modelControlPanel)
         panel.add(projectComboBox)
         panel.add(openProjectButton)
-    }
-    private fun addLogPanelButtons(mainJPanel: JPanel) {
-        val logButtonsPanel = JPanel()
-        logButtonsPanel.layout = BoxLayout(logButtonsPanel, BoxLayout.Y_AXIS)
-
-        clearLogButton.addActionListener {
-            logsJTextArea.text = null
-        }
-        logButtonsPanel.add(clearLogButton)
-        mainJPanel.add(logButtonsPanel)
-    }
-
-    private fun addModelControlPanel(mainJPanel: JPanel) {
-        val modelControlPanel = JPanel()
-        modelControlPanel.add(analyzeButton)
-        mainJPanel.add(modelControlPanel)
     }
 }

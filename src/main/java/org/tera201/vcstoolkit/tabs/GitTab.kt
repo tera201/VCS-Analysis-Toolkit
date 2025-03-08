@@ -1,13 +1,10 @@
 package org.tera201.vcstoolkit.tabs
 
-import com.intellij.notification.Notification
-import com.intellij.notification.NotificationGroupManager
-import com.intellij.notification.NotificationType
-import com.intellij.notification.Notifications
-import com.intellij.openapi.application.ApplicationManager
 import org.tera201.vcstoolkit.helpers.SharedModel
 import org.tera201.vcstoolkit.services.VCSToolkitCache
 import org.tera201.vcstoolkit.services.settings.VCSToolkitSettings
+import org.tera201.vcstoolkit.tabs.git.GitTabController
+import org.tera201.vcstoolkit.tabs.git.GitTabUI
 import java.awt.Dimension
 import java.awt.FlowLayout
 import java.io.File
