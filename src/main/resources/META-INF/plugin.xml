@@ -41,10 +41,16 @@
     <![CDATA[
       <html>
 
+        <b>1.7.2</b> (2025-03-08)
+        <ul>
+          <li>Fixed the issue with nested classes in city visualization</li>
+          <li>Fixed the issue with class sizes when nested classes are present</li>
+        </ul>
+
         <b>1.7.1</b> (2025-03-08)
         <ul>
-            <li>Fixed the issue with analyzing additional branches/tags in a project.</li>
-            <li>Added a gap factor for circle models (This factor defines the default distance between branches/tags when multiple are analyzed).</li>
+            <li>Fixed the issue with analyzing additional branches/tags in a project</li>
+            <li>Added a gap factor for circle models (This factor defines the default distance between branches/tags when multiple are analyzed)</li>
         </ul>
 
         <b>1.7.0</b> (2025-03-07)
