@@ -16,13 +16,9 @@ private var settings: VCSToolkitSettings = VCSToolkitSettings.getInstance()
 
 fun toCircle(circleSpace: FXSpace<HollowCylinder>, number: Int = 0, modelId: Int, dataBaseUtil: DataBaseUtil) {
     val model = dataBaseUtil.getModel(modelId)
-    val radius = 6000.0
-    val packageCircle = PackageCircle(
-        model.name,
-        radius + defaultPackageWidth * settings.circlePackageFactor,
-        radius,
-        height * settings.circleHeightFactor
-    )
+    val radiusInner = 6000.0
+    val radiusOuter = radiusInner + defaultPackageWidth * settings.circlePackageFactor
+    val packageCircle = PackageCircle(model.name, radiusOuter, radiusInner, height * settings.circleHeightFactor)
     packageCircle.translateY = number * gap * settings.circleGapFactor
     packageCircle.filePath = model.filePath
     circleSpace.add(packageCircle)
@@ -37,12 +33,9 @@ private fun generatePackage(circleParent: PackageCircle, dataBaseUtil: DataBaseU
     if (classes.isEmpty() and interfaces.isEmpty() and enumerations.isEmpty()) {
         packageDB.childrenId.forEach { generatePackage(circleParent, dataBaseUtil, it, modelId) }
     } else {
-        val packageCircle = PackageCircle(
-            packageDB.packageName,
-            circleParent.innerRadius / 2 + defaultPackageWidth * settings.circlePackageFactor,
-            circleParent.innerRadius / 2,
-            height * settings.circleHeightFactor
-        )
+        val radiusInner = circleParent.innerRadius / 2
+        val radiusOuter = radiusInner + defaultPackageWidth * settings.circlePackageFactor
+        val packageCircle = PackageCircle(packageDB.packageName, radiusOuter, radiusInner, height * settings.circleHeightFactor)
 
         if (settings.circleColorScheme == ColorScheme.UML) {
             packageCircle.setColor(UMLColorScheme.PACKAGE.color)
@@ -56,15 +49,15 @@ private fun generatePackage(circleParent: PackageCircle, dataBaseUtil: DataBaseU
 }
 
 private fun generateClass(circleParent: PackageCircle, dataBaseUtil: DataBaseUtil, classId: Int, modelId: Int) {
-    val classDB = dataBaseUtil.getClass(classId, modelId)
+    val classDB = dataBaseUtil.getClassFull(classId, modelId)
     val methods = classDB.methodCount.toDouble() + 1
-    val side = classDB.size.toDouble() / 2
-    val classCircle = ClassCircle(
-        classDB.name,
-        side + methods * settings.circleMethodFactor,
-        side,
-        height * settings.circleHeightFactor
-    )
+    val radiusInner = classDB.size.toDouble() / 2
+    val radiusOuter = radiusInner + methods * settings.circleMethodFactor
+    val name = if (classDB.nestedIn != 0)
+        "${dataBaseUtil.getClass(classDB.nestedIn, modelId).name}.${classDB.name}"
+    else
+        classDB.name
+    val classCircle = ClassCircle(name, radiusOuter, radiusInner, height * settings.circleHeightFactor)
     classCircle.filePath = classDB.filePath
     circleParent.addObject(classCircle)
     if (settings.circleColorScheme == ColorScheme.UML) {
@@ -76,13 +69,9 @@ private fun generateInterface(circleParent: PackageCircle, dataBaseUtil: DataBas
     val interfaceDB = dataBaseUtil.getInterface(interfaceId, modelId)
     val size = if (interfaceDB.size == 0L) 700.0 else interfaceDB.size.toDouble()
     val methods = interfaceDB.methodCount.toDouble() + 1
-    val side = size / 2
-    val classCircle = ClassCircle(
-        interfaceDB.name,
-        side + methods * settings.circleMethodFactor,
-        side,
-        height * settings.circleHeightFactor
-    )
+    val radiusInner = size / 2
+    val radiusOuter = radiusInner + methods * settings.circleMethodFactor
+    val classCircle = ClassCircle(interfaceDB.name, radiusOuter, radiusInner,height * settings.circleHeightFactor)
     classCircle.filePath = interfaceDB.filePath
     circleParent.addObject(classCircle)
     if (settings.circleColorScheme == ColorScheme.UML) {
@@ -97,9 +86,10 @@ private fun generateEnumeration(
     modelId: Int
 ) {
     val enumerationDB = dataBaseUtil.getEnumerations(enumerationId, modelId)
-    val side = enumerationDB.size.toDouble() / 20
+    val radiusInner = enumerationDB.size.toDouble() / 20
+    val radiusOuter = radiusInner + settings.circleMethodFactor
     val classCircle =
-        ClassCircle(enumerationDB.name, side + settings.circleMethodFactor, side, height * settings.circleHeightFactor)
+        ClassCircle(enumerationDB.name,  radiusOuter, radiusInner, height * settings.circleHeightFactor)
     classCircle.filePath = enumerationDB.filePath
     circleParent.addObject(classCircle)
     if (settings.circleColorScheme == ColorScheme.UML) {

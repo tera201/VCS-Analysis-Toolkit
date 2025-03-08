@@ -35,8 +35,12 @@ private fun generateClass(
     id: Int,
     modelId: Int
 ) {
-    val classDB = dataBaseUtil.getClass(id, modelId)
-    val root = getVertexOrCreate(graph, id, classDB.name, ElementTypes.CLASS)
+    val classDB = dataBaseUtil.getClassFull(id, modelId)
+    val name = if (classDB.nestedIn != 0)
+        "${dataBaseUtil.getClass(classDB.nestedIn, modelId).name}.${classDB.name}"
+    else
+        classDB.name
+    val root = getVertexOrCreate(graph, id, name, ElementTypes.CLASS)
     classDB.interfaceIdList.forEach { interfacesAsJava(graph, root, dataBaseUtil, it, modelId) }
     classDB.parentClassIdList.forEach { parentsAsJava(graph, root, dataBaseUtil, it, modelId) }
     if (parent != null) graph.getOrCreateEdge(parent, root, "${classDB.name}-${parent}", ArrowTypes.DEPENDENCY)
@@ -68,7 +72,7 @@ private fun parentsAsJava(
     id: Int,
     modelId: Int
 ) {
-    val parents = dataBaseUtil.getClass(id, modelId)
+    val parents = dataBaseUtil.getClassFull(id, modelId)
     val root: Vertex<Int> = getVertexOrCreate(graph, id, parents.name, ElementTypes.CLASS)
     tryInsertEdge(graph, root, mainClass, ArrowTypes.DEPENDENCY)
 }

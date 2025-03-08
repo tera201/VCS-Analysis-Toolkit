@@ -36,38 +36,40 @@ private fun generatePackage(city: City, parentName: String?, dataBaseUtil: DataB
     packageDB.childrenId.forEach { generatePackage(city, newName, dataBaseUtil, it, modelId) }
 }
 
-private fun generateClass(quarter: Quarter?, dataBaseUtil: DataBaseUtil, id: Int, modelId: Int) {
-    val classDB = dataBaseUtil.getClass(id, modelId)
+private fun generateClass(quarter: Quarter, dataBaseUtil: DataBaseUtil, id: Int, modelId: Int) {
+    val classDB = dataBaseUtil.getClassFull(id, modelId)
     val methods = classDB.methodCount.toDouble() + 1
     val side = classDB.size.toDouble() / 20
-    val building = Building(classDB.name, side, settings.cityMethodFactor * methods, side)
+    val name = if (classDB.nestedIn != 0)
+        "${dataBaseUtil.getClass(classDB.nestedIn, modelId).name}.${classDB.name}"
+    else
+        classDB.name
+    val building = Building(name, side, settings.cityMethodFactor * methods, side)
     building.filePath = classDB.filePath
-    building.info = """
-    """.trimIndent()
-    quarter?.addObject(building)
+    quarter.addObject(building)
     if (settings.circleColorScheme == ColorScheme.UML) {
         building.setColor(UMLColorScheme.CLASS.color)
     }
 }
 
-private fun generateInterface(quarter: Quarter?, dataBaseUtil: DataBaseUtil, id: Int, modelId: Int) {
+private fun generateInterface(quarter: Quarter, dataBaseUtil: DataBaseUtil, id: Int, modelId: Int) {
     val interfaceDB = dataBaseUtil.getInterface(id, modelId)
     val methods = interfaceDB.methodCount.toDouble() + 1
     val side = interfaceDB.size.toDouble() / 20
     val building = Building(interfaceDB.name, side, settings.cityMethodFactor * methods, side)
     building.filePath = interfaceDB.filePath
-    quarter?.addObject(building)
+    quarter.addObject(building)
     if (settings.circleColorScheme == ColorScheme.UML) {
         building.setColor(UMLColorScheme.INTERFACE.color)
     }
 }
 
-private fun generateEnumeration(quarter: Quarter?, dataBaseUtil: DataBaseUtil, id: Int, modelId: Int) {
+private fun generateEnumeration(quarter: Quarter, dataBaseUtil: DataBaseUtil, id: Int, modelId: Int) {
     val enumerationDB = dataBaseUtil.getEnumerations(id, modelId)
     val side = enumerationDB.size.toDouble() / 20
     val building = Building(enumerationDB.name, side, settings.cityMethodFactor.toDouble(), side)
     building.filePath = enumerationDB.filePath
-    quarter?.addObject(building)
+    quarter.addObject(building)
     if (settings.circleColorScheme == ColorScheme.UML) {
         building.setColor(UMLColorScheme.ENUM.color)
     }
