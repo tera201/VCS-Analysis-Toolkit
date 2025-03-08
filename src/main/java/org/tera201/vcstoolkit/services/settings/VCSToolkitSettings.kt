@@ -28,6 +28,7 @@ class VCSToolkitSettings : PersistentStateComponent<VCSToolkitSettings> {
     var circleColorScheme: ColorScheme = ColorScheme.DEFAULT
     var circlePackageFactor:Int = 5
     var circleHeightFactor:Int = 1
+    var circleGapFactor:Int = 16
 
     var cityScrollSpeed:Int = 5
     var cityDynamicScrollSpeed:Boolean = false

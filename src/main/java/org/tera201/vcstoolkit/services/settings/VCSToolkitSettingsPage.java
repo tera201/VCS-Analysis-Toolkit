@@ -47,6 +47,7 @@ public class VCSToolkitSettingsPage implements Configurable {
     private JComboBox cityColorScheme;
     private JSpinner circlePackageFactor;
     private JSpinner circleHeightFactor;
+    private JSpinner circleGapFactor;
 
     public VCSToolkitSettingsPage() {
 
@@ -89,10 +90,12 @@ public class VCSToolkitSettingsPage implements Configurable {
 
         SpinnerNumberModel circlePackageModel = new SpinnerNumberModel(5, 1, 500, 1);
         circlePackageFactor.setModel(circlePackageModel);
-        circleMethodFactor.setModel(circleSpinnerModel);
 
         SpinnerNumberModel circleHeightModel = new SpinnerNumberModel(1, 1, 100, 1);
         circleHeightFactor.setModel(circleHeightModel);
+
+        SpinnerNumberModel circleGapModel = new SpinnerNumberModel(8, 1, 200, 1);
+        circleGapFactor.setModel(circleGapModel);
 
         SpinnerNumberModel citySpinnerModel = new SpinnerNumberModel(10, 1, 400, 5);
         cityMethodFactor.setModel(citySpinnerModel);
@@ -146,6 +149,7 @@ public class VCSToolkitSettingsPage implements Configurable {
                 circleColorScheme.getSelectedItem() != settings.getCircleColorScheme() ||
                 ((int) circlePackageFactor.getValue()) != settings.getCirclePackageFactor() ||
                 ((int) circleHeightFactor.getValue()) != settings.getCircleHeightFactor() ||
+                ((int) circleGapFactor.getValue()) != settings.getCircleGapFactor() ||
 
 
                 cityScrollSpeedSlider.getValue() != settings.getCityScrollSpeed() ||
@@ -184,6 +188,7 @@ public class VCSToolkitSettingsPage implements Configurable {
             settings.setCircleColorScheme((ColorScheme) circleColorScheme.getSelectedItem());
         settings.setCirclePackageFactor((int)circlePackageFactor.getValue());
         settings.setCircleHeightFactor((int)circleHeightFactor.getValue());
+        settings.setCircleGapFactor((int)circleGapFactor.getValue());
 
         settings.setCityScrollSpeed(cityScrollSpeedSlider.getValue());
         settings.setCityDynamicScrollSpeed(cityDynamicSpeedCheckBox.isSelected());
@@ -206,6 +211,7 @@ public class VCSToolkitSettingsPage implements Configurable {
         circleColorScheme.setSelectedIndex(settings.getCircleColorScheme().getIndex());
         circlePackageFactor.setValue(settings.getCirclePackageFactor());
         circleHeightFactor.setValue(settings.getCircleHeightFactor());
+        circleGapFactor.setValue(settings.getCircleGapFactor());
 
         cityScrollSpeedSlider.setValue(settings.getCityScrollSpeed());
         cityDynamicSpeedCheckBox.setSelected(settings.getCityDynamicScrollSpeed());
