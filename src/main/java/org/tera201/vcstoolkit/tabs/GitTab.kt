@@ -18,8 +18,6 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
     private var settings: VCSToolkitSettings = VCSToolkitSettings.getInstance()
     private var cache: VCSToolkitCache = VCSToolkitCache.getInstance(tabManager.getCurrentProject())
     val controller: GitTabController
-
-    private val notificationGroup = NotificationGroupManager.getInstance().getNotificationGroup("VCSToolkitNotify")
     
     init {
         try {
@@ -30,24 +28,6 @@ class GitTab(private val tabManager: TabManager, val modelListContent:SharedMode
         }
 
         this.layout = FlowLayout(FlowLayout.LEFT)
-
-//        ApplicationManager.getApplication().messageBus.connect()
-//            .subscribe(VCSToolkitSettings.SettingsChangedListener.TOPIC, object :
-//                VCSToolkitSettings.SettingsChangedListener {
-//                override fun onSettingsChange(settings: VCSToolkitSettings) {
-//                    logsJBScrollPane.isVisible = settings.showGitLogs
-//                    clearLogButton.isVisible = settings.showGitLogs
-//                    createDirectoryIfNotExists(settings.repoPath)
-//                    createDirectoryIfNotExists(settings.modelPath)
-//                    if (settings.externalProjectMode == 1 &&  cache.projectPathMap[projectComboBox.selectedItem]!!.isExternal) {
-//                        branchListModel.clear()
-//                        tagListModel.clear()
-//                    } else {
-//                        projectComboBox.selectedItem = cache.lastProject
-//                    }
-//                    buildCircle()
-//                }
-//            })
 
         this.minimumSize = Dimension(0, 200)
         val ui = GitTabUI(modelListContent)

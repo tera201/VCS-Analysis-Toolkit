@@ -1,13 +1,14 @@
 package org.tera201.vcstoolkit.tabs
 
 import com.intellij.notification.Notification
+import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileTypes.FileTypeManager
-import com.intellij.openapi.updateSettings.impl.pluginsAdvertisement.notificationGroup
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.ui.ColoredTreeCellRenderer
 import com.intellij.ui.components.JBList
@@ -44,6 +45,8 @@ class GitTabController(
     val pathJTree = Tree()
     private var analyzing = false
 
+    private val notificationGroup = NotificationGroupManager.getInstance().getNotificationGroup("VCSToolkitNotify")
+
     init {
         initializeUI()
         dataBaseUtil = DataBaseUtil(dateBaseURL)
@@ -51,6 +54,25 @@ class GitTabController(
         setupListeners()
         setupGitListListeners()
         setupListSelectionListeners()
+
+        ApplicationManager.getApplication().messageBus.connect()
+            .subscribe(VCSToolkitSettings.SettingsChangedListener.TOPIC, object :
+                VCSToolkitSettings.SettingsChangedListener {
+                override fun onSettingsChange(settings: VCSToolkitSettings) {
+                    gitTabUI.logsJBScrollPane.isVisible = settings.showGitLogs
+                    gitTabUI.clearLogButton.isVisible = settings.showGitLogs
+                    createDirectoryIfNotExists(settings.repoPath)
+                    createDirectoryIfNotExists(settings.modelPath)
+                    if (settings.externalProjectMode == 1 &&  cache.projectPathMap[gitTabUI.projectComboBox.selectedItem]!!.isExternal) {
+                        gitTabUI.branchListModel.clear()
+                        gitTabUI.tagListModel.clear()
+                    } else {
+                        gitTabUI.projectComboBox.selectedItem = cache.lastProject
+                    }
+                    buildCircle()
+                }
+            })
+
     }
 
     private fun setupListeners() {
