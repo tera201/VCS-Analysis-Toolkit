@@ -8,8 +8,6 @@ import java.io.File
 
 object GitTabUtils {
 
-    private val notificationGroup = NotificationGroupManager.getInstance().getNotificationGroup("VCSToolkitNotify")
-
     fun createDirectoryIfNotExists(path: String) {
         val directory = File(path)
         if (!directory.exists()) {
@@ -24,6 +22,7 @@ object GitTabUtils {
     }
 
     fun createNotification(title:String, message:String, notificationType: NotificationType) {
+        val notificationGroup = NotificationGroupManager.getInstance().getNotificationGroup("VCSToolkitNotify")
         val notification: Notification =
             notificationGroup.createNotification("VCS Analysis Toolkit - $title", message, notificationType)
         Notifications.Bus.notify(notification, null)
