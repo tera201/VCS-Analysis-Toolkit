@@ -8,12 +8,11 @@ import java.util.*
 class DateUtils {
     companion object {
         fun timestampToLocalDate(timestamp: Int): LocalDate {
-            val instant: Instant = Instant.ofEpochSecond(timestamp.toLong() )
+            val instant: Instant = Instant.ofEpochSecond(timestamp.toLong())
             return instant.atZone(ZoneId.systemDefault()).toLocalDate()
         }
 
         fun timestampToLocalDateTime(timestamp: Int): LocalDateTime {
-            // Преобразование int timestamp в LocalDateTime
             val instant = Instant.ofEpochSecond(timestamp.toLong())
             return instant.atZone(ZoneId.systemDefault()).toLocalDateTime()
         }

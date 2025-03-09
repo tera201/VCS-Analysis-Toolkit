@@ -16,7 +16,7 @@ import javax.swing.JPanel
 class CommitPanel internal constructor() : JPanel() {
     private var year: Int = LocalDate.now().year
     private var daysInYear: Int = Year.of(year).length()
-    private var offset:Int = LocalDate.ofYearDay(year, 1).getDayOfWeek().value - 1
+    private var offset: Int = LocalDate.ofYearDay(year, 1).getDayOfWeek().value - 1
     private var panels: Array<JPanel?> = arrayOfNulls(366)
     private val dayCommit = IntArray(366)
     private val gbc: GridBagConstraints = GridBagConstraints()
@@ -40,7 +40,7 @@ class CommitPanel internal constructor() : JPanel() {
         this.removeAll()
         clearPanels()
         date = LocalDate.ofYearDay(year, 1)
-        dayCommit.forEachIndexed() { i,_ -> dayCommit[i] = 0 }
+        dayCommit.forEachIndexed() { i, _ -> dayCommit[i] = 0 }
         daysInYear = Year.of(year).length()
         offset = date.getDayOfWeek().value - 1
 
@@ -83,7 +83,12 @@ class CommitPanel internal constructor() : JPanel() {
         val panel = panels[day - 1] ?: return
         dayCommit[day - 1] = commitCount
         panel.background = getColorForCommits(dayCommit[day - 1])
-        panel.toolTipText = "${commitCount} commits on ${date.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${date.dayOfMonth}"
+        panel.toolTipText = "${commitCount} commits on ${
+            date.month.getDisplayName(
+                TextStyle.FULL,
+                Locale.getDefault()
+            )
+        } ${date.dayOfMonth}"
     }
 
     fun addCommitCountForDay(day: Int, commitCount: Int) {
@@ -91,7 +96,12 @@ class CommitPanel internal constructor() : JPanel() {
         val panel = panels[day - 1] ?: return
         dayCommit[day - 1] += commitCount
         panel.background = getColorForCommits(dayCommit[day - 1])
-        panel.toolTipText = "${dayCommit[day - 1]} commits on ${date.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${date.dayOfMonth}"
+        panel.toolTipText = "${dayCommit[day - 1]} commits on ${
+            date.month.getDisplayName(
+                TextStyle.FULL,
+                Locale.getDefault()
+            )
+        } ${date.dayOfMonth}"
     }
 
     private fun addDayLabels(gbc: GridBagConstraints) {
@@ -138,7 +148,7 @@ class CommitPanel internal constructor() : JPanel() {
             background = getColorForCommits(0)
         }
 
-        private fun getColorForCommits(commits: Int): Color  = when {
+        private fun getColorForCommits(commits: Int): Color = when {
             commits > 15 -> Color(0, 200, 0)
             commits > 10 -> Color(0, 150, 0)
             commits > 5 -> Color(0, 100, 0)

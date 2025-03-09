@@ -9,7 +9,7 @@ import org.tera201.vcstoolkit.tabs.TabEnum
 import org.tera201.vcstoolkit.tabs.TabManager
 import kotlin.concurrent.thread
 
-class InfoTabPage(val tabManager: TabManager): JBTabbedPane() {
+class InfoTabPage(val tabManager: TabManager) : JBTabbedPane() {
     private val infoPage = InfoPage(tabManager)
     private val authorTab = AuthorTabPage(tabManager)
     private val jBScrollPane1: JBScrollPane = JBScrollPane(infoPage.component)
@@ -31,14 +31,14 @@ class InfoTabPage(val tabManager: TabManager): JBTabbedPane() {
         val path = getPathByTab(tabManager)
         val lastPathNode = if ((path != null)) path.substring(path.lastIndexOf("/") + 1) else null
 
-        gitTab!!.myRepo!!.scm.dbPrepared()
+        gitTab!!.controller.myRepo!!.scm.dbPrepared()
 
-        val commitSizeMap: Map<String, CommitSize> = gitTab.myRepo!!.scm.repositorySize(path)
+        val commitSizeMap: Map<String, CommitSize> = gitTab.controller.myRepo!!.scm.repositorySize(path)
 
         //        BlameManager blameManager  = gitTab.getMyRepo().getScm().blameManager();
-        val developerInfoMap: Map<String, DeveloperInfo> = gitTab.myRepo!!.scm.getDeveloperInfo(path)
-        thread {infoPage.open(commitSizeMap, developerInfoMap)}
-        thread {authorTab.create(commitSizeMap, developerInfoMap)}
+        val developerInfoMap: Map<String, DeveloperInfo> = gitTab.controller.myRepo!!.scm.getDeveloperInfo(path)
+        thread { infoPage.open(commitSizeMap, developerInfoMap) }
+        thread { authorTab.create(commitSizeMap, developerInfoMap) }
     }
 
 

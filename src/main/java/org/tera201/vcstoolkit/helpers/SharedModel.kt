@@ -39,6 +39,7 @@ class SharedModel : ComboBoxModel<String>, ListModel<String> {
         items.add(element)
         notifyListeners()
     }
+
     fun addAll(elements: Collection<String>) {
         items.addAll(elements)
         notifyListeners()

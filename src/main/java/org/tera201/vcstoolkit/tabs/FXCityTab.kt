@@ -14,10 +14,10 @@ import java.awt.FlowLayout
 import javax.swing.JPanel
 
 
-class FXCityTab(private val tabManager: TabManager, modelListContent:SharedModel) : JPanel(), FXTab {
+class FXCityTab(private val tabManager: TabManager, modelListContent: SharedModel) : JPanel(), FXTab {
     val modelComboBox = ComboBox(modelListContent)
     private var model: Int? = null
-    val fxCity:FXCityPanel
+    val fxCity: FXCityPanel
     private val topPanel = JPanel()
 
     init {
@@ -34,8 +34,8 @@ class FXCityTab(private val tabManager: TabManager, modelListContent:SharedModel
             if (modelComboBox.selectedItem != null) {
                 val selectedModelName = modelComboBox.selectedItem as String
                 val gitTab = tabManager.getTabMap()[TabEnum.GIT] as GitTab
-                model = gitTab.modelsIdMap.getOrDefault(selectedModelName, null)
-                model?.let { renderByModel(it, gitTab.dataBaseUtil) }
+                model = gitTab.controller.modelsIdMap.getOrDefault(selectedModelName, null)
+                model?.let { renderByModel(it, gitTab.controller.dataBaseUtil) }
             }
         }
 
@@ -44,20 +44,20 @@ class FXCityTab(private val tabManager: TabManager, modelListContent:SharedModel
                 VCSToolkitSettings.SettingsChangedListener {
                 override fun onSettingsChange(settings: VCSToolkitSettings) {
                     val gitTab = tabManager.getTabMap()[TabEnum.GIT] as GitTab
-                    model?.let { renderByModel(it, gitTab.dataBaseUtil) }
+                    model?.let { renderByModel(it, gitTab.controller.dataBaseUtil) }
                 }
             })
     }
 
     fun renderByModel(model: Int, dataBase: DataBaseUtil) {
         Platform.runLater {
-                fxCity.citySpace.clean()
-                toCity(fxCity.citySpace, model, dataBase)
-                fxCity.citySpace.updateView()
+            fxCity.citySpace.clean()
+            toCity(fxCity.citySpace, model, dataBase)
+            fxCity.citySpace.updateView()
         }
     }
 
-    override fun setJFXPanel(panel:JFXPanel) {
+    override fun setJFXPanel(panel: JFXPanel) {
         this.add(panel, BorderLayout.CENTER)
     }
 

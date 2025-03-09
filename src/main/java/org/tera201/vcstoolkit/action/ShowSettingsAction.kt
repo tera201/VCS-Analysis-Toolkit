@@ -7,9 +7,10 @@ import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.DumbAwareAction
 import java.util.function.Supplier
 
-class ShowSettingsAction : DumbAwareAction(Supplier {"Plugin Settings"}, AllIcons.General.Settings) {
+class ShowSettingsAction : DumbAwareAction(Supplier { "Plugin Settings" }, AllIcons.General.Settings) {
     override fun actionPerformed(event: AnActionEvent) {
-        ShowSettingsUtil.getInstance().editConfigurable(event.project, "VCSToolkitSettings",
+        ShowSettingsUtil.getInstance().editConfigurable(
+            event.project, "VCSToolkitSettings",
             VCSToolkitSettingsPage()
         )
     }

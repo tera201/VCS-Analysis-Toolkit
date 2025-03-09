@@ -20,7 +20,7 @@ class VCSToolkitCache : PersistentStateComponent<VCSToolkitCache> {
 
 
     companion object {
-        fun getInstance(project:Project): VCSToolkitCache {
+        fun getInstance(project: Project): VCSToolkitCache {
             return project.getService(VCSToolkitCache::class.java)
         }
     }

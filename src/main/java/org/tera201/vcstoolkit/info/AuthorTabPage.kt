@@ -8,7 +8,7 @@ import java.util.*
 import javax.swing.*
 
 
-class AuthorTabPage(val tabManager: TabManager): JPanel() {
+class AuthorTabPage(val tabManager: TabManager) : JPanel() {
     init {
         this.setLayout(BorderLayout())
         this.autoscrolls = true
@@ -20,7 +20,7 @@ class AuthorTabPage(val tabManager: TabManager): JPanel() {
         val authorInfoPage = AuthorInfoPage(tabManager)
         this.add(authorInfoPage.component, BorderLayout.CENTER)
         developerInfoMap.forEach {
-                authorInfoPage.emailComboBox.addItem(it.key)
+            authorInfoPage.emailComboBox.addItem(it.key)
         }
         authorInfoPage.emailComboBox.addActionListener {
             val selectedEmail = authorInfoPage.emailComboBox.selectedItem as String

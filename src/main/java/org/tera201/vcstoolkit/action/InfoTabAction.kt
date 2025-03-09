@@ -15,7 +15,8 @@ import org.tera201.vcstoolkit.tabs.*
 import java.util.function.Supplier
 import kotlin.concurrent.thread
 
-class InfoTabAction(private val actionManager: ActionManager, private val tabManager: TabManager) : DumbAwareAction(Supplier {"Open stat"}, MyIcons.VCS) {
+class InfoTabAction(private val actionManager: ActionManager, private val tabManager: TabManager) :
+    DumbAwareAction(Supplier { "Open stat" }, MyIcons.VCS) {
     private val notificationGroup = NotificationGroupManager.getInstance().getNotificationGroup("VCSToolkitNotify")
     override fun actionPerformed(event: AnActionEvent) {
         val selectedTabTitle = tabManager.getSelectedTabTitle()
@@ -28,21 +29,34 @@ class InfoTabAction(private val actionManager: ActionManager, private val tabMan
         val circleSelected = fxCircleTab!!.fxCircle.circleSpace.selectionManager.selected
 
         if (selectedTabTitle == TabEnum.CIRCLE.value && circleSelected == null ||
-            selectedTabTitle == TabEnum.CITY.value && citySelected == null) {
+            selectedTabTitle == TabEnum.CITY.value && citySelected == null
+        ) {
             val notification: Notification =
-                notificationGroup.createNotification("VCS Analysis Toolkit - $selectedTabTitle", "Please select object", NotificationType.WARNING)
+                notificationGroup.createNotification(
+                    "VCS Analysis Toolkit - $selectedTabTitle",
+                    "Please select object",
+                    NotificationType.WARNING
+                )
             Notifications.Bus.notify(notification, null)
-        } else if (selectedTabTitle == TabEnum.CIRCLE.value && gitTab?.models?.isEmpty() == true ||
-            selectedTabTitle == TabEnum.CITY.value && gitTab?.models?.isEmpty() == true) {
+        } else if (selectedTabTitle == TabEnum.CIRCLE.value && gitTab?.controller?.models?.isEmpty() == true ||
+            selectedTabTitle == TabEnum.CITY.value && gitTab?.controller?.models?.isEmpty() == true
+        ) {
             val notification: Notification =
-                notificationGroup.createNotification("VCS Analysis Toolkit - $selectedTabTitle", "Please analyze repo", NotificationType.WARNING)
+                notificationGroup.createNotification(
+                    "VCS Analysis Toolkit - $selectedTabTitle",
+                    "Please analyze repo",
+                    NotificationType.WARNING
+                )
             Notifications.Bus.notify(notification, null)
         } else if (selectedTabTitle == TabEnum.CITY.value && fxCityTab.modelComboBox.selectedIndex == -1) {
             val notification: Notification =
-                notificationGroup.createNotification("VCS Analysis Toolkit - $selectedTabTitle", "Please select model", NotificationType.WARNING)
+                notificationGroup.createNotification(
+                    "VCS Analysis Toolkit - $selectedTabTitle",
+                    "Please select model",
+                    NotificationType.WARNING
+                )
             Notifications.Bus.notify(notification, null)
-        }
-        else {
+        } else {
 
             event.project?.let {
                 val infoTabPanel = InfoTabPage(tabManager)
