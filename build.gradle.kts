@@ -23,11 +23,11 @@ repositories {
 }
 
 dependencies {
-    implementation("org.tera201:javafx-uml-graph:0.0.2-SNAPSHOT")
-    implementation("org.tera201:code-to-uml:1.0.0")
-    implementation("org.tera201:swrminer:1.0.0")
-    implementation("org.tera201:javafx-code-modeling-tool:1.2.2-SNAPSHOT")
-    implementation("org.tera201:swing-components:1.1.2-SNAPSHOT")
+    implementation("org.tera201:javafx-uml-graph")
+    implementation("org.tera201:code-to-uml")
+    implementation("org.tera201:swrminer")
+    implementation("org.tera201:javafx-code-modeling-tool")
+    implementation("org.tera201:swing-components")
     implementation("com.formdev:flatlaf:3.4.1")
     implementation("com.formdev:flatlaf-extras:3.4.1")
     implementation("org.xerial:sqlite-jdbc:3.45.3.0")
