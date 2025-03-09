@@ -41,8 +41,9 @@
     <![CDATA[
       <html>
 
-        <b>1.7.2</b> (2025-03-08)
+        <b>1.7.2</b> (2025-03-09)
         <ul>
+          <li>Fixed the issue where class initialization was incorrectly requesting service instances, leading to initialization errors in the plugin</li>
           <li>Fixed the issue with nested classes in city visualization</li>
           <li>Fixed the issue with class sizes when nested classes are present</li>
           <li>Refactored code</li>
