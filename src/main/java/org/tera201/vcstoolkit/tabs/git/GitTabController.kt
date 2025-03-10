@@ -226,9 +226,14 @@ class GitTabController(
         try {
             if (isGit) checkoutTo(name)
             val analyzerBuilder =
-                AnalyzerBuilder(Language.Java, selectedProject, name, projectPath, dateBaseURL)
-                    .textArea(gitTabUI.logsJTextArea).progressBar(gitTabUI.analyzerProgressBar).threads(4)
-            val modelId = analyzerBuilder.buildDB(dataBaseUtil)
+                AnalyzerBuilder(selectedProject, name)
+                    .setLanguage(Language.Kotlin)
+                    .setPath(projectPath)
+                    .setDataBaseUtil(dataBaseUtil)
+                    .textArea(gitTabUI.logsJTextArea)
+                    .progressBar(gitTabUI.analyzerProgressBar)
+                    .threads(4)
+            val modelId = analyzerBuilder.buildDB()
             models.add(modelId)
             modelsIdMap.put(name, modelId)
         } catch (e:Exception) {
