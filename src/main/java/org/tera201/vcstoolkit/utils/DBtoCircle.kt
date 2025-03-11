@@ -31,7 +31,7 @@ private fun generatePackage(circleParent: PackageCircle, dataBaseUtil: DataBaseU
     val classes = dataBaseUtil.getClassIdsByPackageId(modelId, id)
     val interfaces = dataBaseUtil.getInterfacesIdsByPackageId(modelId, id)
     val enumerations = dataBaseUtil.getEnumerationsIdsByPackageId(modelId, id)
-    if (classes.isEmpty() and interfaces.isEmpty() and enumerations.isEmpty()) {
+    if (classes.isEmpty() and interfaces.isEmpty() and enumerations.isEmpty() and (packageDB.childrenId.size <= 1)) {
         packageDB.childrenId.forEach { generatePackage(circleParent, dataBaseUtil, it, modelId) }
     } else {
         val radiusInner = circleParent.innerRadius / 2
