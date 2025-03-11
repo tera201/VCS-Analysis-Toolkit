@@ -24,7 +24,7 @@ repositories {
 
 dependencies {
     implementation("org.tera201:javafx-uml-graph")
-    implementation("org.tera201:code-to-uml")
+    implementation("org.tera201:code-to-model")
     implementation("org.tera201:swrminer")
     implementation("org.tera201:javafx-code-modeling-tool")
     implementation("org.tera201:swing-components")
