@@ -227,7 +227,7 @@ class GitTabController(
             if (isGit) checkoutTo(name)
             val analyzerBuilder =
                 AnalyzerBuilder(selectedProject, name)
-                    .setLanguage(Language.Kotlin)
+                    .setLanguage(settings.language)
                     .setPath(projectPath)
                     .setDataBaseUtil(dataBaseUtil)
                     .textArea(gitTabUI.logsJTextArea)
