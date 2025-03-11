@@ -1,6 +1,3 @@
-[submodule "modules/code-to-uml"]
-	path = modules/code-to-uml
-	url = git@github.com:tera201/Code2UML.git
 [submodule "modules/swrminer"]
 	path = modules/swrminer
 	url = git@github.com:tera201/SWRMiner.git
@@ -13,3 +10,6 @@
 [submodule "modules/javafx-uml-graph"]
 	path = modules/javafx-uml-graph
 	url = git@github.com:tera201/JavaFXUMLGraph.git
+[submodule "modules/code-to-model"]
+	path = modules/code-to-model
+	url = git@github.com:tera201/Code2Model.git

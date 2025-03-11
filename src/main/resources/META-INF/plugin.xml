@@ -41,6 +41,15 @@
     <![CDATA[
       <html>
 
+        <b>1.8.0</b> (2025-03-11)
+        <ul>
+          <li>Added Kotlin support</li>
+          <li>Language for analysis can now be chosen in settings</li>
+          <li>Fixed package hierarchy in circle visualization</li>
+          <li>Fixed issue with packages and package size</li>
+          <li>Refactored code</li>
+        </ul>
+
         <b>1.7.2</b> (2025-03-09)
         <ul>
           <li>Fixed the issue where class initialization was incorrectly requesting service instances, leading to initialization errors in the plugin</li>

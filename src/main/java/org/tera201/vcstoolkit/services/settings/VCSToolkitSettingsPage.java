@@ -10,6 +10,7 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.tera201.code2uml.Language;
 import org.tera201.code2uml.util.messages.DataBaseUtil;
 import org.tera201.vcstoolkit.services.colors.ColorScheme;
 
@@ -48,6 +49,7 @@ public class VCSToolkitSettingsPage implements Configurable {
     private JSpinner circlePackageFactor;
     private JSpinner circleHeightFactor;
     private JSpinner circleGapFactor;
+    private JComboBox languageComboBox;
 
     public VCSToolkitSettingsPage() {
 
@@ -102,6 +104,8 @@ public class VCSToolkitSettingsPage implements Configurable {
 
         circleColorScheme.setModel(new DefaultComboBoxModel<>(ColorScheme.values()));
         cityColorScheme.setModel(new DefaultComboBoxModel<>(ColorScheme.values()));
+
+        languageComboBox.setModel(new DefaultComboBoxModel(Language.values()));
     }
 
     private void browseFolder(@NotNull final JTextField target) {
@@ -155,7 +159,9 @@ public class VCSToolkitSettingsPage implements Configurable {
                 cityScrollSpeedSlider.getValue() != settings.getCityScrollSpeed() ||
                 cityDynamicSpeedCheckBox.isSelected() != settings.getCityDynamicScrollSpeed() ||
                 ((int) cityMethodFactor.getValue()) != settings.getCityMethodFactor() ||
-                cityColorScheme.getSelectedItem() != settings.getCityColorScheme();
+                cityColorScheme.getSelectedItem() != settings.getCityColorScheme() ||
+
+                languageComboBox.getSelectedItem() != settings.getLanguage();
     }
 
     @Override
@@ -195,6 +201,10 @@ public class VCSToolkitSettingsPage implements Configurable {
         settings.setCityMethodFactor((int) cityMethodFactor.getValue());
         if (cityColorScheme.getSelectedItem() != null)
             settings.setCityColorScheme((ColorScheme) cityColorScheme.getSelectedItem());
+
+
+        if (languageComboBox.getSelectedItem() != null)
+            settings.setLanguage((Language) languageComboBox.getSelectedItem());
     }
 
     private void getSettings(VCSToolkitSettings settings) {
@@ -217,6 +227,8 @@ public class VCSToolkitSettingsPage implements Configurable {
         cityDynamicSpeedCheckBox.setSelected(settings.getCityDynamicScrollSpeed());
         cityMethodFactor.setValue(settings.getCityMethodFactor());
         cityColorScheme.setSelectedIndex(settings.getCityColorScheme().getIndex());
+
+        languageComboBox.setSelectedIndex(settings.getLanguage().getIndex());
     }
 
 }

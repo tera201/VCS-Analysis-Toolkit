@@ -8,6 +8,7 @@ import com.intellij.openapi.components.Storage
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.util.messages.Topic
 import com.intellij.util.xmlb.XmlSerializerUtil
+import org.tera201.code2uml.Language
 import org.tera201.vcstoolkit.services.colors.ColorScheme
 
 
@@ -36,6 +37,8 @@ class VCSToolkitSettings : PersistentStateComponent<VCSToolkitSettings> {
     var cityDynamicScrollSpeed: Boolean = false
     var cityMethodFactor: Int = 10
     var cityColorScheme: ColorScheme = ColorScheme.DEFAULT
+
+    var language: Language = Language.JAVA
 
 
     companion object {
