@@ -74,6 +74,14 @@ public class AuthorInfoPage {
         initSpinner();
     }
 
+    public void create(Map<String, CommitSize>commitSizeMap, Map<String, DeveloperInfo> developerInfoMap) {
+        developerInfoMap.keySet().forEach(comboBox1::addItem);
+        comboBox1.addActionListener(e -> {
+            String selectedEmail = comboBox1.getSelectedItem().toString();
+            open(selectedEmail, commitSizeMap, developerInfoMap);
+        });
+    }
+
     public JComboBox getEmailComboBox() {
         return comboBox1;
     }
@@ -94,7 +102,7 @@ public class AuthorInfoPage {
         barChartByHoursPanel.removeAll();
     }
 
-    public void open(String email, Map<String, CommitSize> commitSizeMap, Map<String, DeveloperInfo> developerInfoMap) throws InterruptedException {
+    public void open(String email, Map<String, CommitSize> commitSizeMap, Map<String, DeveloperInfo> developerInfoMap) {
         this.email = email;
         removeAll();
         updateLabels(developerInfoMap, commitSizeMap);
