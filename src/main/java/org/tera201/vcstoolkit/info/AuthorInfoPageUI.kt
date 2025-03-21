@@ -70,12 +70,11 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
     private val yearList: JList<String> = JBList(listModel).apply {
         selectionMode = ListSelectionModel.SINGLE_SELECTION
     }
-    private val listScrollPane: JScrollPane = JBScrollPane(yearList)
     private val commitPanel = CommitPanel()
     private val splitter = JBSplitter(false, 0.95f).apply {
         dividerWidth = 1
         firstComponent = commitPanel
-        secondComponent = listScrollPane
+        secondComponent = yearList
 
     }
     private val commitScrollPanel = JBScrollPane().apply {
@@ -92,9 +91,7 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
         add(yearButton)
     }
     private val commitBarChartHeader = JBLabel("").apply {
-        putClientProperty(FlatClientProperties.STYLE, (""
-        + "font:+1;"
-        + "border:0,0,5,0"))
+        putClientProperty(FlatClientProperties.STYLE, ("font:+1;border:0,0,5,0"))
     }
     private val commitBarChart = HorizontalBarChart().apply {
         setValuesFormat(DecimalFormat("#,##0"))
@@ -109,11 +106,11 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
             add(monthButton)
             add(yearButton)
         }, GridConstraints().apply { row = 0; column = 0 })
-        add(commitBarChart, GridConstraints().apply { row = 1; column = 0 ; fill = GridConstraints.FILL_HORIZONTAL })
+        add(commitBarChart, GridConstraints().apply { row = 1; column = 0; fill = GridConstraints.FILL_HORIZONTAL })
     }
 
     private var spinner = SpinnerProgress(100, 10)
-    private var spinnerPanel =  JBPanel<JBPanel<*>>(MigLayout("fill, insets 0, align center center", "[center]")).apply {
+    private var spinnerPanel = JBPanel<JBPanel<*>>(MigLayout("fill, insets 0, align center center", "[center]")).apply {
         add(spinner)
         spinner.isIndeterminate = true
     }
@@ -121,17 +118,21 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
     private var email: String? = null
 
     init {
-        panel.add(mainInfoPanel, GridConstraints().apply { row = 0; column = 0 })
-        panel.add(piePanels, GridConstraints().apply { row = 1; column = 0; fill = GridConstraints.FILL_HORIZONTAL })
-        panel.add(commitScrollPanel, GridConstraints().apply { row = 2; column = 0 ; fill = GridConstraints.FILL_HORIZONTAL })
-        panel.add(barChartPanel, GridConstraints().apply { row = 3; column = 0 })
-        panel.add(spinnerPanel, GridConstraints().apply { row = 4; column = 0 })
+        panel.apply {
+            add(mainInfoPanel, GridConstraints().apply { row = 0; column = 0 })
+            add(piePanels, GridConstraints().apply { row = 1; column = 0; fill = GridConstraints.FILL_HORIZONTAL })
+            add(
+                commitScrollPanel,
+                GridConstraints().apply { row = 2; column = 0; fill = GridConstraints.FILL_HORIZONTAL })
+            add(barChartPanel, GridConstraints().apply { row = 3; column = 0; fill = GridConstraints.FILL_HORIZONTAL})
+            add(spinnerPanel, GridConstraints().apply { row = 4; column = 0 })
+        }
         spinnerView(true)
     }
 
     fun open(commitSizeMap: Map<String, CommitSize>, developerInfoMap: Map<String, DeveloperInfo>) {
         developerInfoMap.keys.forEach(emailComboBox::addItem)
-        emailComboBox.addActionListener( {
+        emailComboBox.addActionListener({
             openSelected(commitSizeMap, developerInfoMap)
         })
         openSelected(commitSizeMap, developerInfoMap)
@@ -154,18 +155,20 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
         updatePieChart(createPieDataLines(developerInfoMap[email]!!), linesPieChart)
         updatePieChart(createPieDataStable(commitSizeMap), stableCommitChart)
         updateCalendarPane(commitSizeMap)
+        val dateCollection = commitSizeMap.values.filter { it.authorEmail == email }
+            .map { it.date }
         hoursButton.addActionListener {
-            updateBarChart(createBarDataByHours(commitSizeMap), "Commit by hours")
+            updateBarChart(createBarDataByHours(dateCollection), "Commit by hours")
             weekButton
         }
         weekButton.addActionListener {
-            updateBarChart(createBarDataByDay(commitSizeMap), "Commit by day of week")
+            updateBarChart(createBarDataByDay(dateCollection), "Commit by day of week")
         }
         monthButton.addActionListener {
-            updateBarChart(createBarDataByDayOfMouth(commitSizeMap), "Commit by day of month")
+            updateBarChart(createBarDataByMonth(dateCollection), "Commit by day of month")
         }
         yearButton.addActionListener {
-            updateBarChart(createBarDataByMonth(commitSizeMap), "Commit by month")
+            updateBarChart(createBarDataByYear(dateCollection), "Commit by month")
         }
         spinnerView(false)
         if (barChartButtonGroup.selection == null) hoursButton.doClick()
@@ -201,7 +204,8 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
         avgCommitTimeLabel.text =
             String.format(
                 "%.2f",
-                differences.sum() / (24 * 3600.0 * differences.size)) + " day"
+                differences.sum() / (24 * 3600.0 * differences.size)
+            ) + " day"
     }
 
     private fun updateCalendarPane(commitSizeMap: Map<String, CommitSize>) {
@@ -288,37 +292,33 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
         commitBarChart.setDataset(dataset)
     }
 
-    private fun createBarDataByDay(commitSizeMap: Map<String, CommitSize>): DefaultPieDataset<String> {
+    private fun createBarDataByDay(dateCollection: Collection<Int>): DefaultPieDataset<String> {
         val dataset = DefaultPieDataset<String>()
         val commitCountMap: MutableMap<DayOfWeek, Int> = EnumMap(java.time.DayOfWeek::class.java)
-        commitSizeMap.values.filter { it.authorEmail == email }
-            .map { it.date }
-            .forEach {
-                val day = getDayOfWeek(it)
-                commitCountMap[day] = commitCountMap.getOrDefault(day, 0) + 1
-            }
+        dateCollection.forEach {
+            val day = getDayOfWeek(it)
+            commitCountMap[day] = commitCountMap.getOrDefault(day, 0) + 1
+        }
         commitCountMap.entries.stream().sorted(java.util.Map.Entry.comparingByKey())
             .forEach { it: Map.Entry<DayOfWeek, Int> -> dataset.addValue(it.key.toString(), it.value) }
         return dataset
     }
 
-    private fun createBarDataByMonth(commitSizeMap: Map<String, CommitSize>): DefaultPieDataset<String> {
+    private fun createBarDataByYear(dateCollection: Collection<Int>): DefaultPieDataset<String> {
         val dataset = DefaultPieDataset<String>()
         val commitCountMap: MutableMap<Month, Int> = EnumMap(java.time.Month::class.java)
-        commitSizeMap.values.filter { it.authorEmail == email }
-            .map { it.date }
-            .forEach {
-                val month = getMonthOfYear(it)
-                commitCountMap[month] = commitCountMap.getOrDefault(month, 0) + 1
-            }
+        dateCollection.forEach {
+            val month = getMonthOfYear(it)
+            commitCountMap[month] = commitCountMap.getOrDefault(month, 0) + 1
+        }
         commitCountMap.entries.sortedBy { it.key }.forEach { dataset.addValue(it.key.toString(), it.value) }
         return dataset
     }
 
-    private fun createBarDataByHours(commitSizeMap: Map<String, CommitSize>): DefaultPieDataset<String> {
+    private fun createBarDataByHours(dateCollection: Collection<Int>): DefaultPieDataset<String> {
         val dataset = DefaultPieDataset<String>()
         val commitCount = IntArray(24)
-        commitSizeMap.values.filter { it.authorEmail == email }.map { it.date }.forEach { commitCount[getHourOfDay(it)]++ }
+        dateCollection.forEach { commitCount[getHourOfDay(it)]++ }
         IntStream.range(0, commitCount.size).forEach { index: Int ->
             if (commitCount[index] > 0) dataset.addValue(
                 "$index:00", commitCount[index]
@@ -327,12 +327,10 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
         return dataset
     }
 
-    private fun createBarDataByDayOfMouth(commitSizeMap: Map<String, CommitSize>): DefaultPieDataset<String> {
+    private fun createBarDataByMonth(dateCollection: Collection<Int>): DefaultPieDataset<String> {
         val dataset = DefaultPieDataset<String>()
         val commitCount = IntArray(32)
-        commitSizeMap.values.filter { it: CommitSize -> it.authorEmail == email }
-            .map { it.date }
-            .forEach { commitCount[getDayOfMouth(it)]++ }
+        dateCollection.forEach { commitCount[getDayOfMouth(it)]++ }
         IntStream.range(0, commitCount.size).forEach { index: Int ->
             if (commitCount[index] > 0) dataset.addValue(
                 (index + 1).toString(),
