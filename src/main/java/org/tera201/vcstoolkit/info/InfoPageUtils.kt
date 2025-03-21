@@ -1,7 +1,10 @@
 package org.tera201.vcstoolkit.info
 
+import com.intellij.uiDesigner.core.GridConstraints
 import org.tera201.vcstoolkit.tabs.*
 import org.tera201.vcstoolkit.utils.getBranchName
+import java.awt.Component
+import javax.swing.JPanel
 import javax.swing.tree.DefaultMutableTreeNode
 
 fun getCirclePath(tabManager: TabManager): String? {
@@ -48,4 +51,11 @@ fun checkoutByTab(tabManager: TabManager) {
         TabEnum.CITY.value -> getCityBranch(tabManager)?.let { gitTab!!.controller.checkoutTo(it) }
         TabEnum.CIRCLE.value -> getCircleBranch(tabManager)?.let { gitTab!!.controller.checkoutTo(it) }
     }
+}
+
+
+
+internal fun JPanel.addComponentPairRow(first: Component, second: Component, i: Int) {
+    this.add(first, GridConstraints().apply { row = i; column = 0 })
+    this.add(second, GridConstraints().apply { row = i; column = 1; fill = GridConstraints.FILL_HORIZONTAL })
 }

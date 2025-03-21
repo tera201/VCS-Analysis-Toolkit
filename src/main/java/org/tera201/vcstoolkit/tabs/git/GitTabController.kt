@@ -4,6 +4,7 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileTypes.FileTypeManager
+import com.intellij.openapi.ui.JBMenuItem
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.ui.ColoredTreeCellRenderer
 import com.intellij.ui.treeStructure.Tree
@@ -11,7 +12,6 @@ import com.intellij.util.PlatformIcons
 import model.console.BuildModel
 import org.repodriller.scm.SCMRepository
 import org.tera201.code2uml.AnalyzerBuilder
-import org.tera201.code2uml.Language
 import org.tera201.code2uml.util.messages.DataBaseUtil
 import org.tera201.vcstoolkit.helpers.ProjectPath
 import org.tera201.vcstoolkit.services.VCSToolkitCache
@@ -41,7 +41,7 @@ class GitTabController(
     var modelsIdMap = HashMap<String, Int>()
     val pathJTree = Tree()
     private val listeners = GitTabListeners(gitTabUI, cache, settings, this)
-    val menuItemDeleteFromDB = JMenuItem("Delete From DB")
+    val menuItemDeleteFromDB = JBMenuItem("Delete From DB")
     var analyzing = false
 
 
