@@ -1,122 +1,59 @@
-package org.tera201.vcstoolkit.utils;
+package org.tera201.vcstoolkit.utils
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.concurrent.TimeUnit
 
-public class DateCalculator {
+class DateCalculator(var dateStart: Date, var dateEnd: Date) {
 
-    public Date getDateStart() {
-        return dateStart;
-    }
-
-    public void setDateStart(Date dateStart) {
-        this.dateStart = dateStart;
-    }
-
-    public Date getDateEnd() {
-        return dateEnd;
-    }
-
-    public void setDateEnd(Date dateEnd) {
-        this.dateEnd = dateEnd;
-    }
-
-    public DateCalculator(Date dateStart, Date dateEnd) {
-        this.dateStart = dateStart;
-        this.dateEnd = dateEnd;
-    }
-
-    public DateCalculator() {
-    }
-
-    private Date dateStart;
-    private Date dateEnd;
-
-    public String getTextSearch() {
-        ModelDate start = new ModelDate(dateStart);
-        ModelDate end = new ModelDate(dateEnd);
-        String date;
-        if (start.year != end.year) {
-            date = start.toString() + " - " + end.toString();
-        } else if (start.month != end.month) {
-            date = start.toStringNoYear() + " - " + end.toString();
-        } else if (start.getDay() != end.getDay()) {
-            date = start.toStringNoYear() + " - " + end.toStringNoMonth();
-        } else {
-            date = start.toString();
-        }
-        return date;
-    }
-
-    public long getDifferenceDays() {
-        long diff = dateEnd.getTime() - dateStart.getTime();
-        return TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
-    }
-
-    private class ModelDate {
-
-        public Date getDate() {
-            return date;
+    val textSearch: String
+        get() {
+            val start = ModelDate(dateStart)
+            val end = ModelDate(dateEnd)
+            val date = if (start.year != end.year) {
+                "$start - $end"
+            } else if (start.month != end.month) {
+                start.toStringNoYear() + " - " + end.toString()
+            } else if (start.day != end.day) {
+                start.toStringNoYear() + " - " + end.toStringNoMonth()
+            } else {
+                start.toString()
+            }
+            return date
         }
 
-        public void setDate(Date date) {
-            this.date = date;
+    val differenceDays: Long
+        get() {
+            val diff = dateEnd.time - dateStart.time
+            return TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS)
         }
 
-        public int getDay() {
-            return day;
+    private inner class ModelDate(var date: Date) {
+        var day: Int
+        var month: Int
+        var year: Int
+
+        init {
+            val cal = Calendar.getInstance()
+            cal.time = date
+            day = cal[Calendar.DATE]
+            month = cal[Calendar.MONTH] + 1
+            year = cal[Calendar.YEAR]
         }
 
-        public void setDay(int day) {
-            this.day = day;
+        override fun toString(): String {
+            val df = SimpleDateFormat("dd MMM, yyyy")
+            return df.format(date)
         }
 
-        public int getMonth() {
-            return month;
+        fun toStringNoYear(): String {
+            val df = SimpleDateFormat("dd MMM")
+            return df.format(date)
         }
 
-        public void setMonth(int month) {
-            this.month = month;
-        }
-
-        public int getYear() {
-            return year;
-        }
-
-        public void setYear(int year) {
-            this.year = year;
-        }
-
-        public ModelDate(Date date) {
-            this.date = date;
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(date);
-            day = cal.get(Calendar.DATE);
-            month = cal.get(Calendar.MONTH) + 1;
-            year = cal.get(Calendar.YEAR);
-        }
-
-        private Date date;
-        private int day;
-        private int month;
-        private int year;
-
-        @Override
-        public String toString() {
-            SimpleDateFormat df = new SimpleDateFormat("dd MMM, yyyy");
-            return df.format(date);
-        }
-
-        public String toStringNoYear() {
-            SimpleDateFormat df = new SimpleDateFormat("dd MMM");
-            return df.format(date);
-        }
-
-        public String toStringNoMonth() {
-            SimpleDateFormat df = new SimpleDateFormat("dd, yyyy");
-            return df.format(date);
+        fun toStringNoMonth(): String {
+            val df = SimpleDateFormat("dd, yyyy")
+            return df.format(date)
         }
     }
 }
