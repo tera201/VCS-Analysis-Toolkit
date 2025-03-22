@@ -13,6 +13,7 @@ import org.tera201.swing.chart.bar.HorizontalBarChart
 import org.tera201.swing.chart.data.pie.DefaultPieDataset
 import org.tera201.swing.chart.pie.PieChart
 import org.tera201.swing.spinner.SpinnerProgress
+import org.tera201.vcstoolkit.helpers.addComponentPairRow
 import org.tera201.vcstoolkit.panels.CommitPanel
 import org.tera201.vcstoolkit.tabs.TabManager
 import org.tera201.vcstoolkit.utils.DateUtils.Companion.getDayOfMouth
@@ -43,13 +44,13 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
     private val lastActivityLabel = JBLabel()
     private val labelPanel = JBPanel<JBPanel<*>>(GridLayoutManager(7, 2)).apply {
         var i = 0
-        addComponentPairRow(JBLabel("Email"), emailComboBox, i++)
-        addComponentPairRow(JBLabel("Commit count"), commitCountLabel, i++)
-        addComponentPairRow(JBLabel("Commit frequency"), commitFrequencyLabel, i++)
-        addComponentPairRow(JBLabel("Avg commit time"), avgCommitTimeLabel, i++)
-        addComponentPairRow(JBLabel("Created branches"), createdBranchesLabel, i++)
-        addComponentPairRow(JBLabel("Owner, %"), ownerPercentageLabel, i++)
-        addComponentPairRow(JBLabel("Last activity"), lastActivityLabel, i)
+        addComponentPairRow(i++, JBLabel("Email"), emailComboBox)
+        addComponentPairRow(i++, JBLabel("Commit count"), commitCountLabel)
+        addComponentPairRow(i++, JBLabel("Commit frequency"), commitFrequencyLabel)
+        addComponentPairRow(i++, JBLabel("Avg commit time"), avgCommitTimeLabel)
+        addComponentPairRow(i++, JBLabel("Created branches"), createdBranchesLabel)
+        addComponentPairRow(i++, JBLabel("Owner, %"), ownerPercentageLabel)
+        addComponentPairRow(i, JBLabel("Last activity"), lastActivityLabel)
     }
     private val stableCommitPanel = JBPanel<JBPanel<*>>()
     private val mainInfoPanel = JBPanel<JBPanel<*>>(GridLayoutManager(2, 2)).apply {

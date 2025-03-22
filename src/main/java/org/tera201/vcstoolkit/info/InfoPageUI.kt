@@ -17,6 +17,9 @@ import org.tera201.swing.chart.data.pie.DefaultPieDataset
 import org.tera201.swing.chart.line.LineChart
 import org.tera201.swing.chart.pie.PieChart
 import org.tera201.swing.spinner.SpinnerProgress
+import org.tera201.vcstoolkit.helpers.addComponentPairRow
+import org.tera201.vcstoolkit.helpers.getPathByTab
+import org.tera201.vcstoolkit.helpers.setTextWithShortener
 import org.tera201.vcstoolkit.panels.CommitPanel
 import org.tera201.vcstoolkit.tabs.TabManager
 import org.tera201.vcstoolkit.utils.DateCalculator
@@ -42,12 +45,12 @@ class InfoPageUI(val tabManager: TabManager) {
     private val revisionLabel = JBLabel()
     private val labelPanel = JBPanel<JBPanel<*>>(GridLayoutManager(6, 2)).apply {
         var i = 0
-        addComponentPairRow(JBLabel("Author"), authorLabel, i++)
-        addComponentPairRow(JBLabel("Current author"), curAuthorLabel, i++)
-        addComponentPairRow(JBLabel("Rows"), rowsLabel, i++)
-        addComponentPairRow(JBLabel("Rows size"), rowSizeLabel, i++)
-        addComponentPairRow(JBLabel("Size"), sizeLabel, i++)
-        addComponentPairRow(JBLabel("Revision"), revisionLabel, i)
+        addComponentPairRow(i++, JBLabel("Author"), authorLabel)
+        addComponentPairRow(i++, JBLabel("Current author"), curAuthorLabel)
+        addComponentPairRow(i++, JBLabel("Rows"), rowsLabel)
+        addComponentPairRow(i++, JBLabel("Rows size"), rowSizeLabel)
+        addComponentPairRow(i++, JBLabel("Size"), sizeLabel)
+        addComponentPairRow(i, JBLabel("Revision"), revisionLabel)
     }
     private val authorImpactPieChart = PieChart().apply {
         val header = JLabel("Authors impact")
