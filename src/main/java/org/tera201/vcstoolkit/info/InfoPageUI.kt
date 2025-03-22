@@ -1,9 +1,7 @@
 package org.tera201.vcstoolkit.info
 
 import com.formdev.flatlaf.FlatClientProperties
-import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBLabel
-import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBPanel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.uiDesigner.core.GridConstraints
@@ -18,9 +16,8 @@ import org.tera201.swing.chart.line.LineChart
 import org.tera201.swing.chart.pie.PieChart
 import org.tera201.swing.spinner.SpinnerProgress
 import org.tera201.vcstoolkit.helpers.addComponentPairRow
-import org.tera201.vcstoolkit.helpers.getPathByTab
 import org.tera201.vcstoolkit.helpers.setTextWithShortener
-import org.tera201.vcstoolkit.panels.CommitPanel
+import org.tera201.vcstoolkit.panels.CommitPanelSplitter
 import org.tera201.vcstoolkit.tabs.TabManager
 import org.tera201.vcstoolkit.utils.DateCalculator
 import java.awt.Color
@@ -30,7 +27,6 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.function.Consumer
-import java.util.stream.Collectors
 import javax.swing.*
 import kotlin.math.ceil
 
@@ -78,19 +74,9 @@ class InfoPageUI(val tabManager: TabManager) {
         add(labelPanel, GridConstraints().apply { row = 1; column = 0; anchor = GridConstraints.ANCHOR_NORTHWEST })
         add(chartPanel, GridConstraints().apply { row = 1; column = 1 })
     }
-    private val listModel = DefaultListModel<String>()
-    private val yearList: JList<String> = JBList(listModel).apply {
-        selectionMode = ListSelectionModel.SINGLE_SELECTION
-    }
-    private val commitPanel = CommitPanel()
-    private val splitter = JBSplitter(false, 0.95f).apply {
-        dividerWidth = 1
-        firstComponent = commitPanel
-        secondComponent = yearList
-
-    }
+    private val commitPanelSplitter = CommitPanelSplitter()
     private val commitScrollPanel = JBScrollPane().apply {
-        setViewportView(splitter)
+        setViewportView(commitPanelSplitter)
     }
     private val lineChart: LineChart = LineChart().apply {
         this.chartType = LineChart.ChartType.CURVE
@@ -137,7 +123,7 @@ class InfoPageUI(val tabManager: TabManager) {
         Thread.sleep(100)
         updateLabels(developerInfoMap, commitSizeMap)
         updatePieChart(developerInfoMap)
-        updateCalendarPanel(commitSizeMap)
+        commitPanelSplitter.updatePanel(commitSizeMap)
         updateLineChart(commitSizeMap)
         spinnerView(isVisible = false)
     }
@@ -176,43 +162,6 @@ class InfoPageUI(val tabManager: TabManager) {
     private fun updateLineChart(commitSizeMap: Map<String, CommitSize>) {
         createLineChartData(commitSizeMap.values)
         lineChart.startAnimation()
-    }
-
-    private fun setupYearListListener(commitSizeMap: Map<String, CommitSize>) {
-        yearList.addListSelectionListener { event ->
-            if (!event.valueIsAdjusting) {
-                val year = yearList.selectedValue.toInt()
-                updateCommitPanel(commitSizeMap, year)
-            }
-        }
-    }
-
-    private fun updateCommitPanel(commitSizeMap: Map<String, CommitSize>, year: Int) {
-        commitPanel.updatePanel(year)
-        commitSizeMap.values.forEach {
-            val calendar = Calendar.getInstance()
-            calendar.time = Date(it.date.toLong() * 1000)
-            if (calendar[Calendar.YEAR] == year) {
-                commitPanel.addCommitCountForDay(calendar[Calendar.DAY_OF_YEAR], 1)
-            }
-        }
-        splitter.updateUI()
-    }
-
-    private fun updateCalendarPanel(commitSizeMap: Map<String, CommitSize>) {
-
-        val calendar = Calendar.getInstance()
-        commitSizeMap.values.stream().map { commitSize: CommitSize ->
-            val date = Date(commitSize.date.toLong() * 1000)
-            calendar.time = date
-            calendar[Calendar.YEAR]
-        }.collect(Collectors.toSet()).stream().sorted(Comparator.reverseOrder()).forEach { year: Int ->
-            listModel.addElement(year.toString())
-        }
-
-        setupYearListListener(commitSizeMap)
-        yearList.selectedIndex = 0
-
     }
 
     private fun createPieData(developerInfoMap: Map<String, DeveloperInfo>): DefaultPieDataset<String> {

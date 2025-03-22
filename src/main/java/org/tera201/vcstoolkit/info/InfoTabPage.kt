@@ -4,7 +4,6 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTabbedPane
 import org.repodriller.scm.entities.CommitSize
 import org.repodriller.scm.entities.DeveloperInfo
-import org.tera201.vcstoolkit.helpers.getPathByTab
 import org.tera201.vcstoolkit.tabs.GitTab
 import org.tera201.vcstoolkit.tabs.TabEnum
 import org.tera201.vcstoolkit.tabs.TabManager

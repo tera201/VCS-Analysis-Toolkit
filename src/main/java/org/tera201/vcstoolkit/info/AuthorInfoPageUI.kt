@@ -2,7 +2,6 @@ package org.tera201.vcstoolkit.info
 
 import com.formdev.flatlaf.FlatClientProperties
 import com.intellij.openapi.ui.ComboBox
-import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.*
 import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
@@ -14,7 +13,7 @@ import org.tera201.swing.chart.data.pie.DefaultPieDataset
 import org.tera201.swing.chart.pie.PieChart
 import org.tera201.swing.spinner.SpinnerProgress
 import org.tera201.vcstoolkit.helpers.addComponentPairRow
-import org.tera201.vcstoolkit.panels.CommitPanel
+import org.tera201.vcstoolkit.panels.CommitPanelSplitter
 import org.tera201.vcstoolkit.tabs.TabManager
 import org.tera201.vcstoolkit.utils.DateUtils.Companion.getDayOfMouth
 import org.tera201.vcstoolkit.utils.DateUtils.Companion.getDayOfWeek
@@ -30,7 +29,6 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 import java.util.stream.IntStream
 import javax.swing.*
-import javax.swing.event.ListSelectionListener
 
 class AuthorInfoPageUI(val tabManager: TabManager) {
     val panel = JBPanel<JBPanel<*>>(GridLayoutManager(5, 1))
@@ -67,19 +65,9 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
     private val filePieChart = PieChart().apply { initPieChart(this, filePiePanel, "File actions") }
     private val linesPieChart = PieChart().apply { initPieChart(this, linesPiePanel, "Line actions") }
     private val stableCommitChart = PieChart().apply { initPieChart(this, stableCommitPanel, "Stable commits") }
-    private val listModel = DefaultListModel<String>()
-    private val yearList: JList<String> = JBList(listModel).apply {
-        selectionMode = ListSelectionModel.SINGLE_SELECTION
-    }
-    private val commitPanel = CommitPanel()
-    private val splitter = JBSplitter(false, 0.95f).apply {
-        dividerWidth = 1
-        firstComponent = commitPanel
-        secondComponent = yearList
-
-    }
+    private val commitPanelSplitter = CommitPanelSplitter()
     private val commitScrollPanel = JBScrollPane().apply {
-        setViewportView(splitter)
+        setViewportView(commitPanelSplitter)
     }
     private val hoursButton = JBRadioButton("Hours")
     private val weekButton = JBRadioButton("Week")
@@ -139,10 +127,8 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
         openSelected(commitSizeMap, developerInfoMap)
     }
 
-    private fun removeAll() {
-        yearList.listSelectionListeners
-            .forEach { listener: ListSelectionListener? -> yearList.removeListSelectionListener(listener) }
-        listModel.removeAllElements()
+    private fun clear() {
+        commitPanelSplitter.clear()
         for (listener in hoursButton.actionListeners) {
             hoursButton.removeActionListener(listener)
         }
@@ -150,12 +136,12 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
 
     private fun openSelected(commitSizeMap: Map<String, CommitSize>, developerInfoMap: Map<String, DeveloperInfo>) {
         this.email = emailComboBox.getSelectedItem().toString()
-        removeAll()
+        clear()
         updateLabels(developerInfoMap, commitSizeMap)
         updatePieChart(createPieDataFile(developerInfoMap[email]!!), filePieChart)
         updatePieChart(createPieDataLines(developerInfoMap[email]!!), linesPieChart)
         updatePieChart(createPieDataStable(commitSizeMap), stableCommitChart)
-        updateCalendarPane(commitSizeMap)
+        commitPanelSplitter.updatePanel(commitSizeMap.filter { it.value.authorEmail == email })
         val dateCollection = commitSizeMap.values.filter { it.authorEmail == email }
             .map { it.date }
         hoursButton.addActionListener {
@@ -207,34 +193,6 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
                 "%.2f",
                 differences.sum() / (24 * 3600.0 * differences.size)
             ) + " day"
-    }
-
-    private fun updateCalendarPane(commitSizeMap: Map<String, CommitSize>) {
-        val calendar = Calendar.getInstance()
-        val filteredCommitSize =
-            commitSizeMap.values.filter { it.authorEmail == email }
-
-        filteredCommitSize.map { commitSize: CommitSize ->
-            timestampToLocalDate(commitSize.date).year
-        }.distinct().sortedDescending().forEach { year: Int ->
-            listModel.addElement(year.toString())
-        }
-
-        yearList.addListSelectionListener { e ->
-            if (!e.valueIsAdjusting) {
-                val year: Int = yearList.getSelectedValue().toInt()
-                commitPanel.updatePanel(year)
-
-                filteredCommitSize.map {
-                    calendar.time = Date(it.date.toLong() * 1000)
-                    calendar.get(Calendar.YEAR) to calendar.get(Calendar.DAY_OF_YEAR)
-                }.filter { it.first == year }
-                    .forEach { commitPanel.addCommitCountForDay(it.second, 1) }
-                splitter.updateUI()
-            }
-        }
-        yearList.setSelectedIndex(0)
-        commitScrollPanel.setViewportView(splitter)
     }
 
     private fun initPieChart(
