@@ -6,25 +6,20 @@ import com.intellij.ui.components.JBPanel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
-import net.miginfocom.swing.MigLayout
 import org.repodriller.scm.entities.CommitSize
 import org.repodriller.scm.entities.DeveloperInfo
 import org.tera201.swing.chart.ChartLegendRenderer
 import org.tera201.swing.chart.data.category.DefaultCategoryDataset
 import org.tera201.swing.chart.data.pie.DefaultPieDataset
 import org.tera201.swing.chart.line.LineChart
-import org.tera201.swing.chart.pie.PieChart
-import org.tera201.swing.spinner.SpinnerProgress
 import org.tera201.vcstoolkit.helpers.addComponentPairRow
+import org.tera201.vcstoolkit.helpers.addNComponentsRow
 import org.tera201.vcstoolkit.helpers.setTextWithShortener
 import org.tera201.vcstoolkit.panels.CommitPanelSplitter
 import org.tera201.vcstoolkit.tabs.TabManager
-import org.tera201.vcstoolkit.utils.DateCalculator
 import java.awt.Color
 import java.awt.Component
 import java.text.DecimalFormat
-import java.text.ParseException
-import java.text.SimpleDateFormat
 import java.util.*
 import java.util.function.Consumer
 import javax.swing.*
@@ -48,36 +43,15 @@ class InfoPageUI(val tabManager: TabManager) {
         addComponentPairRow(i++, JBLabel("Size"), sizeLabel)
         addComponentPairRow(i, JBLabel("Revision"), revisionLabel)
     }
-    private val authorImpactPieChart = PieChart().apply {
-        val header = JLabel("Authors impact")
-        header.putClientProperty(FlatClientProperties.STYLE, "font:+1")
-        this.setHeader(header)
-        this.chartColor.addColor(
-            Color.decode("#f87171"),
-            Color.decode("#fb923c"),
-            Color.decode("#fbbf24"),
-            Color.decode("#a3e635"),
-            Color.decode("#34d399"),
-            Color.decode("#22d3ee"),
-            Color.decode("#818cf8"),
-            Color.decode("#c084fc")
-        )
-        this.putClientProperty(FlatClientProperties.STYLE, "border:5,5,5,5,\$Component.borderColor,,20")
-    }
-    private val chartPanel = JBPanel<JBPanel<*>>().apply {
-        this.putClientProperty(FlatClientProperties.STYLE, ("border:5,5,5,5;background:null"))
-        this.layout = MigLayout("wrap,fill,gap 10", "fill")
-        this.add(authorImpactPieChart, "split 5,height 360")
-    }
+    private val chartPanel = JBPanel<JBPanel<*>>()
+    private val authorImpactPieChart = initPieChart(chartPanel, "Authors impact", true)
     private val mainInfoPanel = JBPanel<JBPanel<*>>(GridLayoutManager(2, 2)).apply {
         add(mainPathLabel, GridConstraints().apply { row = 0; column = 0 })
         add(labelPanel, GridConstraints().apply { row = 1; column = 0; anchor = GridConstraints.ANCHOR_NORTHWEST })
         add(chartPanel, GridConstraints().apply { row = 1; column = 1 })
     }
     private val commitPanelSplitter = CommitPanelSplitter()
-    private val commitScrollPanel = JBScrollPane().apply {
-        setViewportView(commitPanelSplitter)
-    }
+    private val commitScrollPanel = JBScrollPane().apply { setViewportView(commitPanelSplitter)  }
     private val lineChart: LineChart = LineChart().apply {
         this.chartType = LineChart.ChartType.CURVE
         this.putClientProperty(FlatClientProperties.STYLE, "border:5,5,5,5,\$Component.borderColor,,20")
@@ -85,78 +59,52 @@ class InfoPageUI(val tabManager: TabManager) {
         this.categoryDataset = categoryDataset
         this.chartColor.addColor(Color.decode("#38bdf8"), Color.decode("#fb7185"), Color.decode("#34d399"))
         val header = JLabel("Project Size Evolution")
-        header.putClientProperty(FlatClientProperties.STYLE, ("font:+1;border:0,0,5,0"))
+        header.putClientProperty(FlatClientProperties.STYLE, "font:+1;border:0,0,5,0")
         this.setHeader(header)
     }
     private val lineChartScrollPanel =
         JBScrollPane(JBScrollPane.VERTICAL_SCROLLBAR_NEVER, JBScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED).apply {
             setViewportView(lineChart)
         }
-
-    private var spinner = SpinnerProgress(100, 10)
-    private var spinnerPanel = JBPanel<JBPanel<*>>(MigLayout("fill, insets 0, align center center", "[center]")).apply {
-        add(spinner)
-        spinner.isIndeterminate = true
-    }
+    private var spinnerPanel = createSpinnerPanel()
     private var lastPathNode: String? = null
 
     init {
         panel.apply {
-            add(mainInfoPanel, GridConstraints().apply { row = 0; column = 0 })
-            add(
-                commitScrollPanel,
-                GridConstraints().apply { row = 1; column = 0; fill = GridConstraints.FILL_HORIZONTAL })
-            add(
-                lineChartScrollPanel,
-                GridConstraints().apply { row = 2; column = 0; fill = GridConstraints.FILL_HORIZONTAL })
-            add(spinnerPanel, GridConstraints().apply { row = 3; column = 0 })
-
+            addNComponentsRow(0, mainInfoPanel to false)
+            addNComponentsRow(1, commitScrollPanel to true)
+            addNComponentsRow(2, lineChartScrollPanel to true)
+            addNComponentsRow(3, spinnerPanel to false)
         }
-        spinnerView(isVisible = true)
+        setContentVisibility(false)
     }
 
     @Throws(InterruptedException::class)
     fun open(commitSizeMap: Map<String, CommitSize>, developerInfoMap: Map<String, DeveloperInfo>) {
-        val path = getPathByTab(tabManager)
-        lastPathNode = path?.substring(path.lastIndexOf("/") + 1)
-        spinner.isIndeterminate = false
-        Thread.sleep(100)
+        lastPathNode = getPathByTab(tabManager)?.substringAfterLast("/")
         updateLabels(developerInfoMap, commitSizeMap)
-        updatePieChart(developerInfoMap)
+        authorImpactPieChart.updateData(createPieData(developerInfoMap))
         commitPanelSplitter.updatePanel(commitSizeMap)
         updateLineChart(commitSizeMap)
-        spinnerView(isVisible = false)
+        setContentVisibility(true)
     }
 
-    private fun spinnerView(isVisible: Boolean) {
-        mainInfoPanel.isVisible = !isVisible
-        commitScrollPanel.isVisible = !isVisible
-        lineChartScrollPanel.isVisible = !isVisible
-        spinnerPanel.isVisible = isVisible
+    private fun setContentVisibility(showContent: Boolean) {
+        mainInfoPanel.isVisible = showContent
+        commitScrollPanel.isVisible = showContent
+        lineChartScrollPanel.isVisible = showContent
+        spinnerPanel.isVisible = !showContent
 
     }
 
     private fun updateLabels(developerInfoMap: Map<String, DeveloperInfo>, commitSizeMap: Map<String, CommitSize>) {
         mainPathLabel.text = lastPathNode
-        authorLabel.text =
-            commitSizeMap.values.minByOrNull { it.date }?.authorName
-        sizeLabel.text =
-            commitSizeMap.values.maxByOrNull { it.date }?.projectSize.toString()
-        curAuthorLabel.text =
-            developerInfoMap.values.maxByOrNull { it.getActualLinesOwner() }?.name
-        rowsLabel.text =
-            developerInfoMap.values.sumOf { it.getActualLinesOwner() }.toString()
-        rowSizeLabel.text =
-            developerInfoMap.values.sumOf { it.getActualLinesSize() }.toString()
-        revisionLabel.setTextWithShortener(
-            commitSizeMap.values.maxByOrNull { it.date }?.name ?: "",
-            6
-        )
-    }
-
-    private fun updatePieChart(developerInfoMap: Map<String, DeveloperInfo>) {
-        authorImpactPieChart.setDataset(createPieData(developerInfoMap))
-        authorImpactPieChart.startAnimation()
+        authorLabel.text = commitSizeMap.values.minByOrNull { it.date }?.authorName
+        sizeLabel.text = commitSizeMap.values.maxByOrNull { it.date }?.projectSize.toString()
+        curAuthorLabel.text = developerInfoMap.values.maxByOrNull { it.getActualLinesOwner() }?.name
+        rowsLabel.text = developerInfoMap.values.sumOf { it.getActualLinesOwner() }.toString()
+        rowSizeLabel.text = developerInfoMap.values.sumOf { it.getActualLinesSize() }.toString()
+        revisionLabel.setTextWithShortener(commitSizeMap.values.maxByOrNull { it.date }?.name ?: "", 6)
     }
 
     private fun updateLineChart(commitSizeMap: Map<String, CommitSize>) {
@@ -167,53 +115,24 @@ class InfoPageUI(val tabManager: TabManager) {
     private fun createPieData(developerInfoMap: Map<String, DeveloperInfo>): DefaultPieDataset<String> {
         val dataset = DefaultPieDataset<String>()
         developerInfoMap.values.forEach(Consumer { developerInfo: DeveloperInfo ->
-            dataset.addValue(
-                developerInfo.name,
-                developerInfo.changes
-            )
+            dataset.addValue(developerInfo.name, developerInfo.changes)
         })
         return dataset
     }
 
-    private fun createLineChartData(commitSizeCollection: Collection<CommitSize>) {
+    private fun createLineChartData(commitSizes: Collection<CommitSize>) {
         val categoryDataset = DefaultCategoryDataset<String, String>()
-        val df = SimpleDateFormat("MMM dd, yyyy")
-        commitSizeCollection.groupBy { df.format(Date(it.date.toLong() * 1000)) }
-            .mapValues { (_, values) -> values.maxByOrNull { it.date } }
-            .values
-            .filterNotNull()
-            .sortedBy { it.date }
-            .forEach { commitSize ->
-                val date = Date(commitSize.date.toLong() * 1000)
-                val formattedDate = df.format(date)
-                categoryDataset.addValue(commitSize.projectSize, "Project ", formattedDate)
-            }
-
-        /**
-         * Control the legend we do not show all legend
-         */
-        try {
-            val date = df.parse(categoryDataset.getColumnKey(0))
-            val dateEnd = df.parse(categoryDataset.getColumnKey(categoryDataset.columnCount - 1))
-
-            val dcal = DateCalculator(date, dateEnd)
-            val diff = dcal.differenceDays
-            val valuesCount = categoryDataset.columnKeys.size.toLong()
-
-            val d = ceil((valuesCount / 20f).toDouble())
-            lineChart.legendRenderer = object : ChartLegendRenderer() {
-                override fun getLegendComponent(legend: Any, index: Int): Component? {
-                    return if (index % d == 0.0) {
-                        super.getLegendComponent(legend, index)
-                    } else {
-                        null
-                    }
-                }
-            }
-        } catch (e: ParseException) {
-            System.err.println(e)
-        }
-
+        commitSizes.sortedBy { it.date }.groupBy { formatDate(it.date) }.mapNotNull { it.value.maxByOrNull { it.date } }
+            .forEach { categoryDataset.addValue(it.projectSize, "Project ", formatDate(it.date)) }
+        createLineChartLegend(categoryDataset.columnKeys.size)
         lineChart.categoryDataset = categoryDataset
+    }
+
+    private fun createLineChartLegend(categoryDatasetColumnCount: Int) {
+        val step = ceil(categoryDatasetColumnCount / 20f)
+        lineChart.legendRenderer = object : ChartLegendRenderer() {
+            override fun getLegendComponent(legend: Any, index: Int): Component? =
+                if (index % step == 0.0f) super.getLegendComponent(legend, index) else null
+        }
     }
 }

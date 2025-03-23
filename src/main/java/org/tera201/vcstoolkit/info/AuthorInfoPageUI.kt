@@ -5,13 +5,10 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.*
 import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
-import net.miginfocom.swing.MigLayout
 import org.repodriller.scm.entities.CommitSize
 import org.repodriller.scm.entities.DeveloperInfo
 import org.tera201.swing.chart.bar.HorizontalBarChart
 import org.tera201.swing.chart.data.pie.DefaultPieDataset
-import org.tera201.swing.chart.pie.PieChart
-import org.tera201.swing.spinner.SpinnerProgress
 import org.tera201.vcstoolkit.helpers.addComponentPairRow
 import org.tera201.vcstoolkit.panels.CommitPanelSplitter
 import org.tera201.vcstoolkit.tabs.TabManager
@@ -59,13 +56,11 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
         add(filePiePanel, GridConstraints().apply { row = 0; column = 0 })
         add(linesPiePanel, GridConstraints().apply { row = 0; column = 1 })
     }
-    private val filePieChart = PieChart().apply { initPieChart(this, filePiePanel, "File actions") }
-    private val linesPieChart = PieChart().apply { initPieChart(this, linesPiePanel, "Line actions") }
-    private val stableCommitChart = PieChart().apply { initPieChart(this, stableCommitPanel, "Stable commits") }
+    private val filePieChart = initPieChart(filePiePanel, "File actions", false)
+    private val linesPieChart = initPieChart(linesPiePanel, "Line actions", false)
+    private val stableCommitChart = initPieChart(stableCommitPanel, "Stable commits", false)
     private val commitPanelSplitter = CommitPanelSplitter()
-    private val commitScrollPanel = JBScrollPane().apply {
-        setViewportView(commitPanelSplitter)
-    }
+    private val commitScrollPanel = JBScrollPane().apply { setViewportView(commitPanelSplitter) }
     private val barChartButtonGroup = ButtonGroup()
     private val timeButtonsPanel = JBPanel<JBPanel<*>>().apply { add(JBLabel("BarChart by:")) }
     private val timeButtons = mapOf(
@@ -74,25 +69,16 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
     )
         .map { (label, dataFunction) -> JBRadioButton(label) to dataFunction }
         .onEach { (button, _) -> barChartButtonGroup.add(button); timeButtonsPanel.add(button) }
-    private val commitBarChartHeader = JBLabel("").apply {
-        putClientProperty(FlatClientProperties.STYLE, ("font:+1;border:0,0,5,0"))
-    }
     private val commitBarChart = HorizontalBarChart().apply {
         setValuesFormat(DecimalFormat("#,##0"))
         barColor = Color.decode("#f97316")
-        setHeader(commitBarChartHeader)
+        header = JBLabel("").apply { putClientProperty(FlatClientProperties.STYLE, ("font:+1;border:0,0,5,0")) }
     }
     private val barChartPanel = JBPanel<JBPanel<*>>(GridLayoutManager(2, 1)).apply {
         add(timeButtonsPanel, GridConstraints().apply { row = 0; column = 0 })
         add(commitBarChart, GridConstraints().apply { row = 1; column = 0; fill = GridConstraints.FILL_HORIZONTAL })
     }
-    private var spinner = SpinnerProgress(100, 10)
-    private var spinnerPanel = JBPanel<JBPanel<*>>().apply {
-        layout = MigLayout("fill, insets 0, align center center", "[center]")
-        add(spinner)
-        spinner.isIndeterminate = true
-    }
-
+    private var spinnerPanel = createSpinnerPanel()
     private var email: String? = null
 
     init {
@@ -105,7 +91,7 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
             add(barChartPanel, GridConstraints().apply { row = 3; column = 0; fill = GridConstraints.FILL_HORIZONTAL })
             add(spinnerPanel, GridConstraints().apply { row = 4; column = 0 })
         }
-        spinnerView(true)
+        setContentVisibility(false)
     }
 
     fun open(commitSizeMap: Map<String, CommitSize>, developerInfoMap: Map<String, DeveloperInfo>) {
@@ -122,39 +108,37 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
     }
 
     private fun openSelected(commitSizeMap: Map<String, CommitSize>, developerInfoMap: Map<String, DeveloperInfo>) {
-        this.email = emailComboBox.getSelectedItem().toString()
-        val filteredCommitSize = commitSizeMap.filter { it.value.authorEmail == email }
         clear()
+        this.email = emailComboBox.selectedItem!!.toString()
+        val filteredCommitSize = commitSizeMap.filter { it.value.authorEmail == email }
         updateLabels(developerInfoMap, filteredCommitSize)
-        updatePieChart(createPieDataFile(developerInfoMap[email]!!), filePieChart)
-        updatePieChart(createPieDataLines(developerInfoMap[email]!!), linesPieChart)
-        updatePieChart(createPieDataStable(filteredCommitSize), stableCommitChart)
+        updatePieCharts(filteredCommitSize, developerInfoMap[email]!!)
         commitPanelSplitter.updatePanel(filteredCommitSize)
         val dateCollection = filteredCommitSize.values.map { it.date }
         timeButtons.forEach { (button, dataFunction) ->
             button.apply { addActionListener { updateBarChart(dataFunction(dateCollection), "Commit by $text") } }
         }
-        spinnerView(false)
+        setContentVisibility(true)
         if (barChartButtonGroup.selection == null) barChartButtonGroup.elements.nextElement().doClick()
         else barChartButtonGroup.elements.toList().find { it.model == barChartButtonGroup.selection }?.doClick()
     }
 
-    private fun spinnerView(isVisible: Boolean) {
-        mainInfoPanel.isVisible = !isVisible
-        commitScrollPanel.isVisible = !isVisible
-        piePanels.isVisible = !isVisible
-        barChartPanel.isVisible = !isVisible
-        spinnerPanel.isVisible = isVisible
+    private fun setContentVisibility(showContent: Boolean) {
+        mainInfoPanel.isVisible = showContent
+        commitScrollPanel.isVisible = showContent
+        piePanels.isVisible = showContent
+        barChartPanel.isVisible = showContent
+        spinnerPanel.isVisible = !showContent
 
     }
 
     private fun updateLabels(developerInfoMap: Map<String, DeveloperInfo>, commitSizeMap: Map<String, CommitSize>) {
-        authorNameLabel.text = developerInfoMap[email]!!.name
-        commitCountLabel.text = developerInfoMap[email]!!.commits.size.toString()
+        val developer = developerInfoMap[email]!!
+        authorNameLabel.text = developer.name
+        commitCountLabel.text = developer.commits.size.toString()
         createdBranchesLabel.text = ""
         val lines = developerInfoMap.values.sumOf { it.getActualLinesOwner().toDouble() }
-        ownerPercentageLabel.text =
-            String.format("%.2f", ((developerInfoMap[email]!!.getActualLinesOwner()) / lines) * 100)
+        ownerPercentageLabel.text = String.format("%.2f", ((developer.getActualLinesOwner()) / lines) * 100)
         val commitDates = commitSizeMap.values.map { it.date }.sorted().toList()
         val differences: MutableList<Int> = ArrayList()
         for (i in 1..<commitDates.size) {
@@ -163,34 +147,14 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
         val date = commitDates.maxOrNull()
         lastActivityLabel.text = if (date != null) getStringDate(date) else ""
         val daysCount = commitDates.map { timestampToLocalDate(it) }.size.toDouble()
-        commitFrequencyLabel.text = String.format("%.2f", differences.size / daysCount) + " per day"
-        avgCommitTimeLabel.text =
-            String.format(
-                "%.2f",
-                differences.sum() / (24 * 3600.0 * differences.size)
-            ) + " day"
+        commitFrequencyLabel.text = String.format("%.2f  per day", differences.size / daysCount)
+        avgCommitTimeLabel.text = String.format("%.2f  day", differences.sum() / (24 * 3600.0 * differences.size))
     }
 
-    private fun initPieChart(
-        pieChart1: PieChart,
-        panel: JPanel,
-        name: String
-    ) {
-        panel.putClientProperty(FlatClientProperties.STYLE, ("border:5,5,5,5;background:null"))
-        panel.layout = MigLayout("wrap,fill,gap 10", "fill")
-        val header1 = JLabel(name)
-        header1.putClientProperty(FlatClientProperties.STYLE, "font:+1")
-        pieChart1.setHeader(header1)
-        pieChart1.chartColor.addColor(Color.decode("#a3e635"), Color.decode("#f87171"), Color.decode("#fb923c"))
-        pieChart1.putClientProperty(FlatClientProperties.STYLE, "border:5,5,5,5,\$Component.borderColor,,20")
-        panel.add(pieChart1, "split 5,height 360")
-        pieChart1.visibleLegend(false)
-        pieChart1.startAnimation()
-    }
-
-    private fun updatePieChart(defaultPieDataset: DefaultPieDataset<String>, pieChart: PieChart) {
-        pieChart.setDataset(defaultPieDataset)
-        pieChart.startAnimation()
+    private fun updatePieCharts(commitSizeMap: Map<String, CommitSize>, developerInfo: DeveloperInfo) {
+        stableCommitChart.updateData(createPieDataStable(commitSizeMap))
+        filePieChart.updateData(createPieDataFile(developerInfo))
+        linesPieChart.updateData(createPieDataLines(developerInfo))
     }
 
     private fun createPieDataFile(developerInfo: DeveloperInfo): DefaultPieDataset<String> {
@@ -223,7 +187,7 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
     }
 
     private fun updateBarChart(dataset: DefaultPieDataset<String>, title: String) {
-        commitBarChartHeader.text = title
+        (commitBarChart.header as JLabel).text = title
         commitBarChart.setDataset(dataset)
     }
 
