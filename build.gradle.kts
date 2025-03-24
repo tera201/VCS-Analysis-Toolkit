@@ -10,7 +10,7 @@ java {
 }
 
 group = "org.tera201"
-version = "1.8.0"
+version = "1.8.1"
 
 val javafxModules = listOf("javafx-controls", "javafx-graphics", "javafx-swing", "javafx-base")
 val javaFXVersion = "21";
