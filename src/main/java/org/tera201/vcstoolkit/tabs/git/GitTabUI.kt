@@ -1,9 +1,13 @@
 package org.tera201.vcstoolkit.tabs.git
 
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.openapi.ui.JBPopupMenu
 import com.intellij.ui.JBSplitter
+import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBList
+import com.intellij.ui.components.JBPanel
 import com.intellij.ui.components.JBScrollPane
+import com.intellij.ui.components.JBTextField
 import org.tera201.vcstoolkit.helpers.SharedModel
 import java.awt.BorderLayout
 import java.awt.Dimension
@@ -12,7 +16,7 @@ import java.awt.event.ComponentEvent
 import javax.swing.*
 
 class GitTabUI (val modelListContent: SharedModel) {
-    val urlField = JTextField().apply { toolTipText = "<html>Enter your repository path.<br>Example: https://github.com/dummy/project.git</html>" }
+    val urlField = JBTextField().apply { toolTipText = "<html>Enter your repository path.<br>Example: https://github.com/dummy/project.git</html>" }
     val getButton = JButton("Get")
     val analyzeButton = JButton("Analyze")
     // TODO: problems with JBTextArea (IDEA freeze) when analyzing one branch
@@ -20,21 +24,19 @@ class GitTabUI (val modelListContent: SharedModel) {
     val clearLogButton = JButton("Clear log")
     val logsJBScrollPane = JBScrollPane(
         logsJTextArea,
-        JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-        JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
+        JBScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+        JBScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
     )
     val branchListModel = DefaultListModel<String>()
     val tagListModel = DefaultListModel<String>()
     val branchList = JBList(branchListModel)
     val tagList = JBList(tagListModel)
-    val branchPane = JPanel().apply {
-        this.layout = BorderLayout()
-        this.add(JLabel("Branches"), BorderLayout.NORTH)
+    val branchPane = JBPanel<JBPanel<*>>(BorderLayout()).apply {
+        this.add(JBLabel("Branches"), BorderLayout.NORTH)
         this.add(JBScrollPane(branchList), BorderLayout.CENTER)
     }
-    val tagPane = JPanel().apply {
-        this.layout = BorderLayout()
-        this.add(JLabel("Tags"), BorderLayout.NORTH)
+    val tagPane = JBPanel<JBPanel<*>>(BorderLayout()).apply {
+        this.add(JBLabel("Tags"), BorderLayout.NORTH)
         this.add(JBScrollPane(tagList), BorderLayout.CENTER)
     }
     val modelList = JBList(modelListContent)
@@ -46,10 +48,9 @@ class GitTabUI (val modelListContent: SharedModel) {
         this.dividerWidth = 1
     }
     val filesTreeJBScrollPane =
-        JBScrollPane(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED)
-    val currentBranchOrTagLabel = JLabel("Current")
-    val filesTreePane = JPanel().apply {
-        this.layout = BorderLayout()
+        JBScrollPane(JBScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JBScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED)
+    val currentBranchOrTagLabel = JBLabel("Current")
+    val filesTreePane = JBPanel<JBPanel<*>>(BorderLayout()).apply {
         this.add(currentBranchOrTagLabel, BorderLayout.NORTH)
         this.add(filesTreeJBScrollPane, BorderLayout.CENTER)
     }
@@ -64,17 +65,16 @@ class GitTabUI (val modelListContent: SharedModel) {
         this.dividerWidth = 1
     }
     val analyzerProgressBar = JProgressBar().apply { isVisible = false }
-    val logModelPane = JPanel().apply {
-        layout = BorderLayout()
+    val logModelPane = JBPanel<JBPanel<*>>(BorderLayout()).apply {
         add(logModelSplitPane, BorderLayout.CENTER)
         add(analyzerProgressBar, BorderLayout.SOUTH)
     }
-    val logButtonsPanel = JPanel().apply {
+    val logButtonsPanel = JBPanel<JBPanel<*>>().apply {
         layout = BoxLayout(this, BoxLayout.Y_AXIS)
         add(clearLogButton)
     }
-    val modelControlPanel = JPanel().apply { add(analyzeButton) }
-    val popupMenu = JPopupMenu()
+    val modelControlPanel = JBPanel<JBPanel<*>>().apply { add(analyzeButton) }
+    val popupMenu = JBPopupMenu()
 
     fun createUI(panel: JPanel) {
         panel.addComponentListener(object : ComponentAdapter() {

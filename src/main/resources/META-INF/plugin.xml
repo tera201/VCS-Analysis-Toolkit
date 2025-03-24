@@ -41,6 +41,15 @@
     <![CDATA[
       <html>
 
+        <b>1.8.1</b> (2025-03-24)
+        <ul>
+          <li>Eliminated duplicate commit counts per author<li>
+          <li>Fixed SQL file naming issue for repository DB</li>
+          <li>Fixed incorrect line owner count computation</li>
+          <li>Optimized redundant calculations for changes</li>
+          <li>Refactored info pages</li>
+        </ul>
+
         <b>1.8.0</b> (2025-03-11)
         <ul>
           <li>Added Kotlin support</li>
@@ -186,7 +195,7 @@
                 factoryClass="org.tera201.vcstoolkit.VCSToolWindowFactoryKt"/>
 
     <applicationService serviceImplementation="org.tera201.vcstoolkit.services.settings.VCSToolkitSettings"/>
-    <applicationConfigurable instance="org.tera201.vcstoolkit.services.settings.VCSToolkitSettingsPage" groupId="language"/>
+    <applicationConfigurable instance="org.tera201.vcstoolkit.services.settings.VCSToolkitSettingsPageUI" groupId="language"/>
     <notificationGroup
             id="VCSToolkitNotify"
             displayType="BALLOON"

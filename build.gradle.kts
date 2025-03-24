@@ -1,6 +1,6 @@
 plugins {
     id("java")
-    id("org.jetbrains.intellij.platform") version "2.2.0"
+    id("org.jetbrains.intellij.platform") version "2.4.0"
     id("org.jetbrains.kotlin.jvm") version "2.1.0"
     id("org.openjfx.javafxplugin") version "0.0.14"
 }
@@ -10,7 +10,7 @@ java {
 }
 
 group = "org.tera201"
-version = "1.8.0"
+version = "1.8.1"
 
 val javafxModules = listOf("javafx-controls", "javafx-graphics", "javafx-swing", "javafx-base")
 val javaFXVersion = "21";
