@@ -1,5 +1,7 @@
 package org.tera201.vcstoolkit.panels
 
+import com.intellij.ui.components.JBLabel
+import com.intellij.ui.components.JBPanel
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.GridBagConstraints
@@ -10,14 +12,12 @@ import java.time.Year
 import java.time.format.TextStyle
 import java.util.*
 import javax.swing.BorderFactory
-import javax.swing.JLabel
-import javax.swing.JPanel
 
-class CommitPanel internal constructor() : JPanel() {
+class CommitPanel internal constructor() : JBPanel<CommitPanel>() {
     private var year: Int = LocalDate.now().year
     private var daysInYear: Int = Year.of(year).length()
-    private var offset:Int = LocalDate.ofYearDay(year, 1).getDayOfWeek().value - 1
-    private var panels: Array<JPanel?> = arrayOfNulls(366)
+    private var offset: Int = LocalDate.ofYearDay(year, 1).getDayOfWeek().value - 1
+    private var panels: Array<JBPanel<JBPanel<*>>?> = arrayOfNulls(366)
     private val dayCommit = IntArray(366)
     private val gbc: GridBagConstraints = GridBagConstraints()
     private var date: LocalDate = LocalDate.ofYearDay(year, 1)
@@ -40,7 +40,7 @@ class CommitPanel internal constructor() : JPanel() {
         this.removeAll()
         clearPanels()
         date = LocalDate.ofYearDay(year, 1)
-        dayCommit.forEachIndexed() { i,_ -> dayCommit[i] = 0 }
+        dayCommit.forEachIndexed() { i, _ -> dayCommit[i] = 0 }
         daysInYear = Year.of(year).length()
         offset = date.getDayOfWeek().value - 1
 
@@ -61,7 +61,7 @@ class CommitPanel internal constructor() : JPanel() {
         for (i in 0 until offset) {
             gbc.gridx = 1
             gbc.gridy = i + 1
-            val nullPanel = JPanel()
+            val nullPanel = JBPanel<JBPanel<*>>()
             nullPanel.preferredSize = Dimension(1, 1)
             this.add(nullPanel, gbc.clone())
         }
@@ -83,7 +83,12 @@ class CommitPanel internal constructor() : JPanel() {
         val panel = panels[day - 1] ?: return
         dayCommit[day - 1] = commitCount
         panel.background = getColorForCommits(dayCommit[day - 1])
-        panel.toolTipText = "${commitCount} commits on ${date.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${date.dayOfMonth}"
+        panel.toolTipText = "${commitCount} commits on ${
+            date.month.getDisplayName(
+                TextStyle.FULL,
+                Locale.getDefault()
+            )
+        } ${date.dayOfMonth}"
     }
 
     fun addCommitCountForDay(day: Int, commitCount: Int) {
@@ -91,21 +96,26 @@ class CommitPanel internal constructor() : JPanel() {
         val panel = panels[day - 1] ?: return
         dayCommit[day - 1] += commitCount
         panel.background = getColorForCommits(dayCommit[day - 1])
-        panel.toolTipText = "${dayCommit[day - 1]} commits on ${date.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${date.dayOfMonth}"
+        panel.toolTipText = "${dayCommit[day - 1]} commits on ${
+            date.month.getDisplayName(
+                TextStyle.FULL,
+                Locale.getDefault()
+            )
+        } ${date.dayOfMonth}"
     }
 
     private fun addDayLabels(gbc: GridBagConstraints) {
         gbc.gridx = 0
         listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun").forEachIndexed { index, dayLabel ->
             gbc.gridy = index + 1
-            add(JLabel(dayLabel, JLabel.CENTER).apply {
-                verticalAlignment = JLabel.NORTH
+            add(JBLabel(dayLabel, JBLabel.CENTER).apply {
+                verticalAlignment = JBLabel.NORTH
             }, gbc.clone())
         }
     }
 
     private fun addMonthLabels(date: LocalDate, gbc: GridBagConstraints) {
-        val months = Month.values().map { it.getDisplayName(TextStyle.SHORT, Locale.getDefault()) }
+        val months = Month.entries.map { it.getDisplayName(TextStyle.SHORT, Locale.getDefault()) }
         val weeksPerMonths = IntArray(12)
         var currentMonth = 0
         weeksPerMonths[currentMonth] = 1
@@ -126,19 +136,19 @@ class CommitPanel internal constructor() : JPanel() {
                 gbc.gridx += weeksPerMonths[index - 1]
                 gbc.gridwidth = weeksPerMonths[index]
             }
-            add(JLabel(month, JLabel.LEFT), gbc)
+            add(JBLabel(month, JBLabel.LEFT), gbc)
         }
     }
 
     companion object {
-        private fun createDayPanel(month: String, dayOfMonth: Int): JPanel = JPanel().apply {
+        private fun createDayPanel(month: String, dayOfMonth: Int) = JBPanel<JBPanel<*>>().apply {
             preferredSize = Dimension(1, 1)
             toolTipText = "0 commits on $month $dayOfMonth"
             border = BorderFactory.createLineBorder(Color.DARK_GRAY)
             background = getColorForCommits(0)
         }
 
-        private fun getColorForCommits(commits: Int): Color  = when {
+        private fun getColorForCommits(commits: Int): Color = when {
             commits > 15 -> Color(0, 200, 0)
             commits > 10 -> Color(0, 150, 0)
             commits > 5 -> Color(0, 100, 0)

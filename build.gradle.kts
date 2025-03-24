@@ -10,7 +10,7 @@ java {
 }
 
 group = "org.tera201"
-version = "1.7.1-223"
+version = "1.8.1-223"
 
 val javafxModules = listOf("javafx-controls", "javafx-graphics", "javafx-swing", "javafx-base")
 val javaFXVersion = "21";
@@ -23,12 +23,11 @@ repositories {
 }
 
 dependencies {
-    implementation(fileTree(mapOf("dir" to "lib", "include" to listOf("*.jar"))))
-    implementation("org.tera201:javafx-uml-graph:0.0.2-SNAPSHOT")
-    implementation("org.tera201:code-to-uml:0.1.0-SNAPSHOT")
-    implementation("org.tera201:swrminer:0.4.1-SNAPSHOT")
-    implementation("org.tera201:javafx-code-modeling-tool:1.2.2-SNAPSHOT")
-    implementation("org.tera201:swing-components:1.1.2-SNAPSHOT")
+    implementation("org.tera201:javafx-uml-graph")
+    implementation("org.tera201:code-to-model")
+    implementation("org.tera201:swrminer")
+    implementation("org.tera201:javafx-code-modeling-tool")
+    implementation("org.tera201:swing-components")
     implementation("com.formdev:flatlaf:3.4.1")
     implementation("com.formdev:flatlaf-extras:3.4.1")
     implementation("org.xerial:sqlite-jdbc:3.45.3.0")

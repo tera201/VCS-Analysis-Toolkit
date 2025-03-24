@@ -4,6 +4,7 @@ class ProjectPath {
     var isExternal:Boolean
     var path:String
     var copyPath:String
+
     constructor() {
         isExternal = false
         path = ""

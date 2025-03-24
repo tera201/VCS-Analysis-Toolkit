@@ -34,7 +34,7 @@ class FXCityPanel : JFXPanel() {
     private fun initFXCity(fxSpace: FXSpace<Quarter>) {
         val sceneWidth = 800.0
         val sceneHeight = 600.0
-        var city = City(8000.0, 20.0, 8000.0)
+        val city = City(8000.0, 20.0, 8000.0)
 
         createQuarters(60, city)
         fxSpace.add(city)
