@@ -25,7 +25,7 @@ repositories {
 dependencies {
     implementation("org.tera201:javafx-uml-graph")
     implementation("org.tera201:code-to-model")
-    implementation("org.tera201:swrminer")
+    implementation("org.tera201:vcs-manager")
     implementation("org.tera201:javafx-code-modeling-tool")
     implementation("org.tera201:swing-components")
     implementation("com.formdev:flatlaf:3.4.1")

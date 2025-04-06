@@ -13,3 +13,6 @@
 [submodule "modules/code-to-model"]
 	path = modules/code-to-model
 	url = git@github.com:tera201/Code2Model.git
+[submodule "modules/vcs-manager"]
+	path = modules/vcs-manager
+	url = git@github.com:tera201/VCS-Manager.git

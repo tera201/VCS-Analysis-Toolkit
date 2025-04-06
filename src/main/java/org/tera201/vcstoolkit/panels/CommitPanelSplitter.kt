@@ -2,7 +2,7 @@ package org.tera201.vcstoolkit.panels
 
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBList
-import org.repodriller.scm.entities.CommitSize
+import org.tera201.vcsmanager.db.entities.CommitSize
 import org.tera201.vcstoolkit.utils.DateUtils.Companion.timestampToLocalDate
 import java.util.*
 import javax.swing.DefaultListModel

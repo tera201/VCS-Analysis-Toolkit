@@ -6,12 +6,12 @@ import com.intellij.ui.components.JBPanel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
-import org.repodriller.scm.entities.CommitSize
-import org.repodriller.scm.entities.DeveloperInfo
 import org.tera201.swing.chart.ChartLegendRenderer
 import org.tera201.swing.chart.data.category.DefaultCategoryDataset
 import org.tera201.swing.chart.data.pie.DefaultPieDataset
 import org.tera201.swing.chart.line.LineChart
+import org.tera201.vcsmanager.db.entities.CommitSize
+import org.tera201.vcsmanager.db.entities.DeveloperInfo
 import org.tera201.vcstoolkit.helpers.addComponentPairRow
 import org.tera201.vcstoolkit.helpers.addNComponentsRow
 import org.tera201.vcstoolkit.helpers.setTextWithShortener
@@ -101,9 +101,9 @@ class InfoPageUI(val tabManager: TabManager) {
         mainPathLabel.text = lastPathNode
         authorLabel.text = commitSizeMap.values.minByOrNull { it.date }?.authorName
         sizeLabel.text = commitSizeMap.values.maxByOrNull { it.date }?.projectSize.toString()
-        curAuthorLabel.text = developerInfoMap.values.maxByOrNull { it.getActualLinesOwner() }?.name
-        rowsLabel.text = developerInfoMap.values.sumOf { it.getActualLinesOwner() }.toString()
-        rowSizeLabel.text = developerInfoMap.values.sumOf { it.getActualLinesSize() }.toString()
+        curAuthorLabel.text = developerInfoMap.values.maxByOrNull { it.actualLinesOwner }?.name
+        rowsLabel.text = developerInfoMap.values.sumOf { it.actualLinesOwner }.toString()
+        rowSizeLabel.text = developerInfoMap.values.sumOf { it.actualLinesOwner }.toString()
         revisionLabel.setTextWithShortener(commitSizeMap.values.maxByOrNull { it.date }?.name ?: "", 6)
     }
 

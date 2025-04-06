@@ -5,10 +5,10 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.*
 import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
-import org.repodriller.scm.entities.CommitSize
-import org.repodriller.scm.entities.DeveloperInfo
 import org.tera201.swing.chart.bar.HorizontalBarChart
 import org.tera201.swing.chart.data.pie.DefaultPieDataset
+import org.tera201.vcsmanager.db.entities.CommitSize
+import org.tera201.vcsmanager.db.entities.DeveloperInfo
 import org.tera201.vcstoolkit.helpers.addComponentPairRow
 import org.tera201.vcstoolkit.panels.CommitPanelSplitter
 import org.tera201.vcstoolkit.tabs.TabManager
@@ -137,8 +137,8 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
         authorNameLabel.text = developer.name
         commitCountLabel.text = developer.commits.size.toString()
         createdBranchesLabel.text = ""
-        val lines = developerInfoMap.values.sumOf { it.getActualLinesOwner().toDouble() }
-        ownerPercentageLabel.text = String.format("%.2f", ((developer.getActualLinesOwner()) / lines) * 100)
+        val lines = developerInfoMap.values.sumOf { it.actualLinesOwner.toDouble() }
+        ownerPercentageLabel.text = String.format("%.2f", ((developer.actualLinesOwner) / lines) * 100)
         val commitDates = commitSizeMap.values.map { it.date }.sorted().toList()
         val differences: MutableList<Int> = ArrayList()
         for (i in 1..<commitDates.size) {

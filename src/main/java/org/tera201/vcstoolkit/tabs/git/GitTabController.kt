@@ -9,10 +9,10 @@ import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.ui.ColoredTreeCellRenderer
 import com.intellij.ui.treeStructure.Tree
 import com.intellij.util.PlatformIcons
-import model.console.BuildModel
-import org.repodriller.scm.SCMRepository
 import org.tera201.code2uml.AnalyzerBuilder
 import org.tera201.code2uml.util.messages.DataBaseUtil
+import org.tera201.vcsmanager.BuildModel
+import org.tera201.vcsmanager.scm.SCMRepository
 import org.tera201.vcstoolkit.helpers.ProjectPath
 import org.tera201.vcstoolkit.services.VCSToolkitCache
 import org.tera201.vcstoolkit.services.settings.VCSToolkitSettings
@@ -184,8 +184,8 @@ class GitTabController(
             if (myRepo?.repoName != projectName && isRepo) myRepo = buildModel.getRepository(projectPath, settings.modelPath)
             updatePathPanel()
             if (isRepo && !(cache.projectPathMap[projectName]!!.isExternal && settings.externalProjectMode == 1)) {
-                populateJBList(gitTabUI.branchListModel, buildModel.getBranches(myRepo).filter { it != "HEAD" })
-                populateJBList(gitTabUI.tagListModel, buildModel.getTags(myRepo))
+                populateJBList(gitTabUI.branchListModel, buildModel.getBranches(myRepo!!).filter { it != "HEAD" })
+                populateJBList(gitTabUI.tagListModel, buildModel.getTags(myRepo!!))
                 if (myRepo?.scm?.currentBranchOrTagName != null)
                     gitTabUI.currentBranchOrTagLabel.text = myRepo?.scm?.currentBranchOrTagName
             } else if (cache.projectPathMap[projectName]!!.isExternal && settings.externalProjectMode == 1) {
