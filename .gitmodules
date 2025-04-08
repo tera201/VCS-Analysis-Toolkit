@@ -1,6 +1,3 @@
-[submodule "modules/swrminer"]
-	path = modules/swrminer
-	url = git@github.com:tera201/SWRMiner.git
 [submodule "modules/javafx-code-modeling-tool"]
 	path = modules/javafx-code-modeling-tool
 	url = git@github.com:tera201/JavaFXCodeModelingTool.git
