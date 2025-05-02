@@ -37,15 +37,13 @@ dependencies {
     }
 
     intellijPlatform {
-        intellijIdeaCommunity("2024.3.2.1")
-        plugin("com.intellij.javafx:1.0.4")
+        intellijIdeaCommunity("2025.1")
     }
 }
 
 intellijPlatform {
     pluginConfiguration {
         ideaVersion {
-            untilBuild = provider { "243.*" }
             sinceBuild = provider { "241" }
         }
     }
