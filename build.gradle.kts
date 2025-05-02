@@ -10,7 +10,7 @@ java {
 }
 
 group = "org.tera201"
-version = "1.8.1"
+version = "1.9.0"
 
 val javafxModules = listOf("javafx-controls", "javafx-graphics", "javafx-swing", "javafx-base")
 val javaFXVersion = "21";
@@ -25,7 +25,7 @@ repositories {
 dependencies {
     implementation("org.tera201:javafx-uml-graph")
     implementation("org.tera201:code-to-model")
-    implementation("org.tera201:swrminer")
+    implementation("org.tera201:vcs-manager")
     implementation("org.tera201:javafx-code-modeling-tool")
     implementation("org.tera201:swing-components")
     implementation("com.formdev:flatlaf:3.4.1")
@@ -37,15 +37,13 @@ dependencies {
     }
 
     intellijPlatform {
-        intellijIdeaCommunity("2024.3.2.1")
-        plugin("com.intellij.javafx:1.0.4")
+        intellijIdeaCommunity("2025.1")
     }
 }
 
 intellijPlatform {
     pluginConfiguration {
         ideaVersion {
-            untilBuild = provider { "243.*" }
             sinceBuild = provider { "241" }
         }
     }

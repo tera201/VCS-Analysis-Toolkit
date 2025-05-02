@@ -2,8 +2,8 @@ package org.tera201.vcstoolkit.info
 
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTabbedPane
-import org.repodriller.scm.entities.CommitSize
-import org.repodriller.scm.entities.DeveloperInfo
+import org.tera201.vcsmanager.db.entities.CommitSize
+import org.tera201.vcsmanager.db.entities.DeveloperInfo
 import org.tera201.vcstoolkit.tabs.GitTab
 import org.tera201.vcstoolkit.tabs.TabEnum
 import org.tera201.vcstoolkit.tabs.TabManager
@@ -33,7 +33,7 @@ class InfoTabPage(val tabManager: TabManager) : JBTabbedPane() {
 
         gitTab!!.controller.myRepo!!.scm.dbPrepared()
 
-        val commitSizeMap: Map<String, CommitSize> = gitTab.controller.myRepo!!.scm.repositorySize(path)
+        val commitSizeMap: Map<String, CommitSize> = gitTab.controller.myRepo!!.scm.getRepositorySize(true, null, path)
 
         //        BlameManager blameManager  = gitTab.getMyRepo().getScm().blameManager();
         val developerInfoMap: Map<String, DeveloperInfo> = gitTab.controller.myRepo!!.scm.getDeveloperInfo(path)
