@@ -45,10 +45,13 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
     private val ownerPercentageLabel = JBLabel()
     private val lastActivityLabel = JBLabel()
     
-    // Create tile panels with borders
-    private val headerPanel = createTilePanel("Developer Information").apply {
-        layout = GridLayoutManager(2, 2)
-        add(createInfoLabel("Name:"), GridConstraints().apply { 
+    // Create compact header panel without border
+    private val headerPanel = JBPanel<JBPanel<*>>().apply {
+        layout = GridLayoutManager(3, 2)
+        border = JBUI.Borders.empty(10)
+        add(createInfoLabel("Developer:").apply { 
+            font = font.deriveFont(Font.BOLD, 13f)
+        }, GridConstraints().apply { 
             row = 0; column = 0 
             anchor = GridConstraints.ANCHOR_WEST
         })
@@ -87,18 +90,25 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
         })
     }
     
-    private val topSection = JBPanel<JBPanel<*>>(GridLayoutManager(1, 3)).apply {
+    // Reorganized top section: Statistics | Commit Stability (larger)
+    private val topSection = JBPanel<JBPanel<*>>(GridLayoutManager(2, 5)).apply {
         border = JBUI.Borders.empty(5)
+        // Header spans both columns
         add(headerPanel, GridConstraints().apply { 
             row = 0; column = 0
-            fill = GridConstraints.FILL_BOTH
+            colSpan = 5
+            fill = GridConstraints.FILL_HORIZONTAL
         })
+        // Statistics takes 1 column
         add(statisticsPanel, GridConstraints().apply { 
-            row = 0; column = 1
+            row = 1; column = 0
+            colSpan = 2
             fill = GridConstraints.FILL_BOTH
         })
+        // Stability takes 1 column with more space
         add(stableCommitTile, GridConstraints().apply { 
-            row = 0; column = 2
+            row = 1; column = 2
+            colSpan = 3
             fill = GridConstraints.FILL_BOTH
         })
     }
