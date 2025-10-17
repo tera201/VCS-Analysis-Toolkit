@@ -12,18 +12,24 @@ import kotlin.concurrent.thread
 class InfoTabPage(val tabManager: TabManager) : JBTabbedPane() {
     private val infoPage = InfoPageUI(tabManager)
     private val authorPage = AuthorInfoPageUI(tabManager)
+    private val commitsPage = CommitsInfoPageUI(tabManager)
     private val jBScrollPane1: JBScrollPane = JBScrollPane(infoPage.panel)
     private val jBScrollPane2: JBScrollPane = JBScrollPane(authorPage.panel)
+    private val jBScrollPane3: JBScrollPane = JBScrollPane(commitsPage.panel)
 
     init {
-        jBScrollPane1.setBorder(null);
+        jBScrollPane1.setBorder(null)
         jBScrollPane1.setHorizontalScrollBarPolicy(JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER)
         jBScrollPane1.setVerticalScrollBarPolicy(JBScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED)
-        jBScrollPane2.setBorder(null);
+        jBScrollPane2.setBorder(null)
         jBScrollPane2.setHorizontalScrollBarPolicy(JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER)
         jBScrollPane2.setVerticalScrollBarPolicy(JBScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED)
+        jBScrollPane3.setBorder(null);
+        jBScrollPane3.setHorizontalScrollBarPolicy(JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER)
+        jBScrollPane3.setVerticalScrollBarPolicy(JBScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED)
         add("Main", jBScrollPane1)
         add("Authors", jBScrollPane2)
+        add("Commits", jBScrollPane3)
     }
 
     fun start() {
