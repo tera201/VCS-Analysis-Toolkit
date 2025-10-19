@@ -21,34 +21,35 @@ class GitTabListeners(
     private val controller: GitTabController
 ) {
 
-    fun setupListeners() {
-        gitTabUI.getButton.addActionListener { handleGetRepo() }
-        clearButtonListener()
-        listenerForAnalyzeButton()
-        setupGitListListeners()
-        setupListSelectionListeners()
-    }
+fun setupListeners() {
+    cloneButtonListener()
+    clearButtonListener()
+    listenerForAnalyzeButton()
+    setupGitListListeners()
+    setupListSelectionListeners()
+}
 
-    private fun handleGetRepo() {
-        thread {
-            //TODO: add regex
-            val url = gitTabUI.urlField.text
-            if (url.isNotEmpty()) {
+private fun cloneButtonListener() {
+    gitTabUI.cloneProjectButton.addActionListener {
+        val url = GitTabUtils.showCloneDialog()
+        if (url != null && url.isNotEmpty()) {
+            thread {
                 cache.urlField = url
                 controller.getRepoByUrl(url)
             }
         }
     }
+}
 
 
-    private fun clearButtonListener() {
-        gitTabUI.clearLogButton.addActionListener {
-            gitTabUI.logsJTextArea.text = null
-        }
+private fun clearButtonListener() {
+    gitTabUI.clearLogButton.addActionListener {
+        gitTabUI.logsJTextArea.text = null
     }
+}
 
-    private fun listenerForAnalyzeButton() {
-        gitTabUI.analyzeButton.addActionListener {
+private fun listenerForAnalyzeButton() {
+    gitTabUI.analyzeButton.addActionListener {
             thread {
                 controller.analyzeAction()
             }

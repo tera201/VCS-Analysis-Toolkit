@@ -16,37 +16,17 @@ import java.awt.Font
 import javax.swing.*
 
 class GitTabUI(val modelListContent: SharedModel) {
-    // Repository URL Section
-    val urlField = JBTextField().apply {
-        toolTipText = "<html>Enter your repository path.<br>Example: https://github.com/dummy/project.git</html>"
-        putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Enter repository URL...")
-    }
-    val getButton = JButton("Clone").apply {
-        putClientProperty(FlatClientProperties.BUTTON_TYPE, FlatClientProperties.BUTTON_TYPE_BORDERLESS)
-    }
-    
-    private val urlPanel = createTilePanel("Repository").apply {
-        layout = GridLayoutManager(1, 2)
-        add(urlField, GridConstraints().apply {
-            row = 0; column = 0
-            fill = GridConstraints.FILL_HORIZONTAL
-            hSizePolicy = GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_CAN_GROW
-        })
-        add(getButton, GridConstraints().apply {
-            row = 0; column = 1
-            fill = GridConstraints.FILL_NONE
-            hSizePolicy = GridConstraints.SIZEPOLICY_FIXED
-        })
-    }
-    
     // Project Selection Section
     val projectComboBox = ComboBox<String>()
     val openProjectButton = JButton("Open...").apply {
         putClientProperty(FlatClientProperties.BUTTON_TYPE, FlatClientProperties.BUTTON_TYPE_BORDERLESS)
     }
+    val cloneProjectButton = JButton("Clone...").apply {
+        putClientProperty(FlatClientProperties.BUTTON_TYPE, FlatClientProperties.BUTTON_TYPE_BORDERLESS)
+    }
     
     private val projectPanel = createTilePanel("Project").apply {
-        layout = GridLayoutManager(1, 2)
+        layout = GridLayoutManager(1, 3)
         add(projectComboBox, GridConstraints().apply {
             row = 0; column = 0
             fill = GridConstraints.FILL_HORIZONTAL
@@ -57,8 +37,13 @@ class GitTabUI(val modelListContent: SharedModel) {
             fill = GridConstraints.FILL_NONE
             hSizePolicy = GridConstraints.SIZEPOLICY_FIXED
         })
+        add(cloneProjectButton, GridConstraints().apply {
+            row = 0; column = 2
+            fill = GridConstraints.FILL_NONE
+            hSizePolicy = GridConstraints.SIZEPOLICY_FIXED
+        })
     }
-
+    
     // Files Tree Section - tree will be set directly by controller
     val currentBranchOrTagLabel = JBLabel("Current").apply {
         font = font.deriveFont(Font.BOLD, 12f)
@@ -212,23 +197,11 @@ class GitTabUI(val modelListContent: SharedModel) {
     }
     
     // Main content panel (will be wrapped in scroll pane)
-    private val contentPanel = JBPanel<JBPanel<*>>(GridLayoutManager(4, 1)).apply {
+    private val contentPanel = JBPanel<JBPanel<*>>(GridLayoutManager(3, 1)).apply {
         border = JBUI.Borders.empty(10)
         
-        // Row 0: Repository and Project panels
-        val topControlsPanel = JBPanel<JBPanel<*>>(GridLayoutManager(1, 2)).apply {
-            add(urlPanel, GridConstraints().apply {
-                row = 0; column = 0
-                fill = GridConstraints.FILL_HORIZONTAL
-                hSizePolicy = GridConstraints.SIZEPOLICY_CAN_GROW or GridConstraints.SIZEPOLICY_WANT_GROW
-            })
-            add(projectPanel, GridConstraints().apply {
-                row = 0; column = 1
-                fill = GridConstraints.FILL_HORIZONTAL
-                hSizePolicy = GridConstraints.SIZEPOLICY_CAN_GROW
-            })
-        }
-        add(topControlsPanel, GridConstraints().apply {
+        // Row 0: Project panel only
+        add(projectPanel, GridConstraints().apply {
             row = 0; column = 0
             fill = GridConstraints.FILL_HORIZONTAL
             vSizePolicy = GridConstraints.SIZEPOLICY_FIXED
