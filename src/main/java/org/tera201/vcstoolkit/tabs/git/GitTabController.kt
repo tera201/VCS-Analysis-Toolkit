@@ -7,6 +7,7 @@ import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.ui.JBMenuItem
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.ui.ColoredTreeCellRenderer
+import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.treeStructure.Tree
 import com.intellij.util.PlatformIcons
 import org.tera201.code2uml.AnalyzerBuilder
@@ -19,6 +20,7 @@ import org.tera201.vcstoolkit.services.settings.VCSToolkitSettings
 import org.tera201.vcstoolkit.tabs.FXCircleTab
 import org.tera201.vcstoolkit.tabs.TabEnum
 import org.tera201.vcstoolkit.tabs.TabManager
+import java.awt.BorderLayout
 import java.io.File
 import javax.swing.*
 import javax.swing.tree.DefaultMutableTreeNode
@@ -254,8 +256,19 @@ class GitTabController(
         buildTree(File(cache.projectPathMap[cache.lastProject]?.path), root)
         pathJTree.model = DefaultTreeModel(root)
         SwingUtilities.invokeLater {
-            gitTabUI.filesTreeJBScrollPane.setViewportView(pathJTree)
-            gitTabUI.filesTreeJBScrollPane.updateUI()
+            // Remove old components
+            gitTabUI.filesTreeContainer.removeAll()
+            // Add tree with scroll pane directly
+            val treeScrollPane = JBScrollPane(
+                pathJTree,
+                JBScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JBScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
+            ).apply {
+                border = null
+            }
+            gitTabUI.filesTreeContainer.add(treeScrollPane, BorderLayout.CENTER)
+            gitTabUI.filesTreeContainer.revalidate()
+            gitTabUI.filesTreeContainer.repaint()
         }
     }
 

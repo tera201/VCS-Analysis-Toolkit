@@ -30,7 +30,7 @@ class GitTabUI(val modelListContent: SharedModel) {
         add(urlField, GridConstraints().apply {
             row = 0; column = 0
             fill = GridConstraints.FILL_HORIZONTAL
-            hSizePolicy = GridConstraints.SIZEPOLICY_CAN_GROW or GridConstraints.SIZEPOLICY_WANT_GROW
+            hSizePolicy = GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_CAN_GROW
         })
         add(getButton, GridConstraints().apply {
             row = 0; column = 1
@@ -50,7 +50,7 @@ class GitTabUI(val modelListContent: SharedModel) {
         add(projectComboBox, GridConstraints().apply {
             row = 0; column = 0
             fill = GridConstraints.FILL_HORIZONTAL
-            hSizePolicy = GridConstraints.SIZEPOLICY_CAN_GROW or GridConstraints.SIZEPOLICY_WANT_GROW
+            hSizePolicy = GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_CAN_GROW
         })
         add(openProjectButton, GridConstraints().apply {
             row = 0; column = 1
@@ -58,22 +58,24 @@ class GitTabUI(val modelListContent: SharedModel) {
             hSizePolicy = GridConstraints.SIZEPOLICY_FIXED
         })
     }
-    
-    // Files Tree Section
-    val filesTreeJBScrollPane = JBScrollPane(
-        JBScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-        JBScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
-    )
+
+    // Files Tree Section - tree will be set directly by controller
     val currentBranchOrTagLabel = JBLabel("Current").apply {
         font = font.deriveFont(Font.BOLD, 12f)
         foreground = JBColor.namedColor("Label.infoForeground", JBColor.GRAY)
+        border = JBUI.Borders.empty(0, 0, 5, 0)
     }
-    
+
+    // Create a panel that will hold the tree directly
+    val filesTreeContainer = JBPanel<JBPanel<*>>(BorderLayout()).apply {
+        border = null
+    }
+
     private val filesTreeTile = createTilePanel("Project Files").apply {
         layout = BorderLayout(5, 5)
         add(currentBranchOrTagLabel, BorderLayout.NORTH)
-        add(filesTreeJBScrollPane, BorderLayout.CENTER)
-        minimumSize = Dimension(150, 200)
+        add(filesTreeContainer, BorderLayout.CENTER)
+        minimumSize = Dimension(50, 50)
         preferredSize = Dimension(300, 300)
     }
     
@@ -83,20 +85,28 @@ class GitTabUI(val modelListContent: SharedModel) {
     val branchList = JBList(branchListModel)
     val tagList = JBList(tagListModel)
     
+    private val branchScrollPane = JBScrollPane(branchList).apply {
+        border = null
+    }
+    
+    private val tagScrollPane = JBScrollPane(tagList).apply {
+        border = null
+    }
+    
     private val branchPane = JBPanel<JBPanel<*>>(BorderLayout()).apply {
         add(JBLabel("Branches").apply {
             font = font.deriveFont(Font.BOLD, 11f)
-            border = JBUI.Borders.empty(5)
+            border = JBUI.Borders.empty(0, 0, 5, 0)
         }, BorderLayout.NORTH)
-        add(JBScrollPane(branchList), BorderLayout.CENTER)
+        add(branchScrollPane, BorderLayout.CENTER)
     }
     
     private val tagPane = JBPanel<JBPanel<*>>(BorderLayout()).apply {
         add(JBLabel("Tags").apply {
             font = font.deriveFont(Font.BOLD, 11f)
-            border = JBUI.Borders.empty(5)
+            border = JBUI.Borders.empty(0, 0, 5, 0)
         }, BorderLayout.NORTH)
-        add(JBScrollPane(tagList), BorderLayout.CENTER)
+        add(tagScrollPane, BorderLayout.CENTER)
     }
     
     val vcSplitPane = JBSplitter(true, 0.5f).apply {
@@ -108,8 +118,8 @@ class GitTabUI(val modelListContent: SharedModel) {
     private val vcTile = createTilePanel("Version Control").apply {
         layout = BorderLayout()
         add(vcSplitPane, BorderLayout.CENTER)
-        minimumSize = Dimension(200, 300)
-        preferredSize = Dimension(300, 400)
+        minimumSize = Dimension(50, 50)
+        preferredSize = Dimension(200, 300)
     }
     
     // Main top split
@@ -117,7 +127,7 @@ class GitTabUI(val modelListContent: SharedModel) {
         firstComponent = filesTreeTile
         secondComponent = vcTile
         dividerWidth = 2
-        minimumSize = Dimension(400, 200)
+        minimumSize = Dimension(100, 50)
         preferredSize = Dimension(600, 300)
     }
     
@@ -153,7 +163,9 @@ class GitTabUI(val modelListContent: SharedModel) {
         logsJTextArea,
         JBScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
         JBScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
-    )
+    ).apply {
+        border = null
+    }
     
     private val logsTile = createTilePanel("Analysis Logs").apply {
         layout = BorderLayout()
@@ -165,17 +177,21 @@ class GitTabUI(val modelListContent: SharedModel) {
         }
         add(logHeader, BorderLayout.NORTH)
         add(logsJBScrollPane, BorderLayout.CENTER)
-        minimumSize = Dimension(200, 100)
+        minimumSize = Dimension(50, 50)
         preferredSize = Dimension(400, 150)
     }
     
     // Models Section
     val modelList = JBList(modelListContent)
     
+    private val modelsScrollPane = JBScrollPane(modelList).apply {
+        border = null
+    }
+    
     private val modelsTile = createTilePanel("Analysis Models").apply {
         layout = BorderLayout()
-        add(JBScrollPane(modelList), BorderLayout.CENTER)
-        minimumSize = Dimension(150, 100)
+        add(modelsScrollPane, BorderLayout.CENTER)
+        minimumSize = Dimension(50, 50)
         preferredSize = Dimension(200, 150)
     }
     
@@ -183,7 +199,7 @@ class GitTabUI(val modelListContent: SharedModel) {
         firstComponent = logsTile
         secondComponent = modelsTile
         dividerWidth = 2
-        minimumSize = Dimension(400, 100)
+        minimumSize = Dimension(100, 50)
         preferredSize = Dimension(600, 150)
     }
     
@@ -191,7 +207,7 @@ class GitTabUI(val modelListContent: SharedModel) {
         add(analysisControlPanel, BorderLayout.NORTH)
         add(logModelSplitPane, BorderLayout.CENTER)
         add(analyzerProgressBar, BorderLayout.SOUTH)
-        minimumSize = Dimension(400, 150)
+        minimumSize = Dimension(50, 50)
         preferredSize = Dimension(800, 200)
     }
     
@@ -238,7 +254,7 @@ class GitTabUI(val modelListContent: SharedModel) {
         border = null
         horizontalScrollBarPolicy = JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER
         verticalScrollBarPolicy = JBScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
-        minimumSize = Dimension(300, 200)
+        minimumSize = Dimension(100, 200)
     }
     
     val popupMenu = JBPopupMenu()
