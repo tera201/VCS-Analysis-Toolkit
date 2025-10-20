@@ -13,6 +13,7 @@ import org.tera201.vcsmanager.db.entities.CommitSize
 import org.tera201.vcsmanager.db.entities.DeveloperInfo
 import org.tera201.vcstoolkit.helpers.addComponentPairRow
 import org.tera201.vcstoolkit.panels.CommitPanelSplitter
+import org.tera201.vcstoolkit.panels.TilePanel
 import org.tera201.vcstoolkit.tabs.TabManager
 import org.tera201.vcstoolkit.utils.DateUtils.Companion.getDayOfMouth
 import org.tera201.vcstoolkit.utils.DateUtils.Companion.getDayOfWeek
@@ -70,7 +71,7 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
         })
     }
     
-    private val statisticsPanel = createTilePanel("Statistics").apply {
+    private val statisticsPanel = TilePanel("Statistics").apply {
         layout = GridLayoutManager(6, 2)
         var i = 0
         addComponentPairRow(i++, createInfoLabel("Total Commits:"), commitCountLabel)
@@ -82,7 +83,7 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
     }
     
     private val stableCommitPanel = JBPanel<JBPanel<*>>()
-    private val stableCommitTile = createTilePanel("Commit Stability").apply {
+    private val stableCommitTile = TilePanel("Commit Stability").apply {
         layout = GridLayoutManager(1, 1)
         add(stableCommitPanel, GridConstraints().apply { 
             row = 0; column = 0
@@ -116,14 +117,14 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
     // Charts section
     private val filePiePanel = JBPanel<JBPanel<*>>()
     private val linesPiePanel = JBPanel<JBPanel<*>>()
-    private val filePieTile = createTilePanel("File Actions").apply {
+    private val filePieTile = TilePanel("File Actions").apply {
         layout = GridLayoutManager(1, 1)
         add(filePiePanel, GridConstraints().apply { 
             row = 0; column = 0
             fill = GridConstraints.FILL_BOTH
         })
     }
-    private val linesPieTile = createTilePanel("Line Actions").apply {
+    private val linesPieTile = TilePanel("Line Actions").apply {
         layout = GridLayoutManager(1, 1)
         add(linesPiePanel, GridConstraints().apply { 
             row = 0; column = 0
@@ -149,7 +150,7 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
     
     // Commit history section
     private val commitPanelSplitter = CommitPanelSplitter()
-    private val commitTile = createTilePanel("Commit History").apply {
+    private val commitTile = TilePanel("Commit History").apply {
         layout = GridLayoutManager(1, 1)
         add(commitPanelSplitter, GridConstraints().apply { 
             row = 0; column = 0
@@ -187,7 +188,7 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
         }
     }
     
-    private val barChartTile = createTilePanel("Commit Activity Patterns").apply {
+    private val barChartTile = TilePanel("Commit Activity Patterns").apply {
         layout = GridLayoutManager(2, 1)
         add(timeButtonsPanel, GridConstraints().apply { 
             row = 0; column = 0
@@ -226,25 +227,6 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
             })
         }
         setContentVisibility(false)
-    }
-
-    private fun createTilePanel(title: String): JBPanel<JBPanel<*>> {
-        return JBPanel<JBPanel<*>>().apply {
-            border = JBUI.Borders.compound(
-                JBUI.Borders.empty(5),
-                JBUI.Borders.compound(
-                    BorderFactory.createTitledBorder(
-                        BorderFactory.createLineBorder(JBColor.border(), 1, true),
-                        title,
-                        0,
-                        2,
-                        Font(Font.SANS_SERIF, Font.BOLD, 12),
-                        JBColor.namedColor("Label.infoForeground", JBColor.GRAY)
-                    ),
-                    JBUI.Borders.empty(10)
-                )
-            )
-        }
     }
     
     private fun createInfoLabel(text: String): JBLabel {

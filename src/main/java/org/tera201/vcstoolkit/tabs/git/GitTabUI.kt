@@ -10,6 +10,7 @@ import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
 import com.intellij.util.ui.JBUI
 import org.tera201.vcstoolkit.helpers.SharedModel
+import org.tera201.vcstoolkit.panels.TilePanel
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.Font
@@ -25,7 +26,7 @@ class GitTabUI(val modelListContent: SharedModel) {
         putClientProperty(FlatClientProperties.BUTTON_TYPE, FlatClientProperties.BUTTON_TYPE_BORDERLESS)
     }
     
-    private val projectPanel = createTilePanel("Project").apply {
+    private val projectPanel = TilePanel("Project").apply {
         layout = GridLayoutManager(1, 3)
         add(projectComboBox, GridConstraints().apply {
             row = 0; column = 0
@@ -48,7 +49,7 @@ class GitTabUI(val modelListContent: SharedModel) {
     val currentBranchOrTagLabel = JBLabel("Current").apply {
         font = font.deriveFont(Font.BOLD, 12f)
         foreground = JBColor.namedColor("Label.infoForeground", JBColor.GRAY)
-        border = JBUI.Borders.empty(0, 0, 5, 0)
+        border = JBUI.Borders.emptyBottom(5)
     }
 
     // Create a panel that will hold the tree directly
@@ -56,7 +57,7 @@ class GitTabUI(val modelListContent: SharedModel) {
         border = null
     }
 
-    private val filesTreeTile = createTilePanel("Project Files").apply {
+    private val filesTreeTile = TilePanel("Project Files").apply {
         layout = BorderLayout(5, 5)
         add(currentBranchOrTagLabel, BorderLayout.NORTH)
         add(filesTreeContainer, BorderLayout.CENTER)
@@ -81,7 +82,7 @@ class GitTabUI(val modelListContent: SharedModel) {
     private val branchPane = JBPanel<JBPanel<*>>(BorderLayout()).apply {
         add(JBLabel("Branches").apply {
             font = font.deriveFont(Font.BOLD, 11f)
-            border = JBUI.Borders.empty(0, 0, 5, 0)
+            border = JBUI.Borders.emptyBottom(5)
         }, BorderLayout.NORTH)
         add(branchScrollPane, BorderLayout.CENTER)
     }
@@ -89,7 +90,7 @@ class GitTabUI(val modelListContent: SharedModel) {
     private val tagPane = JBPanel<JBPanel<*>>(BorderLayout()).apply {
         add(JBLabel("Tags").apply {
             font = font.deriveFont(Font.BOLD, 11f)
-            border = JBUI.Borders.empty(0, 0, 5, 0)
+            border = JBUI.Borders.emptyBottom(5)
         }, BorderLayout.NORTH)
         add(tagScrollPane, BorderLayout.CENTER)
     }
@@ -100,7 +101,7 @@ class GitTabUI(val modelListContent: SharedModel) {
         dividerWidth = 1
     }
     
-    private val vcTile = createTilePanel("Version Control").apply {
+    private val vcTile = TilePanel("Version Control").apply {
         layout = BorderLayout()
         add(vcSplitPane, BorderLayout.CENTER)
         minimumSize = Dimension(50, 50)
@@ -140,23 +141,32 @@ class GitTabUI(val modelListContent: SharedModel) {
         lineWrap = true
         wrapStyleWord = true
     }
-    val clearLogButton = JButton("Clear").apply {
+
+    val clearLogButton = JButton("✕").apply {
+        toolTipText = "Clear logs"
         putClientProperty(FlatClientProperties.BUTTON_TYPE, FlatClientProperties.BUTTON_TYPE_BORDERLESS)
+        putClientProperty(FlatClientProperties.STYLE, "arc:999")
+        preferredSize = Dimension(24, 24)
+        maximumSize = Dimension(24, 24)
+        font = font.deriveFont(Font.PLAIN, 14f)
+        foreground = JBColor.GRAY
+        isFocusable = false
+        cursor = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR)
     }
-    
-    val logsJBScrollPane = JBScrollPane(
+
+    private val logsJBScrollPane = JBScrollPane(
         logsJTextArea,
         JBScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
         JBScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
     ).apply {
         border = null
     }
-    
-    private val logsTile = createTilePanel("Analysis Logs").apply {
+
+    val logsTile = TilePanel("Analysis Logs").apply {
         layout = BorderLayout()
         val logHeader = JBPanel<JBPanel<*>>().apply {
             layout = BoxLayout(this, BoxLayout.X_AXIS)
-            border = JBUI.Borders.empty(0, 0, 5, 0)
+            border = JBUI.Borders.emptyBottom(5)
             add(Box.createHorizontalGlue())
             add(clearLogButton)
         }
@@ -173,7 +183,7 @@ class GitTabUI(val modelListContent: SharedModel) {
         border = null
     }
     
-    private val modelsTile = createTilePanel("Analysis Models").apply {
+    private val modelsTile = TilePanel("Analysis Models").apply {
         layout = BorderLayout()
         add(modelsScrollPane, BorderLayout.CENTER)
         minimumSize = Dimension(50, 50)
@@ -231,25 +241,6 @@ class GitTabUI(val modelListContent: SharedModel) {
     }
     
     val popupMenu = JBPopupMenu()
-
-    private fun createTilePanel(title: String): JBPanel<JBPanel<*>> {
-        return JBPanel<JBPanel<*>>().apply {
-            border = JBUI.Borders.compound(
-                JBUI.Borders.empty(5),
-                JBUI.Borders.compound(
-                    BorderFactory.createTitledBorder(
-                        BorderFactory.createLineBorder(JBColor.border(), 1, true),
-                        title,
-                        0,
-                        2,
-                        Font(Font.SANS_SERIF, Font.BOLD, 12),
-                        JBColor.namedColor("Label.infoForeground", JBColor.GRAY)
-                    ),
-                    JBUI.Borders.empty(10)
-                )
-            )
-        }
-    }
 
     fun createUI(panel: JPanel) {
         panel.layout = BorderLayout()

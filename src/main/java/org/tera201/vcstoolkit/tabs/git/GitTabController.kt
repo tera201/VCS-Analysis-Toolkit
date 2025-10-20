@@ -58,8 +58,7 @@ class GitTabController(
             .subscribe(VCSToolkitSettings.SettingsChangedListener.TOPIC, object :
                 VCSToolkitSettings.SettingsChangedListener {
                 override fun onSettingsChange(settings: VCSToolkitSettings) {
-                    gitTabUI.logsJBScrollPane.isVisible = settings.showGitLogs
-                    gitTabUI.clearLogButton.isVisible = settings.showGitLogs
+                    gitTabUI.logsTile.isVisible = settings.showGitLogs
                     GitTabUtils.createDirectoryIfNotExists(settings.repoPath)
                     GitTabUtils.createDirectoryIfNotExists(settings.modelPath)
                     if (settings.externalProjectMode == 1 &&  cache.projectPathMap[gitTabUI.projectComboBox.selectedItem]!!.isExternal) {
@@ -75,8 +74,7 @@ class GitTabController(
     }
 
     private fun initializeUI() {
-        gitTabUI.logsJBScrollPane.isVisible = settings.showGitLogs
-        gitTabUI.clearLogButton.isVisible = settings.showGitLogs
+        gitTabUI.logsTile.isVisible = settings.showGitLogs
         configureProjectPane()
     }
 
