@@ -33,19 +33,12 @@ class InfoPageUI(val tabManager: TabManager) {
     val panel = JBPanel<JBPanel<*>>(GridLayoutManager(4, 1))
     
     // Header section
-    //TODO Reuse this component in other places
-    private val mainPathLabel = JBLabel().apply {
-        font = font.deriveFont(Font.BOLD, 16f)
-        putClientProperty(FlatClientProperties.STYLE, "font:bold +2")
-    }
-
-    // Project name label
-    private val projectName = JBLabel().apply {
+    private val projectNameLabel = JBLabel().apply {
         font = font.deriveFont(Font.BOLD, 16f)
         putClientProperty(FlatClientProperties.STYLE, "font:bold +2")
         text = (tabManager.getTabMap()[TabEnum.GIT] as GitTab).controller.projectName()
     }
-    
+
     // Statistics labels
     private val authorLabel = JBLabel()
     private val curAuthorLabel = JBLabel()
@@ -53,19 +46,39 @@ class InfoPageUI(val tabManager: TabManager) {
     private val rowSizeLabel = JBLabel()
     private val sizeLabel = JBLabel()
     private val revisionLabel = JBLabel()
-    
+    private val directoryLabel = JBLabel().apply {
+        font = font.deriveFont(Font.PLAIN, 13f)
+        foreground = JBColor.GRAY
+    }
+
     // Create compact header panel
     private val headerPanel = JBPanel<JBPanel<*>>().apply {
-        layout = GridLayoutManager(2, 2)
+        layout = GridLayoutManager(3, 2)
         border = JBUI.Borders.empty(10)
-        add(createInfoLabel("Project:").apply { 
+
+        // Row 0: Project label and name
+        add(createInfoLabel("Project:").apply {
             font = font.deriveFont(Font.BOLD, 13f)
-        }, GridConstraints().apply { 
-            row = 0; column = 0 
+        }, GridConstraints().apply {
+            row = 0; column = 0
             anchor = GridConstraints.ANCHOR_WEST
         })
-        add(projectName, GridConstraints().apply {
-            row = 0; column = 1 
+        add(projectNameLabel, GridConstraints().apply {
+            row = 0; column = 1
+            anchor = GridConstraints.ANCHOR_WEST
+            fill = GridConstraints.FILL_HORIZONTAL
+        })
+
+        // Row 1: Directory label and path (initially hidden)
+        add(createInfoLabel("Directory:").apply {
+            font = font.deriveFont(Font.BOLD, 13f)
+            isVisible = false
+        }, GridConstraints().apply {
+            row = 1; column = 0
+            anchor = GridConstraints.ANCHOR_WEST
+        })
+        add(directoryLabel, GridConstraints().apply {
+            row = 1; column = 1
             anchor = GridConstraints.ANCHOR_WEST
             fill = GridConstraints.FILL_HORIZONTAL
         })
@@ -226,7 +239,26 @@ class InfoPageUI(val tabManager: TabManager) {
 
     @Throws(InterruptedException::class)
     fun open(commitSizeMap: Map<String, CommitSize>, developerInfoMap: Map<String, DeveloperInfo>) {
-        lastPathNode = getPathByTab(tabManager)?.substringAfterLast("/")
+        val fullPath = getPathByTab(tabManager)
+        val gitTab = tabManager.getTabMap()[TabEnum.GIT] as GitTab
+        val projectBasePath = gitTab.controller.myRepo?.path
+
+        // Determine if we're looking at a subdirectory
+        if (fullPath != null && projectBasePath != null && fullPath != projectBasePath) {
+            // Extract relative path from project base
+            val prefixToRemove = projectBasePath.substringBeforeLast("/")
+            val relativePath = fullPath.removePrefix(prefixToRemove).removePrefix("/")
+            directoryLabel.text = "/$relativePath"
+            directoryLabel.isVisible = true
+            // Show "Directory:" label (it's at index 2 in the header panel)
+            headerPanel.getComponent(2).isVisible = true
+        } else {
+            // We're at the project root - hide directory row
+            directoryLabel.isVisible = false
+            headerPanel.getComponent(2).isVisible = false
+        }
+
+        lastPathNode = fullPath?.substringAfterLast("/")
         updateLabels(developerInfoMap, commitSizeMap)
         authorImpactPieChart.updateData(createPieData(developerInfoMap))
         commitPanelSplitter.updatePanel(commitSizeMap)
@@ -242,7 +274,6 @@ class InfoPageUI(val tabManager: TabManager) {
     }
 
     private fun updateLabels(developerInfoMap: Map<String, DeveloperInfo>, commitSizeMap: Map<String, CommitSize>) {
-        mainPathLabel.text = lastPathNode ?: "Project"
         authorLabel.text = commitSizeMap.values.minByOrNull { it.date }?.authorName ?: "N/A"
         sizeLabel.text = formatBytes(commitSizeMap.values.maxByOrNull { it.date }?.projectSize ?: 0)
         curAuthorLabel.text = developerInfoMap.values.maxByOrNull { it.actualLinesOwner }?.name ?: "N/A"

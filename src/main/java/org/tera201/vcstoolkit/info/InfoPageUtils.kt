@@ -41,7 +41,7 @@ fun getCityBranch(tabManager: TabManager): String? {
 fun getGitPath(tabManager: TabManager): String? {
     val gitTab = tabManager.getTabMap()[TabEnum.GIT] as GitTab?
     val pathComponent = gitTab!!.controller.pathJTree.selectionPath?.lastPathComponent
-    return (pathComponent as? DefaultMutableTreeNode)?.userObject?.toString() ?: return gitTab.controller.projectName()
+    return (pathComponent as? DefaultMutableTreeNode)?.userObject?.toString()
 }
 
 fun getPathByTab(tabManager: TabManager): String? {
