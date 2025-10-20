@@ -35,6 +35,7 @@ class GitTabController(
 ) {
 
     val buildModel = BuildModel()
+    fun projectName() = gitTabUI.projectComboBox.selectedItem?.toString()
     var myRepo: SCMRepository? = null
     var isClearingSelection = false
     private val dateBaseURL: String = "${settings.modelPath}/model.db"

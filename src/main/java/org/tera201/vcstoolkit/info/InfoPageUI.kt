@@ -17,6 +17,8 @@ import org.tera201.vcsmanager.db.entities.DeveloperInfo
 import org.tera201.vcstoolkit.helpers.addComponentPairRow
 import org.tera201.vcstoolkit.helpers.setTextWithShortener
 import org.tera201.vcstoolkit.panels.CommitPanelSplitter
+import org.tera201.vcstoolkit.tabs.GitTab
+import org.tera201.vcstoolkit.tabs.TabEnum
 import org.tera201.vcstoolkit.tabs.TabManager
 import java.awt.Color
 import java.awt.Component
@@ -31,9 +33,17 @@ class InfoPageUI(val tabManager: TabManager) {
     val panel = JBPanel<JBPanel<*>>(GridLayoutManager(4, 1))
     
     // Header section
+    //TODO Reuse this component in other places
     private val mainPathLabel = JBLabel().apply {
         font = font.deriveFont(Font.BOLD, 16f)
         putClientProperty(FlatClientProperties.STYLE, "font:bold +2")
+    }
+
+    // Project name label
+    private val projectName = JBLabel().apply {
+        font = font.deriveFont(Font.BOLD, 16f)
+        putClientProperty(FlatClientProperties.STYLE, "font:bold +2")
+        text = (tabManager.getTabMap()[TabEnum.GIT] as GitTab).controller.projectName()
     }
     
     // Statistics labels
@@ -54,7 +64,7 @@ class InfoPageUI(val tabManager: TabManager) {
             row = 0; column = 0 
             anchor = GridConstraints.ANCHOR_WEST
         })
-        add(mainPathLabel, GridConstraints().apply { 
+        add(projectName, GridConstraints().apply {
             row = 0; column = 1 
             anchor = GridConstraints.ANCHOR_WEST
             fill = GridConstraints.FILL_HORIZONTAL

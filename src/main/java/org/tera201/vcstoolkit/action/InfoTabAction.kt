@@ -28,6 +28,8 @@ class InfoTabAction(private val actionManager: ActionManager, private val tabMan
         val citySelected = fxCityTab!!.fxCity.citySpace.selectionManager.selected
         val circleSelected = fxCircleTab!!.fxCircle.circleSpace.selectionManager.selected
 
+        val projectName = gitTab?.controller?.projectName() ?: ""
+
         if (selectedTabTitle == TabEnum.CIRCLE.value && circleSelected == null ||
             selectedTabTitle == TabEnum.CITY.value && citySelected == null
         ) {
@@ -60,11 +62,12 @@ class InfoTabAction(private val actionManager: ActionManager, private val tabMan
 
             event.project?.let {
                 val infoTabPanel = InfoTabPage(tabManager)
+                val tabTitle = "$projectName ${selectedTabTitle}Info"
                 val editor =
-                    JComponentEditorProviderUtils.openEditor(it, selectedTabTitle + "Info", infoTabPanel)
+                    JComponentEditorProviderUtils.openEditor(it, tabTitle, infoTabPanel)
                 thread { infoTabPanel.start() }
                 actionManager.openedFxTabs.set(
-                    selectedTabTitle + "Info",
+                    tabTitle,
                     FullScreenTabInfo(actionManager.jtp.selectedIndex, JFXPanel(), editor[0].file)
                 )
                 actionManager.setToolBarWithCollapse()
