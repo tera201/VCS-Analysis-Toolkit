@@ -12,17 +12,23 @@ import java.awt.BorderLayout
 import java.awt.Cursor
 import java.awt.Dimension
 import java.awt.Font
+import java.awt.Point
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
+import java.awt.image.BufferedImage
 import javax.swing.BorderFactory
 import javax.swing.Box
 import javax.swing.BoxLayout
+import javax.swing.ImageIcon
 import javax.swing.JButton
+import javax.swing.JComponent
+import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JScrollPane
 import javax.swing.SwingConstants
+import javax.swing.SwingUtilities
 
 class CommitsInfoPageUI(val tabManager: TabManager) {
     var scm: SCM? = null
@@ -328,6 +334,10 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
             // Store count label for updates
             putClientProperty("countLabel", countLabel)
             putClientProperty("groupByLabel", groupByLabel)
+
+            val dragHandler = SmoothTileDragHandler(this, groupTilesContainer)
+            addMouseListener(dragHandler)
+            addMouseMotionListener(dragHandler)
 
             // Add hover effect
             addMouseListener(object : MouseAdapter() {
