@@ -12,23 +12,17 @@ import java.awt.BorderLayout
 import java.awt.Cursor
 import java.awt.Dimension
 import java.awt.Font
-import java.awt.Point
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import java.awt.image.BufferedImage
 import javax.swing.BorderFactory
 import javax.swing.Box
 import javax.swing.BoxLayout
-import javax.swing.ImageIcon
 import javax.swing.JButton
-import javax.swing.JComponent
-import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JScrollPane
 import javax.swing.SwingConstants
-import javax.swing.SwingUtilities
 
 class CommitsInfoPageUI(val tabManager: TabManager) {
     var scm: SCM? = null
@@ -245,120 +239,11 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
     }
 
     private fun createGroupTile(groupData: GroupData): JPanel {
-        return JBPanel<JBPanel<*>>().apply {
-            layout = BorderLayout(5, 5)
-            border = BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(JBColor.border(), 1, true),
-                BorderFactory.createEmptyBorder(10, 10, 10, 10)
-            )
-            cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-            preferredSize = Dimension(200, 120)
-            minimumSize = Dimension(150, 100)
-
-            putClientProperty(FlatClientProperties.STYLE, "arc:8")
-            // Store the group data for editing
-            putClientProperty("groupData", groupData)
-
-            fun data() = this.getClientProperty("groupData") as? GroupData
-
-            // Top section with title and buttons
-            val topPanel = JBPanel<JBPanel<*>>().apply {
-                layout = BorderLayout()
-                isOpaque = false
-            }. also {
-
-                val titleLabel = JBLabel(groupData.name).apply {
-                    font = font.deriveFont(Font.BOLD, 13f)
-                }
-
-                val buttonsPanel = JBPanel<JBPanel<*>>().apply {
-                    layout = BoxLayout(this, BoxLayout.X_AXIS)
-                    isOpaque = false
-                }.also { panel ->
-
-                    // Edit button
-                    val editButton = JButton("✎").apply {
-                        toolTipText = "Edit group"
-                        preferredSize = Dimension(24, 24)
-                        cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-                        foreground = JBColor.BLUE
-                        putClientProperty(FlatClientProperties.BUTTON_TYPE, FlatClientProperties.BUTTON_TYPE_BORDERLESS)
-
-                    }.also {
-                        it.addActionListener {
-                            data()?.let { data -> onEditGroupClicked(this, data) }
-                        }
-                    }
-
-                    // Remove button
-                    val removeButton = JButton("×").apply {
-                        toolTipText = "Remove group"
-                        preferredSize = Dimension(24, 24)
-                        cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-                        foreground = JBColor.RED
-                        putClientProperty(FlatClientProperties.BUTTON_TYPE, FlatClientProperties.BUTTON_TYPE_BORDERLESS)
-
-                    }.also {
-                        it.addActionListener {
-                            removeGroupTile(this)
-                        }
-                    }
-
-                    panel.add(editButton)
-                    panel.add(Box.createHorizontalStrut(2))
-                    panel.add(removeButton)
-                }
-
-                it.add(titleLabel, BorderLayout.CENTER)
-                it.add(buttonsPanel, BorderLayout.EAST)
-            }
-
-            // Center section with count
-            val countLabel = JBLabel(groupData.count).apply {
-                font = font.deriveFont(Font.BOLD, 28f)
-                foreground = JBColor.BLUE
-                horizontalAlignment = SwingConstants.CENTER
-            }
-
-            // Bottom section with group by info
-            val groupByLabel = JBLabel("Grouped by: ${groupData.getGroupByDescription()}").apply {
-                font = font.deriveFont(Font.PLAIN, 10f)
-                foreground = JBColor.GRAY
-                horizontalAlignment = SwingConstants.CENTER
-            }
-
-            add(topPanel, BorderLayout.NORTH)
-            add(countLabel, BorderLayout.CENTER)
-            add(groupByLabel, BorderLayout.SOUTH)
-
-            // Store count label for updates
-            putClientProperty("countLabel", countLabel)
-            putClientProperty("groupByLabel", groupByLabel)
-
-            val dragHandler = SmoothTileDragHandler(this, groupTilesContainer)
-            addMouseListener(dragHandler)
-            addMouseMotionListener(dragHandler)
-
-            // Add hover effect
-            addMouseListener(object : MouseAdapter() {
-                override fun mouseEntered(e: MouseEvent) {
-                    border = BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(JBColor.BLUE, 2, true),
-                        BorderFactory.createEmptyBorder(10, 10, 10, 10)
-                    )
-                }
-
-                override fun mouseExited(e: MouseEvent) {
-                    border = BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(JBColor.border(), 1, true),
-                        BorderFactory.createEmptyBorder(10, 10, 10, 10)
-                    )
-                }
-
-                override fun mouseClicked(e: MouseEvent) {
-                    data()?.let { data -> onGroupTileClicked(data.name, data.getGroupByDescription()) }
-                }
-            })
+        return GroupTile(groupData).also {
+            it.addEditButtonAction(this::onEditGroupClicked )
+            it.addRemoveButtonAction( this::removeGroupTile )
+            it.addDragHandler(groupTilesContainer)
+            it.addMouseClickAction(this::onGroupTileClicked)
         }
     }
 
