@@ -238,7 +238,7 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
         }
     }
 
-    private fun createGroupTile(groupName: String, groupBy: String, count: String): JPanel {
+    private fun createGroupTile(groupData: GroupData): JPanel {
         return JBPanel<JBPanel<*>>().apply {
             layout = BorderLayout(5, 5)
             border = BorderFactory.createCompoundBorder(
@@ -250,42 +250,72 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
             minimumSize = Dimension(150, 100)
 
             putClientProperty(FlatClientProperties.STYLE, "arc:8")
+            // Store the group data for editing
+            putClientProperty("groupData", groupData)
 
-            // Top section with title and remove button
-            val topPanel = JBPanel<JBPanel<*>>().also {
-                it.layout = BorderLayout()
-                it.isOpaque = false
+            fun data() = this.getClientProperty("groupData") as? GroupData
 
-                val titleLabel = JBLabel(groupName).apply {
+            // Top section with title and buttons
+            val topPanel = JBPanel<JBPanel<*>>().apply {
+                layout = BorderLayout()
+                isOpaque = false
+            }. also {
+
+                val titleLabel = JBLabel(groupData.name).apply {
                     font = font.deriveFont(Font.BOLD, 13f)
                 }
 
-                val removeButton = JButton("×").apply {
-                    toolTipText = "Remove group"
-                    preferredSize = Dimension(24, 24)
-                    cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-                    foreground = JBColor.RED
-                    putClientProperty(FlatClientProperties.BUTTON_TYPE, FlatClientProperties.BUTTON_TYPE_BORDERLESS)
+                val buttonsPanel = JBPanel<JBPanel<*>>().apply {
+                    layout = BoxLayout(this, BoxLayout.X_AXIS)
+                    isOpaque = false
+                }.also { panel ->
 
-                }.also {
-                    it.addActionListener {
-                        removeGroupTile(this)
+                    // Edit button
+                    val editButton = JButton("✎").apply {
+                        toolTipText = "Edit group"
+                        preferredSize = Dimension(24, 24)
+                        cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+                        foreground = JBColor.BLUE
+                        putClientProperty(FlatClientProperties.BUTTON_TYPE, FlatClientProperties.BUTTON_TYPE_BORDERLESS)
+
+                    }.also {
+                        it.addActionListener {
+                            data()?.let { data -> onEditGroupClicked(this, data) }
+                        }
                     }
+
+                    // Remove button
+                    val removeButton = JButton("×").apply {
+                        toolTipText = "Remove group"
+                        preferredSize = Dimension(24, 24)
+                        cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+                        foreground = JBColor.RED
+                        putClientProperty(FlatClientProperties.BUTTON_TYPE, FlatClientProperties.BUTTON_TYPE_BORDERLESS)
+
+                    }.also {
+                        it.addActionListener {
+                            removeGroupTile(this)
+                        }
+                    }
+
+                    panel.add(editButton)
+                    panel.add(Box.createHorizontalStrut(2))
+                    panel.add(removeButton)
                 }
 
                 it.add(titleLabel, BorderLayout.CENTER)
-                it.add(removeButton, BorderLayout.EAST)
+                it.add(buttonsPanel, BorderLayout.EAST)
             }
 
             // Center section with count
-            val countLabel = JBLabel(count).apply {
+            val countLabel = JBLabel(groupData.count).apply {
                 font = font.deriveFont(Font.BOLD, 28f)
                 foreground = JBColor.BLUE
                 horizontalAlignment = SwingConstants.CENTER
             }
 
             // Bottom section with group by info
-            val groupByLabel = JBLabel("Grouped by: $groupBy").apply {
+            val groupByLabel = JBLabel("Grouped by: ${groupData.getGroupByDescription()}").apply {
                 font = font.deriveFont(Font.PLAIN, 10f)
                 foreground = JBColor.GRAY
                 horizontalAlignment = SwingConstants.CENTER
@@ -297,6 +327,7 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
 
             // Store count label for updates
             putClientProperty("countLabel", countLabel)
+            putClientProperty("groupByLabel", groupByLabel)
 
             // Add hover effect
             addMouseListener(object : MouseAdapter() {
@@ -315,7 +346,7 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
                 }
 
                 override fun mouseClicked(e: MouseEvent) {
-                    onGroupTileClicked(groupName, groupBy)
+                    data()?.let { data -> onGroupTileClicked(data.name, data.getGroupByDescription()) }
                 }
             })
         }
@@ -326,12 +357,12 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
         scm.developerInfo.keys.forEach(authorComboBox::addItem)
         scm.allBranchesMap.keys.forEach(branchComboBox::addItem)
 
-        // Example: Add some test tiles
-        addGroupTile("Feature Commits", "commit message pattern", "15")
-        addGroupTile("Bug Fixes", "commit type", "8")
-        addGroupTile("Refactoring", "code changes", "12")
-        addGroupTile("Documentation", "file type", "5")
-        addGroupTile("Tests", "test coverage", "20")
+        // Example: Add some test tiles with realistic filter descriptions
+        addGroupTile(GroupData("Feature Commits", commitMessageRegex = "^feat:.*", count = "15"))
+        addGroupTile(GroupData("Bug Fixes", commitMessageRegex = "^fix:.*", fileType = ".java", count = "8"))
+        addGroupTile(GroupData("Documentation", fileType = ".md", filePath = "/docs", count = "5"))
+        addGroupTile(GroupData("Refactoring", changesRegex = ".*refactor.*", count = "12"))
+        addGroupTile(GroupData("Tests", filePath = "/test", fileType = ".java, .kt", count = "20"))
     }
 
     private fun setupListeners() {
@@ -438,8 +469,8 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
         countLabel?.text = count.toString()
     }
 
-    fun addGroupTile(groupName: String, groupBy: String, count: String) {
-        val groupTile = createGroupTile(groupName, groupBy, count)
+    fun addGroupTile(groupData: GroupData) {
+        val groupTile = createGroupTile(groupData)
         groupTilesContainer.add(groupTile)
         groupTilesContainer.revalidate()
         groupTilesContainer.repaint()
@@ -457,6 +488,27 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
         groupTilesContainer.repaint()
     }
 
+    private fun updateGroupTile(tile: JPanel, newData: GroupData) {
+        // Update stored data
+        tile.putClientProperty("groupData", newData)
+
+        // Update title label
+        val topPanel = tile.getComponent(0) as JPanel
+        val titleLabel = (topPanel.getComponent(0) as JBLabel)
+        titleLabel.text = newData.name
+
+        // Update count label
+        val countLabel = tile.getClientProperty("countLabel") as? JBLabel
+        countLabel?.text = newData.count
+
+        // Update group by description
+        val groupByLabel = tile.getClientProperty("groupByLabel") as? JBLabel
+        groupByLabel?.text = "Grouped by: ${newData.getGroupByDescription()}"
+
+        tile.revalidate()
+        tile.repaint()
+    }
+
     // Callback methods (to be implemented)
     private fun onStableCommitsClicked() {
         println("Stable commits clicked")
@@ -471,11 +523,23 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
     }
 
     private fun onFilterConfigClicked() {
-        println("Filter config clicked")
+        FilterConfigDialog(panel).show()
     }
 
     private fun onAddGroupClicked() {
-        println("Add group clicked")
+        val dialog = AddGroupDialog(panel, editMode = false)
+        if (dialog.showAndGet()) {
+            val result = dialog.getGroupData()
+            addGroupTile(result)
+        }
+    }
+
+    private fun onEditGroupClicked(tile: JPanel, existingData: GroupData) {
+        val dialog = AddGroupDialog(panel, editMode = true, existingData = existingData)
+        if (dialog.showAndGet()) {
+            val updatedData = dialog.getGroupData()
+            updateGroupTile(tile, updatedData)
+        }
     }
 
     private fun onFiltersChanged() {
