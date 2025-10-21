@@ -5,14 +5,15 @@ import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
-import com.intellij.uiDesigner.core.GridConstraints
-import com.intellij.uiDesigner.core.GridLayoutManager
 import net.miginfocom.swing.MigLayout
+import org.tera201.vcsmanager.scm.SCM
 import org.tera201.vcstoolkit.tabs.TabManager
 import java.awt.BorderLayout
 import java.awt.Cursor
 import java.awt.Dimension
 import java.awt.Font
+import java.awt.event.ComponentAdapter
+import java.awt.event.ComponentEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.BorderFactory
@@ -20,9 +21,11 @@ import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JButton
 import javax.swing.JPanel
+import javax.swing.JScrollPane
 import javax.swing.SwingConstants
 
 class CommitsInfoPageUI(val tabManager: TabManager) {
+    var scm: SCM? = null
     val panel = JBPanel<JBPanel<*>>().apply {
         layout = BoxLayout(this, BoxLayout.Y_AXIS)
     }
@@ -30,12 +33,10 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
     // Filter components
     private val authorComboBox = ComboBox<String>().apply {
         addItem("All Authors")
-        // Add more authors dynamically
     }
 
     private val branchComboBox = ComboBox<String>().apply {
         addItem("All Branches")
-        // Add more branches dynamically
     }
 
     private val commitsComboBox = ComboBox<String>().apply {
@@ -59,6 +60,8 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
         add(createFilterSection("Commits:", commitsComboBox), "grow")
         add(filterConfigButton, "")
         border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        alignmentX = java.awt.Component.LEFT_ALIGNMENT
+        maximumSize = Dimension(Int.MAX_VALUE, preferredSize.height)
     }
 
     // Tiles for stable/unstable commits
@@ -70,6 +73,8 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
         add(stableCommitsTile, "grow")
         add(unstableCommitsTile, "grow")
         border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        alignmentX = java.awt.Component.LEFT_ALIGNMENT
+        maximumSize = Dimension(Int.MAX_VALUE, preferredSize.height)
     }
 
     // All commits tile (full width)
@@ -79,18 +84,43 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
         layout = MigLayout("insets 10", "[grow]", "[]")
         add(allCommitsTile, "grow")
         border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        alignmentX = java.awt.Component.LEFT_ALIGNMENT
+        maximumSize = Dimension(Int.MAX_VALUE, preferredSize.height)
     }
 
-    // Grouping section
+    // Grouping section with tiles container
+    private val groupTilesContainer = JBPanel<JBPanel<*>>().apply {
+        layout = ResponsiveGridLayout()
+        border = BorderFactory.createEmptyBorder(10, 10, 10, 10)
+    }
+
     private val addGroupButton = JButton("+ Add Group").apply {
         cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
     }
 
     private val groupingPanel = JBPanel<JBPanel<*>>().apply {
-        layout = BoxLayout(this, BoxLayout.Y_AXIS)
+        layout = BorderLayout()
         border = BorderFactory.createTitledBorder("Group Commits By")
-        add(Box.createVerticalStrut(10))
-        add(createGroupButtonPanel())
+        alignmentX = java.awt.Component.LEFT_ALIGNMENT
+        maximumSize = Dimension(Int.MAX_VALUE, Int.MAX_VALUE)
+
+        // Create a scroll pane for tiles
+        val scrollPane = JScrollPane(groupTilesContainer).apply {
+            border = null
+            horizontalScrollBarPolicy = JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+            verticalScrollBarPolicy = JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
+        }
+
+        add(scrollPane, BorderLayout.CENTER)
+        add(createGroupButtonPanel(), BorderLayout.SOUTH)
+
+        // Add component listener to trigger relayout when panel resizes
+        addComponentListener(object : ComponentAdapter() {
+            override fun componentResized(e: ComponentEvent?) {
+                groupTilesContainer.revalidate()
+                groupTilesContainer.repaint()
+            }
+        })
     }
 
     init {
@@ -210,41 +240,98 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
 
     private fun createGroupTile(groupName: String, groupBy: String, count: String): JPanel {
         return JBPanel<JBPanel<*>>().apply {
-            layout = MigLayout("insets 15", "[grow][]", "[]5[]")
+            layout = BorderLayout(5, 5)
             border = BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(JBColor.border(), 1, true),
-                BorderFactory.createEmptyBorder(10, 15, 10, 15)
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)
             )
             cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+            preferredSize = Dimension(200, 120)
+            minimumSize = Dimension(150, 100)
 
             putClientProperty(FlatClientProperties.STYLE, "arc:8")
 
-            val titleLabel = JBLabel(groupName).apply {
-                font = font.deriveFont(Font.BOLD, 13f)
+            // Top section with title and remove button
+            val topPanel = JBPanel<JBPanel<*>>().also {
+                it.layout = BorderLayout()
+                it.isOpaque = false
+
+                val titleLabel = JBLabel(groupName).apply {
+                    font = font.deriveFont(Font.BOLD, 13f)
+                }
+
+                val removeButton = JButton("×").apply {
+                    toolTipText = "Remove group"
+                    preferredSize = Dimension(24, 24)
+                    cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+                    foreground = JBColor.RED
+                    putClientProperty(FlatClientProperties.BUTTON_TYPE, FlatClientProperties.BUTTON_TYPE_BORDERLESS)
+
+                }.also {
+                    it.addActionListener {
+                        removeGroupTile(this)
+                    }
+                }
+
+                it.add(titleLabel, BorderLayout.CENTER)
+                it.add(removeButton, BorderLayout.EAST)
             }
 
-            val groupByLabel = JBLabel("Grouped by: $groupBy").apply {
-                font = font.deriveFont(Font.PLAIN, 11f)
-                foreground = JBColor.GRAY
-            }
-
+            // Center section with count
             val countLabel = JBLabel(count).apply {
-                font = font.deriveFont(Font.BOLD, 24f)
+                font = font.deriveFont(Font.BOLD, 28f)
                 foreground = JBColor.BLUE
+                horizontalAlignment = SwingConstants.CENTER
             }
 
-            val removeButton = JButton("×").apply {
-                toolTipText = "Remove group"
-                preferredSize = Dimension(30, 30)
-                cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-                foreground = JBColor.RED
+            // Bottom section with group by info
+            val groupByLabel = JBLabel("Grouped by: $groupBy").apply {
+                font = font.deriveFont(Font.PLAIN, 10f)
+                foreground = JBColor.GRAY
+                horizontalAlignment = SwingConstants.CENTER
             }
 
-            add(titleLabel, "wrap")
-            add(groupByLabel, "span 2, wrap")
-            add(countLabel, "")
-            add(removeButton, "align right top")
+            add(topPanel, BorderLayout.NORTH)
+            add(countLabel, BorderLayout.CENTER)
+            add(groupByLabel, BorderLayout.SOUTH)
+
+            // Store count label for updates
+            putClientProperty("countLabel", countLabel)
+
+            // Add hover effect
+            addMouseListener(object : MouseAdapter() {
+                override fun mouseEntered(e: MouseEvent) {
+                    border = BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(JBColor.BLUE, 2, true),
+                        BorderFactory.createEmptyBorder(10, 10, 10, 10)
+                    )
+                }
+
+                override fun mouseExited(e: MouseEvent) {
+                    border = BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(JBColor.border(), 1, true),
+                        BorderFactory.createEmptyBorder(10, 10, 10, 10)
+                    )
+                }
+
+                override fun mouseClicked(e: MouseEvent) {
+                    onGroupTileClicked(groupName, groupBy)
+                }
+            })
         }
+    }
+
+    fun open(scm: SCM) {
+        this.scm = scm
+        scm.developerInfo.keys.forEach(authorComboBox::addItem)
+        scm.allBranchesMap.keys.forEach(branchComboBox::addItem)
+
+        // Example: Add some test tiles
+        addGroupTile("Feature Commits", "commit message pattern", "15")
+        addGroupTile("Bug Fixes", "commit type", "8")
+        addGroupTile("Refactoring", "code changes", "12")
+        addGroupTile("Documentation", "file type", "5")
+        addGroupTile("Tests", "test coverage", "20")
     }
 
     private fun setupListeners() {
@@ -353,40 +440,49 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
 
     fun addGroupTile(groupName: String, groupBy: String, count: String) {
         val groupTile = createGroupTile(groupName, groupBy, count)
-        groupingPanel.add(groupTile, groupingPanel.componentCount - 1)
-        groupingPanel.revalidate()
-        groupingPanel.repaint()
+        groupTilesContainer.add(groupTile)
+        groupTilesContainer.revalidate()
+        groupTilesContainer.repaint()
+    }
+
+    fun removeGroupTile(tile: JPanel) {
+        groupTilesContainer.remove(tile)
+        groupTilesContainer.revalidate()
+        groupTilesContainer.repaint()
+    }
+
+    fun clearGroupTiles() {
+        groupTilesContainer.removeAll()
+        groupTilesContainer.revalidate()
+        groupTilesContainer.repaint()
     }
 
     // Callback methods (to be implemented)
     private fun onStableCommitsClicked() {
-        // Handle stable commits tile click
         println("Stable commits clicked")
     }
 
     private fun onUnstableCommitsClicked() {
-        // Handle unstable commits tile click
         println("Unstable commits clicked")
     }
 
     private fun onAllCommitsClicked() {
-        // Handle all commits tile click
         println("All commits clicked")
     }
 
     private fun onFilterConfigClicked() {
-        // Open filter configuration dialog
         println("Filter config clicked")
     }
 
     private fun onAddGroupClicked() {
-        // Open dialog to add new grouping
-        // Example: addGroupTile("Feature Commits", "commit message pattern", "15")
         println("Add group clicked")
     }
 
     private fun onFiltersChanged() {
-        // Update data based on selected filters
         println("Filters changed")
+    }
+
+    private fun onGroupTileClicked(groupName: String, groupBy: String) {
+        println("Group tile clicked: $groupName (grouped by: $groupBy)")
     }
 }

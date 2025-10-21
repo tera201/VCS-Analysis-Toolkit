@@ -39,12 +39,12 @@ class InfoTabPage(val tabManager: TabManager) : JBTabbedPane() {
         gitTab!!.controller.myRepo!!.scm.dbPrepared()
 
         val commitSizeMap: Map<String, CommitSize> = gitTab.controller.myRepo!!.scm.getRepositorySize(true, null, path)
-
-        //        BlameManager blameManager  = gitTab.getMyRepo().getScm().blameManager();
         val developerInfoMap: Map<String, DeveloperInfo> = gitTab.controller.myRepo!!.scm.getDeveloperInfo(path)
+
         if (developerInfoMap.isEmpty() || commitSizeMap.isEmpty()) throw Exception("Not found git info! Path: $path")
         thread { infoPage.open(commitSizeMap, developerInfoMap) }
         thread { authorPage.open(commitSizeMap, developerInfoMap) }
+        thread { commitsPage.open(gitTab.controller.myRepo!!.scm) }
     }
 
 
