@@ -42,7 +42,6 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
     private val commitCountLabel = JBLabel()
     private val commitFrequencyLabel = JBLabel()
     private val avgCommitTimeLabel = JBLabel()
-    private val createdBranchesLabel = JBLabel()
     private val ownerPercentageLabel = JBLabel()
     private val lastActivityLabel = JBLabel()
     
@@ -77,7 +76,6 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
         addComponentPairRow(i++, createInfoLabel("Total Commits:"), commitCountLabel)
         addComponentPairRow(i++, createInfoLabel("Commit Frequency:"), commitFrequencyLabel)
         addComponentPairRow(i++, createInfoLabel("Avg. Commit Time:"), avgCommitTimeLabel)
-        addComponentPairRow(i++, createInfoLabel("Created Branches:"), createdBranchesLabel)
         addComponentPairRow(i++, createInfoLabel("Code Ownership:"), ownerPercentageLabel)
         addComponentPairRow(i, createInfoLabel("Last Activity:"), lastActivityLabel)
     }
@@ -276,7 +274,6 @@ class AuthorInfoPageUI(val tabManager: TabManager) {
         val developer = developerInfoMap[email]!!
         authorNameLabel.text = developer.name
         commitCountLabel.text = "${developer.commits.size} commits"
-        createdBranchesLabel.text = "N/A"
         val lines = developerInfoMap.values.sumOf { it.actualLinesOwner.toDouble() }
         ownerPercentageLabel.text = String.format("%.2f%%", ((developer.actualLinesOwner) / lines) * 100)
         val commitDates = commitSizeMap.values.map { it.date }.sorted().toList()
