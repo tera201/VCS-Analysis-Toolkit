@@ -1,7 +1,7 @@
 [versions]
 ######### main ########
 platform = "2.4.0"
-kotlin = "2.1.0"
+kotlin = "2.2.20"
 javafxplugin = "0.0.14"
 flatlaf = "3.4.1"
 sqlite = "3.49.1.0"

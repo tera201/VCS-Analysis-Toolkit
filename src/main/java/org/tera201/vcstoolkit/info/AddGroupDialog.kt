@@ -21,7 +21,7 @@ data class GroupData(
     val fileType: String? = null,
     val commitMessageRegex: String? = null,
     val changesRegex: String? = null,
-    val count: String = "0"
+    var count: String = "0"
 ) {
     fun getGroupByDescription(): String {
         val criteria = mutableListOf<String>()

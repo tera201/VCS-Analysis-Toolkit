@@ -7,7 +7,6 @@ import com.intellij.ui.components.*
 import com.intellij.util.ui.JBUI
 import java.awt.*
 import java.text.SimpleDateFormat
-import java.util.*
 import javax.swing.*
 
 data class CommitFilterConfig(
@@ -337,5 +336,5 @@ class FilterConfigDialog(parent: Component) : DialogWrapper(parent, true) {
         return parts.joinToString(" | ")
     }
 
-    fun getFilters(): List<CommitFilterConfig> = filters.toList()
+    fun getFilters(): Map<String, CommitFilterConfig> = filters.associateBy { it.name }
 }
