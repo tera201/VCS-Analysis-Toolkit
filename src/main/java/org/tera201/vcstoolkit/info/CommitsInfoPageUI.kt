@@ -435,15 +435,17 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
 
     // Callback methods (to be implemented)
     private fun onStableCommitsClicked() {
-        println("Stable commits clicked")
+        val stableCommits = commits.filter { it.stability > 0.2 }
+        showCommitDetailsDialog(stableCommits, "Stable Commits")
     }
 
     private fun onUnstableCommitsClicked() {
-        println("Unstable commits clicked")
+        val unstableCommits = commits.filter { it.stability <= 0.2 }
+        showCommitDetailsDialog(unstableCommits, "Unstable Commits")
     }
 
     private fun onAllCommitsClicked() {
-        println("All commits clicked")
+        showCommitDetailsDialog(commits, "All Matching Commits")
     }
 
     private fun onFilterConfigClicked() {
@@ -495,5 +497,10 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
 
     private fun onGroupTileClicked(groupName: String, groupBy: String) {
         println("Group tile clicked: $groupName (grouped by: $groupBy)")
+    }
+
+    private fun showCommitDetailsDialog(commits: List<CommitEntity>, title: String) {
+        val dialog = CommitDetailsDialog(tabManager.project, commits, title)
+        dialog.show()
     }
 }

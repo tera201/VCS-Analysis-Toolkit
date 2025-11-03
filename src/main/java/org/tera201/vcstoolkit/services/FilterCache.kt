@@ -34,14 +34,10 @@ class FilterCache: PersistentStateComponent<FilterCacheState> {
     }
 
     override fun getState(): FilterCacheState{
-        println("Saving FilterCache: ${state.commitFilterCache}")
-        println("Saving GroupData: ${state.groupDataCache}")
         return state
     }
 
     override fun loadState(state: FilterCacheState) {
-        println("Loaded FilterCache: ${state.commitFilterCache}")
-        println("Loaded GroupData: ${state.groupDataCache}")
         XmlSerializerUtil.copyBean(state, this.state)
         this.state = state
         ApplicationManager.getApplication().messageBus.syncPublisher(FilterCacheChangedListener.TOPIC)
