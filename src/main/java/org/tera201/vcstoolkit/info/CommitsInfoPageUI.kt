@@ -7,6 +7,8 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
 import net.miginfocom.swing.MigLayout
 import org.tera201.vcsmanager.scm.SCM
+import org.tera201.vcstoolkit.services.FilterCache
+import org.tera201.vcstoolkit.services.VCSToolkitCache
 import org.tera201.vcstoolkit.tabs.TabManager
 import java.awt.BorderLayout
 import java.awt.Cursor
@@ -29,7 +31,11 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
     val panel = JBPanel<JBPanel<*>>().apply {
         layout = BoxLayout(this, BoxLayout.Y_AXIS)
     }
-    var commitFilters: Map<String, CommitFilterConfig> = mapOf()
+    private var vcsToolkitCache: VCSToolkitCache = VCSToolkitCache.getInstance(tabManager.getCurrentProject())
+    private val project: String get() = vcsToolkitCache.lastProject
+    private var filterCache: FilterCache = FilterCache.getInstance(tabManager.getCurrentProject())
+    val commitFilters: MutableList<CommitFilterConfig> get() = filterCache.commitFilterCache.getOrPut(project){ mutableListOf<CommitFilterConfig>() }
+    val groupDataList: MutableList<GroupData> get()= filterCache.groupDataCache.getOrPut(project){ mutableListOf<GroupData>() }
 
     // Filter components
     private val authorComboBox = ComboBox<String>().apply {
@@ -42,9 +48,6 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
 
     private val commitsComboBox = ComboBox<String>().apply {
         addItem("All Commits")
-        addItem("Last 10")
-        addItem("Last 50")
-        addItem("Last 100")
     }
 
     private val filterConfigButton = JButton("⚙").apply {
@@ -262,11 +265,13 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
         }
 
         // Example: Add some test tiles with realistic filter descriptions
-        addGroupTile(GroupData("Feature Commits", commitMessageRegex = "^feat:.*", count = "15"))
-        addGroupTile(GroupData("Bug Fixes", commitMessageRegex = "^fix:.*", fileType = ".java", count = "8"))
-        addGroupTile(GroupData("Documentation", fileType = ".md", filePath = "/docs", count = "5"))
-        addGroupTile(GroupData("Refactoring", changesRegex = ".*refactor.*", count = "12"))
-        addGroupTile(GroupData("Tests", filePath = "/test", fileType = ".java, .kt", count = "20"))
+        groupDataList.forEach { addGroupTile(it) }
+        commitFilters.forEach { commitsComboBox.addItem(it.name) }
+//        addGroupTile(GroupData("Feature Commits", commitMessageRegex = "^feat:.*", count = "15"))
+//        addGroupTile(GroupData("Bug Fixes", commitMessageRegex = "^fix:.*", fileType = ".java", count = "8"))
+//        addGroupTile(GroupData("Documentation", fileType = ".md", filePath = "/docs", count = "5"))
+//        addGroupTile(GroupData("Refactoring", changesRegex = ".*refactor.*", count = "12"))
+//        addGroupTile(GroupData("Tests", filePath = "/test", fileType = ".java, .kt", count = "20"))
     }
 
     private fun setupListeners() {
@@ -380,8 +385,9 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
         groupTilesContainer.repaint()
     }
 
-    fun removeGroupTile(tile: JPanel) {
+    fun removeGroupTile(tile: JPanel, existingData: GroupData) {
         groupTilesContainer.remove(tile)
+        groupDataList.remove(existingData)
         groupTilesContainer.revalidate()
         groupTilesContainer.repaint()
     }
@@ -430,9 +436,10 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
         val dialog = FilterConfigDialog(panel)
         if (dialog.showAndGet()) {
             val result = dialog.getFilters()
-            commitFilters = result
+            commitFilters.clear()
+            commitFilters.addAll(result)
             commitsComboBox.removeAllItems()
-            commitFilters.forEach { commitsComboBox.addItem(it.key) }
+            commitFilters.forEach { commitsComboBox.addItem(it.name) }
         }
     }
 
@@ -441,9 +448,10 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
         if (dialog.showAndGet()) {
             val result = dialog.getGroupData()
             if (result.commitMessageRegex != null && scm != null) {
-                val hashes = scm!!.getCommitsByMessageRegex(result.commitMessageRegex)
+                val hashes = scm!!.getCommitsByMessageRegex(result.commitMessageRegex!!)
                 result.count = hashes.size.toString()
             }
+            groupDataList.add(result)
             addGroupTile(result)
         }
     }
@@ -453,8 +461,10 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
         if (dialog.showAndGet()) {
             val updatedData = dialog.getGroupData()
             if (updatedData.commitMessageRegex != null && scm != null) {
-                val hashes = scm!!.getCommitsByMessageRegex(updatedData.commitMessageRegex)
+                groupDataList.remove(existingData)
+                val hashes = scm!!.getCommitsByMessageRegex(updatedData.commitMessageRegex!!)
                 updatedData.count = hashes.size.toString()
+                groupDataList.add(updatedData)
             }
             updateGroupTile(tile, updatedData)
         }

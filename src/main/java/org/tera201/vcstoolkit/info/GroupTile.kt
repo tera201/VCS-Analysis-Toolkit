@@ -94,8 +94,8 @@ class GroupTile(groupData: GroupData): JBPanel<JBPanel<*>>() {
         add(groupByLabel, BorderLayout.SOUTH)
     }
 
-    fun addRemoveButtonAction(unit: (tile: JBPanel<JBPanel<*>>) -> Unit) {
-        removeButton.addActionListener { unit(this) }
+    fun addRemoveButtonAction(unit: (JPanel, existingData: GroupData) -> Unit) {
+        removeButton.addActionListener { data()?.let { data -> unit(this, data) } }
     }
 
     fun addEditButtonAction(unit: (tile: JPanel, existingData: GroupData) -> Unit) {

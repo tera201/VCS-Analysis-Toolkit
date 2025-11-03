@@ -10,11 +10,11 @@ import java.text.SimpleDateFormat
 import javax.swing.*
 
 data class CommitFilterConfig(
-    val name: String,
-    val startDate: String? = null,
-    val endDate: String? = null,
-    val commitAmount: Int? = null,
-    val isLastCommits: Boolean = true
+    var name: String = "",
+    var startDate: String? = null,
+    var endDate: String? = null,
+    var commitAmount: Int? = null,
+    var isLastCommits: Boolean = true
 )
 
 class FilterConfigDialog(parent: Component) : DialogWrapper(parent, true) {
@@ -336,5 +336,5 @@ class FilterConfigDialog(parent: Component) : DialogWrapper(parent, true) {
         return parts.joinToString(" | ")
     }
 
-    fun getFilters(): Map<String, CommitFilterConfig> = filters.associateBy { it.name }
+    fun getFilters(): List<CommitFilterConfig> = filters
 }

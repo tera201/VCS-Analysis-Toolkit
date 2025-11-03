@@ -16,11 +16,11 @@ import java.util.regex.PatternSyntaxException
 import javax.swing.*
 
 data class GroupData(
-    val name: String,
-    val filePath: String? = null,
-    val fileType: String? = null,
-    val commitMessageRegex: String? = null,
-    val changesRegex: String? = null,
+    var name: String = "",
+    var filePath: String? = null,
+    var fileType: String? = null,
+    var commitMessageRegex: String? = null,
+    var changesRegex: String? = null,
     var count: String = "0"
 ) {
     fun getGroupByDescription(): String {
@@ -33,10 +33,10 @@ data class GroupData(
             criteria.add("Type: $fileType")
         }
         if (!commitMessageRegex.isNullOrBlank()) {
-            criteria.add("Message: ${commitMessageRegex.take(20)}${if (commitMessageRegex.length > 20) "..." else ""}")
+            criteria.add("Message: ${commitMessageRegex!!.take(20)}${if (commitMessageRegex!!.length > 20) "..." else ""}")
         }
         if (!changesRegex.isNullOrBlank()) {
-            criteria.add("Changes: ${changesRegex.take(20)}${if (changesRegex.length > 20) "..." else ""}")
+            criteria.add("Changes: ${changesRegex!!.take(20)}${if (changesRegex!!.length > 20) "..." else ""}")
         }
 
         return if (criteria.isEmpty()) "No filters" else criteria.joinToString(", ")
@@ -102,7 +102,7 @@ class AddGroupDialog(
 
         if (!data.filePath.isNullOrBlank()) {
             useFilePathCheckBox.isSelected = true
-            filePathField.text = data.filePath
+            filePathField.text = data.filePath.toString()
         }
 
         if (!data.fileType.isNullOrBlank()) {
