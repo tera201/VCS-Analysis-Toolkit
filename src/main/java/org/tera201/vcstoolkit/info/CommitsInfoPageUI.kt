@@ -6,6 +6,7 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
 import net.miginfocom.swing.MigLayout
+import org.tera201.vcsmanager.db.entities.CommitEntity
 import org.tera201.vcsmanager.scm.SCM
 import org.tera201.vcstoolkit.services.FilterCache
 import org.tera201.vcstoolkit.services.VCSToolkitCache
@@ -36,6 +37,7 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
     private var filterCache: FilterCache = FilterCache.getInstance(tabManager.getCurrentProject())
     val commitFilters: MutableList<CommitFilterConfig> get() = filterCache.commitFilterCache.getOrPut(project){ mutableListOf<CommitFilterConfig>() }
     val groupDataList: MutableList<GroupData> get()= filterCache.groupDataCache.getOrPut(project){ mutableListOf<GroupData>() }
+    val commits: MutableList<CommitEntity> = mutableListOf()
 
     // Filter components
     private val authorComboBox = ComboBox<String>().apply {
@@ -46,9 +48,7 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
         addItem("All Branches")
     }
 
-    private val commitsComboBox = ComboBox<String>().apply {
-        addItem("All Commits")
-    }
+    private val commitsComboBox = ComboBox<String>()
 
     private val filterConfigButton = JButton("⚙").apply {
         toolTipText = "Configure Filters"
@@ -255,23 +255,37 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
         this.scm = scm
         scm.developerInfo.keys.forEach(authorComboBox::addItem)
         scm.allBranchesName.forEach(branchComboBox::addItem)
-        val commits = scm.getCommitInfo(authorComboBox.selectedItem as String, branchComboBox.selectedItem as String)
-        updateAllCommitsCount(commits.size)
-        commits.mapNotNull { it?.stability }.filter { it > 0.2 }.size.let {
-            updateStableCommitsCount(it)
+        if (commitFilters.isEmpty()) {
+            commitFilters.add(CommitFilterConfig("All Commits"))
         }
-        commits.mapNotNull { it?.stability }.filter { it <= 0.2 }.size.let {
-            updateUnstableCommitsCount(it)
-        }
-
-        // Example: Add some test tiles with realistic filter descriptions
         groupDataList.forEach { addGroupTile(it) }
         commitFilters.forEach { commitsComboBox.addItem(it.name) }
-//        addGroupTile(GroupData("Feature Commits", commitMessageRegex = "^feat:.*", count = "15"))
-//        addGroupTile(GroupData("Bug Fixes", commitMessageRegex = "^fix:.*", fileType = ".java", count = "8"))
-//        addGroupTile(GroupData("Documentation", fileType = ".md", filePath = "/docs", count = "5"))
-//        addGroupTile(GroupData("Refactoring", changesRegex = ".*refactor.*", count = "12"))
-//        addGroupTile(GroupData("Tests", filePath = "/test", fileType = ".java, .kt", count = "20"))
+        onFiltersChanged()
+    }
+
+    private fun filterCommits() {
+        this.commits.clear()
+        val draftCommits = scm!!.getCommitInfo(authorComboBox.selectedItem as String, branchComboBox.selectedItem as String)
+        val selectedCommitFilter: CommitFilterConfig =
+            (commitFilters.find { it.name == commitsComboBox.selectedItem } ?: {commitsComboBox.selectedItem = commitFilters[0].name; commitFilters[0]}) as CommitFilterConfig
+        val filteredCommits = draftCommits.filter { commitEntity ->
+            selectedCommitFilter.startDate?.let { start ->
+                commitEntity.date >= start
+            } ?: true
+        }.filter { commitEntity ->
+            selectedCommitFilter.endDate?.let { start ->
+                commitEntity.date <= start
+            } ?: true
+        }
+        val sortedFilteredCommits = if (selectedCommitFilter.isLastCommits) {
+            filteredCommits.sortedByDescending { it.date }
+        } else {
+            filteredCommits.sortedBy { it.date }
+        }
+        val filteredCommitCount = if (selectedCommitFilter.commitAmount != null) {
+            sortedFilteredCommits.take(selectedCommitFilter.commitAmount!!)
+        } else sortedFilteredCommits
+        this.commits.addAll(filteredCommitCount)
     }
 
     private fun setupListeners() {
@@ -433,11 +447,8 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
     }
 
     private fun onFilterConfigClicked() {
-        val dialog = FilterConfigDialog(panel)
+        val dialog = FilterConfigDialog(panel, commitFilters)
         if (dialog.showAndGet()) {
-            val result = dialog.getFilters()
-            commitFilters.clear()
-            commitFilters.addAll(result)
             commitsComboBox.removeAllItems()
             commitFilters.forEach { commitsComboBox.addItem(it.name) }
         }
@@ -471,7 +482,15 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
     }
 
     private fun onFiltersChanged() {
-        println("Filters changed")
+        filterCommits()
+
+        updateAllCommitsCount(commits.size)
+        commits.map { it.stability }.filter { it > 0.2 }.size.let {
+            updateStableCommitsCount(it)
+        }
+        commits.map { it.stability }.filter { it <= 0.2 }.size.let {
+            updateUnstableCommitsCount(it)
+        }
     }
 
     private fun onGroupTileClicked(groupName: String, groupBy: String) {

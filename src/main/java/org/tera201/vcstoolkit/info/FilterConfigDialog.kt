@@ -7,28 +7,29 @@ import com.intellij.ui.components.*
 import com.intellij.util.ui.JBUI
 import java.awt.*
 import java.text.SimpleDateFormat
+import java.util.Date
 import javax.swing.*
 
 data class CommitFilterConfig(
     var name: String = "",
-    var startDate: String? = null,
-    var endDate: String? = null,
+    var startDate: Int? = null,   // Unix timestamp (seconds)
+    var endDate: Int? = null,     // Unix timestamp (seconds)
     var commitAmount: Int? = null,
     var isLastCommits: Boolean = true
 )
 
-class FilterConfigDialog(parent: Component) : DialogWrapper(parent, true) {
+class FilterConfigDialog(parent: Component, private val filters: MutableList<CommitFilterConfig>) : DialogWrapper(parent, true) {
     private val filterListModel = DefaultListModel<String>()
     private val filterList = JBList(filterListModel)
-    private val filters = mutableListOf<CommitFilterConfig>()
+    private val dateFormat = SimpleDateFormat("yyyy-MM-dd")
 
     // Add filter components
     private val nameField = JBTextField(20)
     private val startDateField = JBTextField(10).apply {
-        toolTipText = "Format: yyyy-MM-dd"
+        toolTipText = "Format: ${dateFormat.toPattern()}"
     }
     private val endDateField = JBTextField(10).apply {
-        toolTipText = "Format: yyyy-MM-dd"
+        toolTipText = "Format: ${dateFormat.toPattern()}"
     }
     private val useDateRangeCheckBox = JCheckBox("Use Date Range")
     private val commitAmountSpinner = JSpinner(SpinnerNumberModel(10, 1, 10000, 1))
@@ -39,22 +40,11 @@ class FilterConfigDialog(parent: Component) : DialogWrapper(parent, true) {
         title = "Configure Commit Filters"
 
         // Load sample filters
-        addSampleFilters()
+        updateFilterList()
 
         init()
 
         setupListeners()
-    }
-
-    private fun addSampleFilters() {
-        val sampleFilters = listOf(
-            CommitFilterConfig("Last 30 Commits", commitAmount = 30, isLastCommits = true),
-            CommitFilterConfig("First 100 Commits", commitAmount = 100, isLastCommits = false),
-            CommitFilterConfig("All Time")
-        )
-
-        filters.addAll(sampleFilters)
-        updateFilterList()
     }
 
     override fun createCenterPanel(): JComponent {
@@ -79,8 +69,12 @@ class FilterConfigDialog(parent: Component) : DialogWrapper(parent, true) {
             addActionListener {
                 val selectedIndex = filterList.selectedIndex
                 if (selectedIndex >= 0) {
-                    filters.removeAt(selectedIndex)
-                    updateFilterList()
+                    if (filters[selectedIndex].name == "All Commits") {
+                        null
+                    } else {
+                        filters.removeAt(selectedIndex)
+                        updateFilterList()
+                    }
                 }
             }
         }
@@ -195,11 +189,7 @@ class FilterConfigDialog(parent: Component) : DialogWrapper(parent, true) {
             })
             add(Box.createHorizontalStrut(10))
             add(component.apply {
-                if (component is JTextField) {
-                    maximumSize = Dimension(200, preferredSize.height)
-                } else {
-                    maximumSize = Dimension(200, preferredSize.height)
-                }
+                maximumSize = Dimension(200, preferredSize.height)
             })
             add(Box.createHorizontalGlue())
         }
@@ -271,8 +261,8 @@ class FilterConfigDialog(parent: Component) : DialogWrapper(parent, true) {
 
         val filter = CommitFilterConfig(
             name = name,
-            startDate = startDate,
-            endDate = endDate,
+            startDate = startDate?.toEpochSeconds(),
+            endDate = endDate?.toEpochSeconds(),
             commitAmount = amount,
             isLastCommits = isLast
         )
@@ -295,13 +285,24 @@ class FilterConfigDialog(parent: Component) : DialogWrapper(parent, true) {
 
     private fun isValidDate(dateStr: String): Boolean {
         return try {
-            val format = SimpleDateFormat("yyyy-MM-dd")
-            format.isLenient = false
-            format.parse(dateStr)
+            dateFormat.isLenient = false
+            dateFormat.parse(dateStr)
             true
         } catch (e: Exception) {
             false
         }
+    }
+
+    fun String.toEpochSeconds(): Int? = try {
+        val date = dateFormat.parse(this)
+        (date.time / 1000).toInt()
+    } catch (e: Exception) {
+        null
+    }
+
+    fun Int.toDateString(): String {
+        val date = Date(this.toLong() * 1000)
+        return dateFormat.format(date)
     }
 
     private fun updateFilterList() {
