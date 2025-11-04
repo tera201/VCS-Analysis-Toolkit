@@ -28,6 +28,7 @@ class CommitDetailsDialog(
     private val tableModel = CommitTableModel(commits)
     private val table = JBTable(tableModel)
     private val visitedCommits = mutableSetOf<String>()
+    private var mainPanel: JPanel? = null
 
     // Column visibility state
     private var showAuthor = true
@@ -45,6 +46,14 @@ class CommitDetailsDialog(
         6 to 60    // Checked
     )
 
+    // Padding for dialog
+    private val HORIZONTAL_PADDING = 40
+    private val VERTICAL_PADDING = 150 // Controls + title + buttons
+    private val MIN_WIDTH = 400
+    private val MIN_HEIGHT = 300
+    private val MAX_WIDTH = 1400
+    private val MAX_HEIGHT = 800
+
     // Column controls
     private val authorCheckbox = JBCheckBox("Show Author", showAuthor)
     private val dateCheckbox = JBCheckBox("Show Date", showDate)
@@ -55,6 +64,7 @@ class CommitDetailsDialog(
         setTitle(title)
         setupTable()
         setupColumnControls()
+        updateDialogSize()
     }
 
     private fun setupTable() {
@@ -105,11 +115,13 @@ class CommitDetailsDialog(
         authorCheckbox.addActionListener {
             showAuthor = authorCheckbox.isSelected
             updateColumnVisibility()
+            updateDialogSize()
         }
 
         dateCheckbox.addActionListener {
             showDate = dateCheckbox.isSelected
             updateColumnVisibility()
+            updateDialogSize()
         }
 
         messageToggleCheckbox.addActionListener {
@@ -123,12 +135,11 @@ class CommitDetailsDialog(
                 table.columnModel.getColumn(i).preferredWidth = columnWidths[modelIndex] ?: 100
             }
             updateColumnVisibility()
+            updateDialogSize()
         }
     }
 
     private fun updateColumnVisibility() {
-        val columnModel = table.columnModel
-
         // Author column (index 1)
         setColumnVisibility(1, showAuthor)
 
@@ -164,10 +175,51 @@ class CommitDetailsDialog(
         }
     }
 
+    private fun calculateTableWidth(): Int {
+        var totalWidth = 0
+        for (i in 0 until table.columnCount) {
+            val column = table.columnModel.getColumn(i)
+            if (column.preferredWidth > 0) {
+                totalWidth += column.preferredWidth
+            }
+        }
+        return totalWidth
+    }
+
+    private fun calculateTableHeight(): Int {
+        val rowCount = table.rowCount
+        val rowHeight = table.rowHeight
+        val headerHeight = table.tableHeader.preferredSize.height
+
+        // Calculate based on visible rows (max 20 rows visible at once)
+        val visibleRows = minOf(rowCount, 20)
+        return headerHeight + (visibleRows * rowHeight)
+    }
+
+    private fun updateDialogSize() {
+        // Calculate dimensions based on visible columns
+        val tableWidth = calculateTableWidth()
+        val tableHeight = calculateTableHeight()
+
+        // Add padding and constrain to min/max bounds
+        val dialogWidth = (tableWidth + HORIZONTAL_PADDING).coerceIn(MIN_WIDTH, MAX_WIDTH)
+        val dialogHeight = (tableHeight + VERTICAL_PADDING).coerceIn(MIN_HEIGHT, MAX_HEIGHT)
+
+        // Update main panel preferred size
+        mainPanel?.preferredSize = Dimension(dialogWidth, dialogHeight)
+
+        // Force dialog to resize
+        window?.pack()
+        window?.setSize(dialogWidth, dialogHeight)
+
+        // Center the dialog
+        window?.setLocationRelativeTo(null)
+    }
+
     private fun openCommitInIDE(commit: CommitEntity): Nothing = TODO()
 
     override fun createCenterPanel(): JComponent {
-        val mainPanel = JPanel(BorderLayout())
+        mainPanel = JPanel(BorderLayout())
 
         // Create controls panel at the top
         val controlsPanel = JPanel().apply {
@@ -181,13 +233,22 @@ class CommitDetailsDialog(
         }
 
         // Create table scroll pane
-        val scrollPane = JBScrollPane(table)
-        scrollPane.preferredSize = Dimension(1000, 600)
+        val scrollPane = JBScrollPane(table).apply {
+            // Set initial size
+            val tableWidth = calculateTableWidth()
+            val tableHeight = calculateTableHeight()
+            preferredSize = Dimension(tableWidth, tableHeight)
+        }
 
-        mainPanel.add(controlsPanel, BorderLayout.NORTH)
-        mainPanel.add(scrollPane, BorderLayout.CENTER)
+        mainPanel!!.add(controlsPanel, BorderLayout.NORTH)
+        mainPanel!!.add(scrollPane, BorderLayout.CENTER)
 
-        return mainPanel
+        // Set initial preferred size
+        val dialogWidth = (calculateTableWidth() + HORIZONTAL_PADDING).coerceIn(MIN_WIDTH, MAX_WIDTH)
+        val dialogHeight = (calculateTableHeight() + VERTICAL_PADDING).coerceIn(MIN_HEIGHT, MAX_HEIGHT)
+        mainPanel!!.preferredSize = Dimension(dialogWidth, dialogHeight)
+
+        return mainPanel!!
     }
 
     override fun createActions() = arrayOf(okAction)
@@ -242,7 +303,7 @@ class CommitDetailsDialog(
                     val date = Date(commit.date * 1000L)
                     SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date)
                 }
-                5 ->commit.stability
+                5 -> commit.stability
                 6 -> visitedCommits.contains(commit.hash)
                 else -> ""
             }
