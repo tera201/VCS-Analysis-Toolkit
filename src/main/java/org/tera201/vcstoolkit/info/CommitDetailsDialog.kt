@@ -1,12 +1,17 @@
 package org.tera201.vcstoolkit.info
 
+import com.intellij.diff.DiffContentFactory
+import com.intellij.diff.DiffManager
+import com.intellij.diff.requests.SimpleDiffRequest
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
+import com.intellij.openapi.ui.Messages
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.table.JBTable
 import org.tera201.vcsmanager.db.entities.CommitEntity
+import org.tera201.vcsmanager.scm.SCM
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.FlowLayout
@@ -22,7 +27,8 @@ import javax.swing.table.AbstractTableModel
 class CommitDetailsDialog(
     private val project: Project,
     private val commits: List<CommitEntity>,
-    private val title: String
+    private val title: String,
+    private val scm: SCM
 ) : DialogWrapper(project) {
 
     private val tableModel = CommitTableModel(commits)
@@ -216,7 +222,31 @@ class CommitDetailsDialog(
         window?.setLocationRelativeTo(null)
     }
 
-    private fun openCommitInIDE(commit: CommitEntity): Nothing = TODO()
+    private fun openCommitInIDE(commit: CommitEntity) {
+                val commitDiffs = scm.getCommitDiffByFiles(commit.hash)
+                val selectedPath = Messages.showEditableChooseDialog(
+                    "Select file to view changes:",
+                    "Commit ${commit.hash.take(8)} Changes",
+                    null,
+                    commitDiffs.keys.toTypedArray(),
+                    commitDiffs.keys.firstOrNull(),
+                    null
+                )
+
+                if (selectedPath.isNullOrEmpty()) return
+
+                val contentFactory = DiffContentFactory.getInstance()
+                val oldContent = contentFactory.create(project, commitDiffs[selectedPath]!!.first)
+                val newContent = contentFactory.create(project, commitDiffs[selectedPath]!!.second)
+                val diffRequest = SimpleDiffRequest(
+                    "Commit ${commit.hash.take(8)}",
+                    oldContent,
+                    newContent,
+                    "Parent",
+                    "Commit"
+                )
+                DiffManager.getInstance().showDiff(project, diffRequest)
+    }
 
     override fun createCenterPanel(): JComponent {
         mainPanel = JPanel(BorderLayout())

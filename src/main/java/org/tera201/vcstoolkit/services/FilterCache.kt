@@ -21,10 +21,6 @@ data class FilterCacheState(
 @Service(Service.Level.PROJECT)
 @State(name = "VCSToolkitFilterCache", storages = [Storage("vcs_toolkit_filter_cache.xml")])
 class FilterCache: PersistentStateComponent<FilterCacheState> {
-    init {
-        println("FilterCache initialized for project: ${hashCode()}")
-    }
-
     private var state = FilterCacheState()
 
     companion object {
