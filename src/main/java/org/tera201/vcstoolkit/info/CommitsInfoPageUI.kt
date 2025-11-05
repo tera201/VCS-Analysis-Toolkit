@@ -500,7 +500,7 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
     }
 
     private fun showCommitDetailsDialog(commits: List<CommitEntity>, title: String) {
-        val dialog = CommitDetailsDialog(tabManager.project, commits, title, scm!!)
+        val dialog = CustomCommitDetailsDialog(tabManager.project, commits, title, scm!!)
         dialog.show()
     }
 }
