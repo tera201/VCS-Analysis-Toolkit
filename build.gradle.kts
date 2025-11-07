@@ -10,7 +10,7 @@ java {
 }
 
 group = "org.tera201"
-version = "1.9.0"
+version = "1.10.0"
 
 val javafxModules = listOf("javafx-controls", "javafx-graphics", "javafx-swing", "javafx-base")
 val javaFXVersion = libs.versions.javafx.get()
