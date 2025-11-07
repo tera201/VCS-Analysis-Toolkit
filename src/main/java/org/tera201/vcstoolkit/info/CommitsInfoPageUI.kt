@@ -1,6 +1,7 @@
 package org.tera201.vcstoolkit.info
 
 import com.formdev.flatlaf.FlatClientProperties
+import com.intellij.icons.AllIcons
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
@@ -8,6 +9,7 @@ import com.intellij.ui.components.JBPanel
 import net.miginfocom.swing.MigLayout
 import org.tera201.vcsmanager.db.entities.CommitEntity
 import org.tera201.vcsmanager.scm.SCM
+import org.tera201.vcstoolkit.panels.TilePanel
 import org.tera201.vcstoolkit.services.FilterCache
 import org.tera201.vcstoolkit.services.VCSToolkitCache
 import org.tera201.vcstoolkit.tabs.TabManager
@@ -22,6 +24,7 @@ import java.awt.event.MouseEvent
 import javax.swing.BorderFactory
 import javax.swing.Box
 import javax.swing.BoxLayout
+import javax.swing.DefaultComboBoxModel
 import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.JScrollPane
@@ -35,8 +38,9 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
     private var vcsToolkitCache: VCSToolkitCache = VCSToolkitCache.getInstance(tabManager.getCurrentProject())
     private val project: String get() = vcsToolkitCache.lastProject
     private var filterCache: FilterCache = FilterCache.getInstance(tabManager.getCurrentProject())
-    val commitFilters: MutableList<CommitFilterConfig> get() = filterCache.commitFilterCache.getOrPut(project){ mutableListOf<CommitFilterConfig>() }
-    val groupDataList: MutableList<GroupData> get()= filterCache.groupDataCache.getOrPut(project){ mutableListOf<GroupData>() }
+    val commitFilters: MutableList<CommitFilterConfig> get() = filterCache.commitFilterCache.getOrPut(project){ mutableListOf() }
+    val groupDataList: MutableList<GroupData> get()= filterCache.groupDataCache.getOrPut(project){ mutableListOf() }
+    val checkedCommits: MutableSet<String> get() = filterCache.checkedCommits.getOrPut(project){ mutableSetOf() }
     val commits: MutableList<CommitEntity> = mutableListOf()
 
     // Filter components
@@ -50,19 +54,28 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
 
     private val commitsComboBox = ComboBox<String>()
 
-    private val filterConfigButton = JButton("⚙").apply {
+    private val filterConfigButton = JButton().apply {
+        icon = AllIcons.General.GearPlain
         toolTipText = "Configure Filters"
+        isContentAreaFilled = false
+        isFocusPainted = false
+        isBorderPainted = false
         preferredSize = Dimension(40, 30)
         cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
     }
 
-    // Filter line panel
-    private val filterLine = JBPanel<JBPanel<*>>().apply {
-        layout = MigLayout("insets 10", "[grow][grow][grow][]", "[]")
-        add(createFilterSection("Author:", authorComboBox), "grow")
-        add(createFilterSection("Branch:", branchComboBox), "grow")
-        add(createFilterSection("Commits:", commitsComboBox), "grow")
-        add(filterConfigButton, "")
+//    // Filter line panel
+    private val filterLine = JBPanel<JBPanel<*>>().apply {layout = MigLayout(
+        "insets 10, wrap 2", // wrap after 2 columns (we’ll control spans manually)
+        "[grow][grow][]",     // author, commits, config button
+        "[][]"                // two rows: first for author/commits, second for branch
+            )
+        add(TilePanel("Author:").apply { add(authorComboBox) }, "growx, pushx")
+        add(TilePanel("Branch:").apply { add(branchComboBox) }, "growx, pushx")
+        add(TilePanel("Commits:").apply {
+            add(commitsComboBox)
+            add(filterConfigButton, "")
+        }, "growx, span 2, pushx")
         border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
         alignmentX = java.awt.Component.LEFT_ALIGNMENT
         maximumSize = Dimension(Int.MAX_VALUE, preferredSize.height)
@@ -141,16 +154,6 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
 
         // Setup listeners
         setupListeners()
-    }
-
-    private fun createFilterSection(label: String, comboBox: ComboBox<String>): JPanel {
-        return JBPanel<JBPanel<*>>().apply {
-            layout = MigLayout("insets 0", "[]5[]", "[]")
-            add(JBLabel(label).apply {
-                font = font.deriveFont(Font.PLAIN, 12f)
-            })
-            add(comboBox, "grow")
-        }
     }
 
     private fun createCommitTile(title: String, count: String, accentColor: JBColor): JPanel {
@@ -451,8 +454,18 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
     private fun onFilterConfigClicked() {
         val dialog = FilterConfigDialog(panel, commitFilters)
         if (dialog.showAndGet()) {
-            commitsComboBox.removeAllItems()
-            commitFilters.forEach { commitsComboBox.addItem(it.name) }
+            val model = commitsComboBox.model as DefaultComboBoxModel<String>
+            val filterNames = commitFilters.map { it.name}
+            for (i in model.size - 1 downTo 0) {
+                if (model.getElementAt(i) !in filterNames) {
+                    model.removeElementAt(i)
+                }
+            }
+            commitFilters.forEach { filter ->
+                if (model.getIndexOf(filter.name) == -1) {
+                    model.addElement(filter.name)
+                }
+            }
         }
     }
 
@@ -500,7 +513,7 @@ class CommitsInfoPageUI(val tabManager: TabManager) {
     }
 
     private fun showCommitDetailsDialog(commits: List<CommitEntity>, title: String) {
-        val dialog = CustomCommitDetailsDialog(tabManager.project, commits, title, scm!!)
+        val dialog = CustomCommitDetailsDialog(tabManager.project, commits, title, scm!!, checkedCommits)
         dialog.show()
     }
 }

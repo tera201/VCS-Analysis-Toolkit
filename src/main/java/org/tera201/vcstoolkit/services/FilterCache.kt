@@ -15,7 +15,8 @@ import org.tera201.vcstoolkit.info.GroupData
 @Tag("FilterCacheState")
 data class FilterCacheState(
     var commitFilterCache: MutableMap<String, MutableList<CommitFilterConfig>> = mutableMapOf(),
-    var groupDataCache: MutableMap<String, MutableList<GroupData>> = mutableMapOf()
+    var groupDataCache: MutableMap<String, MutableList<GroupData>> = mutableMapOf(),
+    var checkedCommits: MutableMap<String, MutableSet<String>> = mutableMapOf(),
 )
 
 @Service(Service.Level.PROJECT)
@@ -43,6 +44,7 @@ class FilterCache: PersistentStateComponent<FilterCacheState> {
 
     val commitFilterCache get() = state.commitFilterCache
     val groupDataCache get() = state.groupDataCache
+    val checkedCommits get() = state.checkedCommits
 
     interface FilterCacheChangedListener {
 

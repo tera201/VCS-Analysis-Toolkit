@@ -1,6 +1,10 @@
 package org.tera201.vcstoolkit.info
 
-import com.intellij.icons.AllIcons
+import com.intellij.diff.DiffContentFactory
+import com.intellij.diff.DiffDialogHints
+import com.intellij.diff.DiffManager
+import com.intellij.diff.chains.SimpleDiffRequestChain
+import com.intellij.diff.requests.SimpleDiffRequest
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.Gray
@@ -22,17 +26,17 @@ class CustomCommitDetailsDialog(
     private val project: Project,
     private val commits: List<CommitEntity>,
     private val title: String,
-    private val scm: SCM
+    private val scm: SCM,
+    private val checkedCommits: MutableSet<String>,
 ) : DialogWrapper(project) {
-
-    private val visitedCommits = mutableSetOf<String>()
-    private val visitedFiles = mutableMapOf<String, MutableSet<String>>()
     private var showFullMessage = false
     private var showAuthors = true
     private var showDates = true
+    private var hideCheckedCommits = false
     private val messageToggleCheckbox = JBCheckBox("Show Full Message", showFullMessage)
     private val showAuthorsCheckbox = JBCheckBox("Show Authors", showAuthors)
     private val showDatesCheckbox = JBCheckBox("Show Dates", showDates)
+    private val hideCheckedCommitsCheckbox = JBCheckBox("Hide Checked Commits", hideCheckedCommits)
     private val commitPanels = mutableListOf<CommitPanel>()
 
     init {
@@ -48,6 +52,7 @@ class CustomCommitDetailsDialog(
             add(messageToggleCheckbox)
             add(showAuthorsCheckbox)
             add(showDatesCheckbox)
+            add(hideCheckedCommitsCheckbox)
         }
 
         messageToggleCheckbox.addActionListener {
@@ -62,6 +67,11 @@ class CustomCommitDetailsDialog(
 
         showDatesCheckbox.addActionListener {
             showDates = showDatesCheckbox.isSelected
+            commitPanels.forEach { it.updateVisibility() }
+        }
+
+        hideCheckedCommitsCheckbox.addActionListener {
+            hideCheckedCommits = hideCheckedCommitsCheckbox.isSelected
             commitPanels.forEach { it.updateVisibility() }
         }
 
@@ -92,7 +102,6 @@ class CustomCommitDetailsDialog(
     inner class CommitPanel(private val commit: CommitEntity) : JPanel(BorderLayout()) {
         private val changesPanel = JPanel()
         private val messageLabel: JBLabel
-        private var expanded = false
         private val authorLabel = JBLabel("Author: ")
         private lateinit var authorValue: JComponent
         private  val dateLabel = JBLabel("Date: ")
@@ -114,73 +123,64 @@ class CustomCommitDetailsDialog(
                 insets = JBUI.insets(2)
                 fill = GridBagConstraints.HORIZONTAL
             }
-
-            val expandButton = JButton(AllIcons.General.ArrowRight).apply {
-                preferredSize = Dimension(24, 24)
-                isContentAreaFilled = false
-                isBorderPainted = false
-                isFocusPainted = false
-                cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-                addActionListener {
-                    toggleExpansion()
+            addMouseListener(object : MouseAdapter() {
+                override fun mouseClicked(e: MouseEvent?) {
+                    if (e?.clickCount == 2) {
+                        openMultiFileDiff(project, scm.getCommitDiffByFiles(commit.hash))
+                    }
                 }
-            }
+            })
 
             gbc.gridx = 0
-            gbc.gridy = 0
-            gbc.gridheight = 4
-            gbc.weightx = 0.0
-            headerPanel.add(expandButton, gbc)
-
-            gbc.gridx = 1
             gbc.gridy = 0
             gbc.gridheight = 1
             gbc.weightx = 0.0
             headerPanel.add(JBLabel("Hash: "), gbc)
 
-            gbc.gridx = 2
+            gbc.gridx = 1
             gbc.weightx = 1.0
             headerPanel.add(JBLabel(commit.hash.take(8)), gbc)
 
-            gbc.gridx = 3
+            gbc.gridx = 2
             gbc.weightx = 0.0
             headerPanel.add(JBLabel("Stability: "), gbc)
 
-            gbc.gridx = 4
+            gbc.gridx = 3
             gbc.weightx = 0.0
             headerPanel.add(JBLabel(String.format("%.2f", commit.stability)), gbc)
 
-            gbc.gridx = 5
+            gbc.gridx = 4
             gbc.weightx = 0.0
-            val checkedCheckbox = JBCheckBox("Checked", visitedCommits.contains(commit.hash)).apply {
+            val checkedCheckbox = JBCheckBox("Checked", checkedCommits.contains(commit.hash)).apply {
                 addActionListener {
                     if (isSelected) {
-                        visitedCommits.add(commit.hash)
+                        checkedCommits.add(commit.hash)
                     } else {
-                        visitedCommits.remove(commit.hash)
+                        checkedCommits.remove(commit.hash)
                     }
+                    updateVisibility()
                 }
             }
             headerPanel.add(checkedCheckbox, gbc)
 
-            gbc.gridx = 1
+            gbc.gridx = 0
             gbc.gridy = 1
             gbc.weightx = 0.0
             headerPanel.add(authorLabel, gbc)
 
-            gbc.gridx = 2
+            gbc.gridx = 1
             gbc.gridwidth = 4
             gbc.weightx = 1.0
             authorValue = JBLabel(commit.authorName)
             headerPanel.add(authorValue, gbc)
 
-            gbc.gridx = 1
+            gbc.gridx = 0
             gbc.gridy = 2
             gbc.gridwidth = 1
             gbc.weightx = 0.0
             headerPanel.add(dateLabel, gbc)
 
-            gbc.gridx = 2
+            gbc.gridx = 1
             gbc.gridwidth = 4
             gbc.weightx = 1.0
             val date = Date(commit.date * 1000L)
@@ -188,13 +188,13 @@ class CustomCommitDetailsDialog(
             dateValue = JBLabel(dateStr)
             headerPanel.add(dateValue, gbc)
 
-            gbc.gridx = 1
+            gbc.gridx = 0
             gbc.gridy = 3
             gbc.gridwidth = 1
             gbc.weightx = 0.0
             headerPanel.add(JBLabel("Message: "), gbc)
 
-            gbc.gridx = 2
+            gbc.gridx = 1
             gbc.gridwidth = 4
             gbc.weightx = 1.0
             messageLabel = JBLabel(if (showFullMessage) commit.fullMessage else commit.shortMessage)
@@ -217,97 +217,30 @@ class CustomCommitDetailsDialog(
             authorValue.isVisible = showAuthors
             dateLabel.isVisible = showDates
             dateValue.isVisible = showDates
+            this.isVisible = !hideCheckedCommits || !checkedCommits.contains(commit.hash)
             revalidate()
             repaint()
         }
 
-        private fun toggleExpansion() {
-            expanded = !expanded
-            changesPanel.isVisible = expanded
+        fun openMultiFileDiff(project: Project, diffs: Map<String, Pair<String, String>>) {
+            val contentFactory = DiffContentFactory.getInstance()
 
-            (getComponent(0) as? JPanel)?.let { headerPanel ->
-                val button = headerPanel.getComponent(0) as? JButton
-                button?.icon = if (expanded) AllIcons.General.ArrowDown else AllIcons.General.ArrowRight
+            // Create a list of DiffRequestProducers
+            val request = diffs.map { (filePath, pair) ->
+                val oldContent = contentFactory.create(project, pair.first)
+                val newContent = contentFactory.create(project, pair.second)
+                SimpleDiffRequest(
+                    filePath,
+                    oldContent,
+                    newContent,
+                    "Parent",
+                    "Commit"
+                )
             }
+            val requestChain = SimpleDiffRequestChain(request)
+            val hints = DiffDialogHints.DEFAULT
 
-            if (expanded && changesPanel.componentCount == 0) loadChanges()
-
-            revalidate()
-            repaint()
+            DiffManager.getInstance().showDiff(project, requestChain, hints)
         }
-
-        private fun loadChanges() {
-            try {
-                val modifications = scm.getCommit(commit.hash)?.modifications
-
-                if (!visitedFiles.containsKey(commit.hash)) {
-                    visitedFiles[commit.hash] = mutableSetOf()
-                }
-
-                modifications?.forEach { modification ->
-                    val filePanel = JPanel(BorderLayout()).apply {
-                        border = JBUI.Borders.compound(
-                            JBUI.Borders.empty(5),
-                            BorderFactory.createLineBorder(JBColor.LIGHT_GRAY, 1),
-                        )
-                        background = JBColor.background()
-                    }
-
-                    val fileInfoPanel = JPanel(FlowLayout(FlowLayout.LEFT, 10, 5)).apply {
-                        background = JBColor.background()
-                        add(JBLabel("Type: ${modification.type}"))
-                        add(JBLabel("Path: ${modification.newPath ?: modification.oldPath}"))
-                    }
-
-                    val fileChecked = visitedFiles[commit.hash]?.contains(modification.oldPath) ?: false
-                    val fileCheckbox = JBCheckBox("Checked", fileChecked).apply {
-                        addActionListener {
-                            if (isSelected) {
-                                visitedFiles[commit.hash]?.add(modification.oldPath)
-                            } else {
-                                visitedFiles[commit.hash]?.remove(modification.oldPath)
-                            }
-                        }
-                    }
-                    val checkBoxPanel = JPanel(FlowLayout(FlowLayout.LEFT, 10, 5)).apply {
-                        background = JBColor.background()
-                        add(fileCheckbox)
-                    }
-
-                    filePanel.add(fileInfoPanel, BorderLayout.WEST)
-                    filePanel.add(checkBoxPanel, BorderLayout.EAST)
-
-                    filePanel.addMouseListener(object : MouseAdapter() {
-                        override fun mouseClicked(e: MouseEvent) {
-                            if (e.clickCount == 2) {
-                                openDiff()
-                            }
-                        }
-
-                        override fun mouseEntered(e: MouseEvent) {
-                            filePanel.background = JBColor.PanelBackground.brighter()
-                            fileInfoPanel.background = JBColor.PanelBackground.brighter()
-                            checkBoxPanel.background = JBColor.PanelBackground.brighter()
-                            fileCheckbox.background = JBColor.PanelBackground.brighter()
-                            filePanel.cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-                        }
-
-                        override fun mouseExited(e: MouseEvent) {
-                            filePanel.background = JBColor.PanelBackground
-                            fileInfoPanel.background = JBColor.PanelBackground
-                            checkBoxPanel.background = JBColor.PanelBackground
-                            fileCheckbox.background = JBColor.PanelBackground
-                            filePanel.cursor = Cursor.getDefaultCursor()
-                        }
-                    })
-
-                    changesPanel.add(filePanel)
-                }
-            } catch (e: Exception) {
-                changesPanel.add(JBLabel("Error loading changes: ${e.message}"))
-            }
-        }
-
-        private fun openDiff() {}
     }
 }

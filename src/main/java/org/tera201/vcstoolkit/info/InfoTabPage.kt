@@ -35,8 +35,7 @@ class InfoTabPage(val tabManager: TabManager) : JBTabbedPane() {
     fun start() {
         val gitTab = tabManager.getTabMap()[TabEnum.GIT] as GitTab?
         val path = getPathByTab(tabManager)
-
-        gitTab!!.controller.myRepo!!.scm.dbPrepared()
+        gitTab!!.controller.myRepo!!.scm.dbPrepared(tabManager.project)
 
         val commitSizeMap: Map<String, CommitSize> = gitTab.controller.myRepo!!.scm.getRepositorySize(true, null, path)
         val developerInfoMap: Map<String, DeveloperInfo> = gitTab.controller.myRepo!!.scm.getDeveloperInfo(path)
