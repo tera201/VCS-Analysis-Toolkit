@@ -1,5 +1,6 @@
 package org.tera201.vcstoolkit.services.colors
 
+import com.intellij.openapi.vcs.FileStatus
 import com.intellij.ui.JBColor
 import java.awt.Color
 
@@ -14,6 +15,6 @@ object PluginColors {
     val PURPLE = JBColor(Color(192, 132, 252), Color(140, 80, 200))
 
     val ALL_COLORS = arrayOf(
-        LIGHT_GREEN, RED, ORANGE, YELLOW, TEAL_GREEN, SKY_BLUE, LIGHT_PURPLE, PURPLE
+        FileStatus.ADDED.color, FileStatus.DELETED.color, FileStatus.MODIFIED.color, YELLOW, TEAL_GREEN, SKY_BLUE, LIGHT_PURPLE, PURPLE
     )
 }
