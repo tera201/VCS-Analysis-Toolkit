@@ -1,8 +1,10 @@
 
 package org.tera201.vcstoolkit.info
 
+import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.ui.DialogWrapper
+import com.intellij.openapi.ui.TextBrowseFolderListener
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBCheckBox
@@ -54,10 +56,10 @@ class AddGroupDialog(
     private val useFilePathCheckBox = JBCheckBox("Filter by File Path")
     private val filePathField = TextFieldWithBrowseButton().apply {
         addBrowseFolderListener(
-            "Select File or Directory",
-            "Choose a file or directory to filter commits",
-            null,
-            FileChooserDescriptorFactory.createAllButJarContentsDescriptor()
+            TextBrowseFolderListener(FileChooserDescriptor(
+                true, true,
+                false, false, false, false
+            ).apply { title = "Select File or Directory" })
         )
     }
 

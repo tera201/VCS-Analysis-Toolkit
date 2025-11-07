@@ -42,7 +42,7 @@
 
         <b>1.10.0</b> (2025-11)
         <ul>
-          <li>Stable commit metric is more accurate now/li>
+          <li>Stable commit metric is more accurate now</li>
           <li>Preparing git date base is more stable now</li>
           <li>Updated color scheme for git info</li>
           <li>New commits page for the git info</li>
