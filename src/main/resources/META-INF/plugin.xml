@@ -40,15 +40,27 @@
     <![CDATA[
       <html>
 
+        <b>1.10.0</b> (2025-11)
+        <ul>
+          <li>Stable commit metric is more accurate now</li>
+          <li>Preparing git date base is more stable now</li>
+          <li>Updated color scheme for git info</li>
+          <li>New commits page for the git info</li>
+          <li>Updated design for the author info page</li>
+          <li>Updated design for the main info page</li>
+          <li>Updated design for the git tab in the toolwindow</li>
+          <li>Fix with opening the git info window</li>
+        </ul>
+
         <b>1.9.0</b> (2025-05-02)
         <ul>
-          <li>The dependency on the com.intellij.javafx plugin has been removed<li>
-          <li>VCS control lib was fully migrated to Kotlin<li>
+          <li>The dependency on the com.intellij.javafx plugin has been removed</li>
+          <li>VCS control lib was fully migrated to Kotlin</li>
         </ul>
 
         <b>1.8.1</b> (2025-03-24)
         <ul>
-          <li>Eliminated duplicate commit counts per author<li>
+          <li>Eliminated duplicate commit counts per author</li>
           <li>Fixed SQL file naming issue for repository DB</li>
           <li>Fixed incorrect line owner count computation</li>
           <li>Optimized redundant calculations for changes</li>

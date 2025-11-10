@@ -1,8 +1,8 @@
 plugins {
     id("java")
-    id("org.jetbrains.intellij.platform") version "2.4.0"
-    id("org.jetbrains.kotlin.jvm") version "2.1.0"
-    id("org.openjfx.javafxplugin") version "0.0.14"
+    alias(libs.plugins.platform)
+    alias(libs.plugins.kotlin)
+    alias(libs.plugins.javafxplugin)
 }
 
 java {
@@ -10,10 +10,10 @@ java {
 }
 
 group = "org.tera201"
-version = "1.9.0"
+version = "1.10.0"
 
 val javafxModules = listOf("javafx-controls", "javafx-graphics", "javafx-swing", "javafx-base")
-val javaFXVersion = "21";
+val javaFXVersion = libs.versions.javafx.get()
 
 repositories {
     mavenCentral()
@@ -28,9 +28,8 @@ dependencies {
     implementation("org.tera201:vcs-manager")
     implementation("org.tera201:javafx-code-modeling-tool")
     implementation("org.tera201:swing-components")
-    implementation("com.formdev:flatlaf:3.4.1")
-    implementation("com.formdev:flatlaf-extras:3.4.1")
-    implementation("org.xerial:sqlite-jdbc:3.45.3.0")
+    implementation(libs.bundles.flatlaf)
+    implementation(libs.sqlite)
     javafxModules.forEach { lib ->
         runtimeOnly("org.openjfx:$lib:$javaFXVersion:linux")
         runtimeOnly("org.openjfx:$lib:$javaFXVersion:win")

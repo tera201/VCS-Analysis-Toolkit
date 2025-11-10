@@ -1,0 +1,77 @@
+[versions]
+######### main ########
+platform = "2.4.0"
+kotlin = "2.2.20"
+javafxplugin = "0.0.14"
+flatlaf = "3.4.1"
+sqlite = "3.49.1.0"
+javafx = "21"
+
+######### vcs-manager ########
+commons = "2.14.0"
+lombok = "1.18.30"
+lang3 = "3.3.2"
+slf4j = "1.7.36"
+jgit = "7.1.0.202411261347-r"
+jackson = "2.15.1"
+coroutine = "1.10.1"
+exposed = "1.0.0-rc-2"
+
+######### swing-components ########
+fronts = "2.137"
+miglayout = "11.3"
+
+######### javafx-uml-graph ########
+ikonli = "12.3.1"
+
+######### code-to-modeling-tool ########
+antlr = "4.13.0"
+
+
+
+[libraries]
+######### main ########
+flatlaf-core = { module = "com.formdev:flatlaf", version.ref = "flatlaf" }
+flatlaf-extras = { module = "com.formdev:flatlaf-extras", version.ref = "flatlaf" }
+sqlite = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite" }
+
+######### vcs-manager ########
+commons-io = { module = "commons-io:commons-io", version.ref = "commons" }
+lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
+commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "lang3" }
+slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
+jgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "jgit" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutine" }
+exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
+exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
+
+######### swing-components ########
+flatlaf-fronts = { module = "com.formdev:flatlaf-fonts-roboto", version.ref = "fronts" }
+miglayout = { module = "com.miglayout:miglayout-swing", version.ref = "miglayout" }
+
+######### javafx-uml-graph ########
+ikonli-javafx = { module = "org.kordamp.ikonli:ikonli-javafx", version.ref = "ikonli" }
+ikonli-material = { module = "org.kordamp.ikonli:ikonli-materialdesign2-pack", version.ref = "ikonli" }
+
+######### code-to-modeling-tool ########
+antlr = { module = "org.antlr:antlr4", version.ref = "antlr" }
+
+
+[plugins]
+######### main ########
+platform = { id = "org.jetbrains.intellij.platform", version.ref = "platform" }
+kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+javafxplugin = { id = "org.openjfx.javafxplugin", version.ref = "javafxplugin" }
+
+######### vcs-manager ########
+
+[bundles]
+######### main ########
+flatlaf = ["flatlaf-core", "flatlaf-extras"]
+
+######### vcs-manager ########
+exposed = ["exposed-core", "exposed-jdbc"]
+
+######### javafx-uml-graph ########
+ikoni = ["ikonli-javafx", "ikonli-material"]

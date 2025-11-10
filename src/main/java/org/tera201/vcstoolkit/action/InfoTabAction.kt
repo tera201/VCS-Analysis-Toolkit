@@ -5,6 +5,8 @@ import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.impl.JComponentEditorProviderUtils
 import com.intellij.openapi.project.DumbAwareAction
 import icons.MyIcons
@@ -27,6 +29,8 @@ class InfoTabAction(private val actionManager: ActionManager, private val tabMan
 
         val citySelected = fxCityTab!!.fxCity.citySpace.selectionManager.selected
         val circleSelected = fxCircleTab!!.fxCircle.circleSpace.selectionManager.selected
+
+        val projectName = gitTab?.controller?.projectName() ?: ""
 
         if (selectedTabTitle == TabEnum.CIRCLE.value && circleSelected == null ||
             selectedTabTitle == TabEnum.CITY.value && citySelected == null
@@ -58,13 +62,28 @@ class InfoTabAction(private val actionManager: ActionManager, private val tabMan
             Notifications.Bus.notify(notification, null)
         } else {
 
-            event.project?.let {
+            event.project?.let { project ->
+                val fileEditorManager = FileEditorManager.getInstance(project)
                 val infoTabPanel = InfoTabPage(tabManager)
+                val tabTitle = "$projectName ${selectedTabTitle}Info"
                 val editor =
-                    JComponentEditorProviderUtils.openEditor(it, selectedTabTitle + "Info", infoTabPanel)
-                thread { infoTabPanel.start() }
+                    JComponentEditorProviderUtils.openEditor(project, tabTitle, infoTabPanel)
+                thread {
+                    runCatching { infoTabPanel.start() }.onFailure {
+                        val notification: Notification =
+                            notificationGroup.createNotification(
+                                "VCS Analysis Toolkit - $selectedTabTitle",
+                                "Failed to start info tab. " + it.message,
+                                NotificationType.ERROR
+                            )
+                        Notifications.Bus.notify(notification, null)
+                        ApplicationManager.getApplication().invokeLater {
+                            fileEditorManager.closeFile(editor[0].file!!)
+                        }
+                    }
+                }
                 actionManager.openedFxTabs.set(
-                    selectedTabTitle + "Info",
+                    tabTitle,
                     FullScreenTabInfo(actionManager.jtp.selectedIndex, JFXPanel(), editor[0].file)
                 )
                 actionManager.setToolBarWithCollapse()
